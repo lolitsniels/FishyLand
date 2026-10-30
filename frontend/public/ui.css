@@ -28,8 +28,8 @@ html body .btn:disabled { filter: grayscale(.8) brightness(.7); }
 
 .fr-tile { background: url(/art/hud/tile.webp) center / 100% 100% no-repeat !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; }
 .fr-tile-label { color: #fff1c9 !important; text-shadow: 0 1px 2px #000, 0 0 6px #000 !important; font-weight: 700 !important; }
-.sf-item-art, .sf-deal img { background-image: url(/art/hud/tile.webp) !important; background-size: 100% 100% !important; border: 0 !important; }
-.sf-deal img { padding: 5px; }
+.sf-item-art, .sf-deal > img { background-image: url(/art/hud/tile.webp) !important; background-size: 100% 100% !important; border: 0 !important; }
+.sf-deal > img { padding: 5px; }
 
 /* player card */
 .pcard { position: relative; width: 360px; height: 169px; background: url(/art/hud/card2.webp) 0 0 / 100% 100% no-repeat; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .7)); }
@@ -158,3 +158,18 @@ html body .btn-sm { padding: 0 6px !important; }
 html body .panel-head, .sf-side-h { color: #ffd27a !important; }
 .look-edit-btn { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; color: #2a1503; background: linear-gradient(180deg, #ffd88a, #e08a1e); border: 2px solid #fff0c8; box-shadow: 0 3px 6px rgba(0, 0, 0, .6); transition: transform .15s; }
 .look-edit-btn:hover { transform: scale(1.1); }
+
+/* toasts + popups in the game theme */
+html body [data-sonner-toast] { border: 14px solid transparent !important; border-image: url(/art/hud/panel.webp) 195 fill / 14px / 0 stretch !important; background: none !important; box-shadow: 0 10px 24px rgba(0, 0, 0, .55) !important; color: #f2f6ff !important; font: 700 13.5px var(--ui-font) !important; padding: 6px 10px !important; border-radius: 0 !important; }
+html body [data-sonner-toast] [data-title] { font: 800 14px var(--ui-font) !important; color: #ffd27a !important; text-shadow: 0 1px 2px #000; text-transform: none !important; letter-spacing: 0 !important; }
+html body [data-sonner-toast] [data-description] { color: #dbe8ff !important; font: 600 12.5px var(--ui-font) !important; text-transform: none !important; }
+html body [data-sonner-toast] [data-icon] svg { color: #7dd87d; }
+html body [data-sonner-toast][data-type="error"] [data-title] { color: #ff9a8a !important; }
+.fixed.inset-0 > .panel, .fixed.inset-0 > div > .panel, [role="dialog"] .panel, [data-testid="look-dialog"] > div {
+  border: 30px solid transparent !important; border-image: url(/art/hud/panel.webp) 195 fill / 30px / 0 stretch !important; background: none !important; box-shadow: 0 20px 50px rgba(0, 0, 0, .7) !important; border-radius: 0 !important; }
+@media (max-width: 640px) { .fixed.inset-0 > .panel, .fixed.inset-0 > div > .panel, [role="dialog"] .panel, [data-testid="look-dialog"] > div { border-width: 18px !important; border-image-width: 18px !important; } }
+
+/* reel button: one control, navy when idle, orange while held */
+html body .reel-btn { border: 14px solid transparent !important; border-image: url(/art/hud/btn_dark.webp) 70 140 fill / 14px 24px / 0 stretch !important; background: none !important; color: #f2f6ff !important; min-height: 58px; font: 800 17px var(--ui-font) !important; text-shadow: 0 1px 2px #000 !important; box-shadow: none !important; }
+html body .reel-btn.holding { border-image: url(/art/hud/btn_gold.webp) 80 140 fill / 14px 24px / 0 stretch !important; color: #2a1503 !important; text-shadow: 0 1px 0 rgba(255, 240, 200, .6) !important; background: none !important; }
+.pcard-ic { width: 18px; height: 18px; object-fit: contain; margin-top: -2px; }

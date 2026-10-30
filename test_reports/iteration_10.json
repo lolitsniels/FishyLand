@@ -1,0 +1,40 @@
+{
+  "summary": "Frontend-only test of the iteration-10 features (backend skipped as requested). I ran Playwright at 1920x1080 and 390x844, logged in as TestAngler. 19 of 20 checks PASS. (1) Travel Map: only the world map plus the expedition banner show. There are 0 water-card or travel-* elements. All 13 pins work, and the popover buttons map-travel, map-fish-here and the harbour 'You are here' state all work (fish-here sets fr_mode=water and goes to /game). (2) Harbour collisions: I teleported next to 10 objects and held an arrow key: fountain (from the south and the east), house x300, lantern x900, quest board x1270, Anchor Cafe, Aqua Pearl, house x2440, Crew HQ, bait hut. The character stopped at the edge of all 10 (for example, from the south the fountain stops it at y=1347). Clicking a signpost auto-opens its page: Tackle Shop opens /game/shop, Crew HQ opens /game/crews, Quest Board opens /game/quests. Walking onto a spot with the keyboard only shows the '[E]' prompt, which is expected. (3) Chat: the Global, Crew and Trade tabs work. Crew shows 'Join a crew at the Crew HQ to use crew chat.' and has no input. Sending posts to /api/chat/global and the line appears in the list after the next poll (up to 3s). The speech bubble shows over my character and expires after about 6s. Typing 'wasd' in the input did not move the character. The toggle collapses and reopens the chat. (4) Quick tackle: the Rod list shows Cane Pole (T1) and Fibreglass Rod ('In use', disabled). Equipping Cane Pole sends POST /shop/equip and the slot icon changes from rod_fibre to rod_cane. Bait list: switching Earthworms to Bread Crust changed the cap to 'Bait x2'. Reel and Line show the single owned item as 'In use'. I put the original gear back. (5) Player card: porthole portrait, level 6, name, location, energy bar, gold 4,577 and pearls 0 all sit inside the plate at 1920 and 390. (6) The big button uses sail.webp ('SAIL') in the harbour and opens /game/waters. On water it uses fishbtn.webp with the anchor/hook art, labelled 'FIND SPOT'. (7) Profile: no guestbook. change-look-button is 32x32 and round, and overlaps no text. look-dialog opens and Cancel closes it. (8) Quests, Crews, Inventory, Shop, Market, Profile and Waters all have the teak/brass frame and navy panels. No buttons are clipped and nothing overflows sideways at 390 (scrollWidth is 390 on every page) or at 1920. The only 'Guild' left in the source is a code comment. No page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Harbour/Millbrook house sprite (/art/map/house.webp)", "issue": "The bottom ~60px of the image has a dithered half-transparent dark shadow that shows as a visible checkerboard under the porch of every house (Almanac, Hall of Achievements, house x300, Millbrook houses). Confirmed with PIL: alternating alpha 0/150 pixels at rows h-5..h-40.", "selector": "canvas (house objects)", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Chat send", "issue": "My own message is not added to the list straight away; it only shows on the next 3s poll, so the chat feels laggy. The bubble does show at once.", "affected_selectors": ["[data-testid=chat-list]", "[data-testid=chat-send]"]}
+    ],
+    "design_issues": [
+      {"screen": "Travel Map 390px", "issues": ["The map is only ~225px tall and has ~400px of empty navy panel below it.", "Every pin label except 'The Harbour' is hidden, so you cannot tell the waters apart until you tap a pin."]},
+      {"screen": "Travel Map 1920", "issues": ["The Greyfell Lake and Frozen Reach lighthouse pins are cut off by the top edge of the map."]},
+      {"screen": "Harbour HUD 390px", "issues": ["The hint 'Tap to walk or use WASD...' is drawn behind / overlapping the chat box (open and collapsed), so its text is cut off.", "The spawn point (1550,1460) puts the player name on top of the 'Fountain of Fame' signpost label.", "The '100/100' energy text on the player card is tiny and hard to read."]},
+      {"screen": "Crew HQ building", "issues": ["Walking up to the door from the south lets the character climb the front steps to y=945 (the building base); it reads as walking into the building. Other buildings stop at y=957."]},
+      {"screen": "Tackle Box (inventory)", "issues": ["The selected 'Keepnet' tab has a square dark box behind its rounded button.", "At 390 the ROD/REEL/LINE/BAIT slot captions have low contrast against the painted background."]},
+      {"screen": "Look dialog", "issues": ["The text still says 'Outfits, wings and pets will arrive...'. The user asked for wings to be removed, so consider dropping the word 'wings'."]},
+      {"screen": "Profile", "issues": ["Shows 'Fishing at Millbrook Pond' while the player is in the harbour (it uses user.water, not the current mode)."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix house.webp: remove the dithered checkerboard shadow at the bottom (make it a smooth alpha shadow or crop it off).",
+    "Chat: add the sent message to rows straight away after POST /chat (or pull immediately) instead of waiting up to 3s for the poll.",
+    "Mobile Travel Map: make the map larger (or let it pan/zoom) and show the pin labels; fill the empty space.",
+    "Move the mobile hint bar above the chat box, or hide it when the chat is open.",
+    "Optional polish: Crew HQ step collision, top pins clipped at 1920, Keepnet tab square background, 'wings' text in the look dialog, profile location while in harbour."
+  ],
+  "critical_code_review_comments": [
+    "Waters.js: WaterMood and TestWaterCard are now dead code, and many imports are unused (Link, Panel, Rarity, PassIcon, ConditionLine, Lock, WaterProgress, fmt, NO_IAP). The WorldMap import sits in the middle of the file after the function definitions. Clean this up.",
+    "ChatBox.js: the header comment still says 'Global / Guild / Trade'. send() does not refresh rows. Polling every 3s per open tab, with no backoff when the tab is hidden, adds load.",
+    "QuickTackle.js: lookups?.baitById is used without guarding against a missing lookups when slot=bait. pool[slot] crashes if data.rods/reels/lines is missing."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "95% (19/20 checks; 1 medium asset bug + polish items)"},
+  "seed_data_creation": "Posted one Global chat message 'TEST_hello wasd from tester' as TestAngler. TestAngler's gear was switched and then restored (rod_fibre, bait_worm).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Login: POST /api/auth/login, set localStorage owo_token and sessionStorage fr_mode. Auto-open signposts: use /game?mapview=1 and click (150+wx*0.45, wy*0.45-20); clicking the exact spot point (without the -20) walks there but does not auto-open. Collisions: teleport with __fx.me, clear __fx.dest/path, then hold an arrow key. TestAngler owns rod_cane + rod_fibre and bait_worm(5) + bait_bread(2), and has no crew. Niels may be chatting live in Global."
+}

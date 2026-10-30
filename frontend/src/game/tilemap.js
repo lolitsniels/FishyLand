@@ -18,7 +18,7 @@ export const OBJ = {
   bush: { w: 130, fp: [0.8, 0.3] },
   rocks: { w: 180, fp: [0.86, 0.36] },
   barrels: { w: 130, fp: [0.9, 0.42], rect: true },
-  reeds: { w: 150, fp: [0, 0], wet: true },
+  reeds: { w: 150, fp: [0, 0] },
   rowboat: { w: 230, fp: [0, 0], bob: 1.2, wet: true },
   ship: { w: 820, fp: [0, 0], bob: 2, wet: true },
   bridge: { w: 700, fp: [0, 0], ground: true },
@@ -103,7 +103,7 @@ export function buildMap(map, img) {
     ctx.shadowColor = "transparent";
     ctx.fillStyle = "#3a2412"; ctx.fillRect(-20, -hw - 6, L + 40, 8); ctx.fillRect(-20, hw - 2, L + 40, 8);
     ctx.restore();
-    for (let d = -10; d <= L + 30; d += 80) for (const side of [-1, 1]) {
+    for (let d = 0; d <= L + 20; d += 130) for (const side of [-1, 1]) {
       const px = ax + Math.cos(ang) * d - Math.sin(ang) * side * (hw + 2), py = ay + Math.sin(ang) * d + Math.cos(ang) * side * (hw + 2);
       ctx.drawImage(img.post, px - 16, py - 34, 32, 47);
     }
@@ -119,7 +119,20 @@ export function buildMap(map, img) {
   for (const s of map.water) { shape(g, s); if (s.line) { g.lineWidth = s.width + 30; g.stroke(); } else { g.lineWidth = 30; g.fill(); g.stroke(); } }
   const gw0 = Math.ceil(W / CELL), gh0 = Math.ceil(H / CELL), wpx = g.getImageData(0, 0, gw0, gh0).data;
   const isWater = (x, y) => { const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL); return cx >= 0 && cy >= 0 && cx < gw0 && cy < gh0 && wpx[(cy * gw0 + cx) * 4] < 128; };
-  const objects = map.objects.filter((o) => OBJ[o.k].wet || OBJ[o.k].ground || !isWater(o.x, o.y - 4));
+  // Land props must stand fully on dry ground: if any base point is in water, nudge to the nearest dry spot.
+  const settle = (o) => {
+    const def = OBJ[o.k];
+    if (def.wet || def.ground) return o;
+    const w = o.w || def.w, half = w * 0.4;
+    const dry = (x, y) => [[x, y], [x - half, y], [x + half, y], [x, y - w * 0.2], [x - half, y - w * 0.2], [x + half, y - w * 0.2]].every(([a, b]) => !isWater(a, b + 6) && !isWater(a, b + 24));
+    if (dry(o.x, o.y)) return o;
+    for (let r = 16; r <= 480; r += 16) for (let k = 0; k < 16; k++) {
+      const x = o.x + Math.cos((k * Math.PI) / 8) * r, y = o.y + Math.sin((k * Math.PI) / 8) * r;
+      if (dry(x, y)) return { ...o, x, y };
+    }
+    return null;
+  };
+  const objects = map.objects.map(settle).filter(Boolean);
   g.fillStyle = g.strokeStyle = "#fff";
   for (const d of map.docks || []) { pathPoly(g, d.poly); g.fill(); }
   for (const b of map.bridges || []) { pathLine(g, [...b.a, ...b.b]); g.lineWidth = b.w - 18; g.stroke(); }

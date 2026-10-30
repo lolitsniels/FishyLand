@@ -4,7 +4,7 @@
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
  */
-import { Coins, ShieldCheck, Heart } from "lucide-react";
+import { ShieldCheck, Heart } from "lucide-react";
 import { fmt } from "../lib/api";
 import { PixelIcon } from "./PixelIcon";
 import { t as tt } from "../i18n";
@@ -26,12 +26,12 @@ export const Rarity = ({ r, tag = false, className = "" }) =>
 
 export const Gold = ({ n, className = "", "data-testid": testId }) => (
   <span data-testid={testId} className={`num inline-flex items-center gap-1 text-[#ffcfa8] ${className}`}>
-    <Coins size={13} className="text-[var(--gold)]" />{fmt(n)}
+    <img src="/art/hud/gold.webp" alt="" aria-hidden className="w-[15px] h-[15px] object-contain" />{fmt(n)}
   </span>
 );
 
 export const PearlIcon = ({ size = 11, className = "" }) => (
-  <span aria-hidden className={`inline-block rounded-full shrink-0 ${className}`} style={{ width: size, height: size, background: "radial-gradient(circle at 35% 30%, #ffffff 0%, #f1e6f7 35%, #b9a8c9 75%, #7d6b8f 100%)", boxShadow: "0 0 0 1px rgba(255,255,255,.25), 0 0 4px rgba(214,196,234,.45)" }} />
+  <img src="/art/hud/pearl.webp" alt="" aria-hidden className={`inline-block shrink-0 object-contain ${className}`} style={{ width: size + 4, height: size + 4 }} />
 );
 
 export const Pearls = ({ n, className = "", "data-testid": testId }) => (

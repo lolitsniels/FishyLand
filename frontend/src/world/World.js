@@ -13,18 +13,22 @@ import { Ring, Bar } from "../components/fr";
 import { useFight } from "./useFight";
 import { startMusic } from "../game/sfx";
 import CatchCard from "./CatchCard";
+import { toast } from "sonner";
 import { ChatBox } from "./ChatBox";
 import { QuickTackle } from "./QuickTackle";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
-  inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "bait"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
+  inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "/art/hud/tackle.webp"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
   quests: ["Quests", "quests"], contracts: ["Contracts", "daily"], market: ["Market", "market"], crews: ["Crew HQ", "crew"], tournaments: ["Tournaments", "rankings"],
   duel: ["Duel Pier", "guild"], leaderboards: ["Leaderboards", "rankings"], achievements: ["Achievements", "daily"], crafting: ["Bait Crafting", "craft"],
   messages: ["Messages", "pass"], almanac: ["Almanac", "fishdex"], wiki: ["Wiki", "skills"], "pearl-shop": ["Pearl Shop", "pass"], admin: ["Admin", "settings"],
 };
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
+const BAR_R_WATER = ["quests", "profile"];
+// Only reachable from harbour buildings, never from a water.
+const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
 const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
 
 function useScale() {
@@ -47,8 +51,8 @@ function TopBar({ u, place, here }) {
         <div className="pcard-bar"><i style={{ width: `${Math.min(100, (u.energy / u.max_energy) * 100)}%` }} data-testid="energy-bar" /><span data-testid="energy-value">{Math.floor(u.energy)}/{u.max_energy}</span></div>
         <div className="pcard-bar xp"><i style={{ width: `${Math.min(100, ((u.xp_into_level ?? 0) / (u.xp_next || 1)) * 100)}%` }} data-testid="xp-bar" /></div>
       </div>
-      <Coins size={15} color="#ffd34d" className="pcard-ic gold" /><b className="pcard-v gold" data-testid="gold-value">{compact(u.gold)}</b>
-      <Gem size={14} color="#bff4ff" className="pcard-ic pearl" /><b className="pcard-v pearl" title="Pearls are earned in game and only buy cosmetics" data-testid="pearls-value">{compact(u.pearls)}</b>
+      <img src="/art/hud/gold.webp" alt="Gold" className="pcard-ic gold" /><b className="pcard-v gold" data-testid="gold-value">{compact(u.gold)}</b>
+      <img src="/art/hud/pearl.webp" alt="Pearls" className="pcard-ic pearl" /><b className="pcard-v pearl" title="Pearls are earned in game and only buy cosmetics" data-testid="pearls-value">{compact(u.pearls)}</b>
     </div>
   );
 }
@@ -91,6 +95,9 @@ export default function World() {
 
   const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(m === "harbour" ? "harbour" : user?.water || "millbrook").spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
+  useEffect(() => {
+    if (mode === "water" && page && HARBOUR_ONLY.has(page)) { toast("That's in the harbour. Sail back to visit it."); nav("/game", { replace: true }); }
+  }, [mode, page, nav]);
   useEffect(() => {
     const on = (e) => { goTo(e.detail); nav("/game", { replace: true }); };
     window.addEventListener("fr-mode", on);
@@ -170,17 +177,17 @@ export default function World() {
           <button type="button" data-testid="cast-fish-button" disabled={mode === "water" && (!canFish || !idle)}
             onPointerDown={(e) => { e.preventDefault(); onFish(); }}
             style={{ backgroundImage: `url(/art/hud/${mode === "harbour" ? "sail" : "fishbtn"}.webp)` }}
-            className={`fish-btn fish-btn-img w-[96px] h-[96px] -mt-7 grid place-items-center ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
+            className={`fish-btn fish-btn-img w-[96px] h-[96px] -mt-7 grid place-items-center ${ph === "fight" ? "invisible" : ""} ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
             <span className="fish-btn-label">{fishLabel}</span>
           </button>
-          {BAR_R.map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
+          {(mode === "water" ? BAR_R_WATER : BAR_R).map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <Ring img="settings" label="More" size={w < 600 ? 36 : 46} testid="menu-more" onClick={() => setMore(true)} />
         </div>
       </div>
       {more && (
         <Modal title="Menu" testid="more-modal" width={620} onClose={() => setMore(false)}>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-4 py-2 justify-items-center">
-            {[...MORE, ...(user.is_admin ? ["admin"] : [])].map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
+            {[...MORE, ...(user.is_admin ? ["admin"] : [])].filter((k) => mode !== "water" || !HARBOUR_ONLY.has(k)).map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
           </div>
           <div className="flex justify-center mt-3">
             <button type="button" className="fr-btn fr-btn-dark px-5 py-1.5 text-sm flex items-center gap-2" onClick={async () => { await logout(); nav("/"); }} data-testid="logout-button"><LogOut size={14} /> Log out</button>

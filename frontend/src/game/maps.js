@@ -20,7 +20,7 @@ export const HARBOUR_MAP = {
   ],
   objects: [
     { k: "bait_hut", x: 430, y: 945, w: 340 }, { k: "house", x: 800, y: 945 }, { k: "tackle_shop", x: 1160, y: 945 }, { k: "market_stall", x: 1560, y: 945 },
-    { k: "guild_hall", x: 2000, y: 945, w: 470 }, { k: "house", x: 2440, y: 945, flip: true },
+    { k: "guild_hall", x: 2000, y: 945, w: 470, fp: [0.92, 0.6] }, { k: "house", x: 2440, y: 945, flip: true },
     { k: "fountain", x: 1550, y: 1310, w: 250 }, { k: "quest_board", x: 1830, y: 1175, w: 140 }, { k: "quest_board", x: 1270, y: 1175, w: 140 },
     { k: "tavern", x: 900, y: 1585, w: 400 }, { k: "pearl_shop", x: 2120, y: 1585, w: 350 }, { k: "house", x: 300, y: 1585, w: 260 },
     { k: "ship", x: 3060, y: 1590, w: 620 }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
@@ -37,9 +37,9 @@ export const HARBOUR_MAP = {
   spots: [
     { id: "crafting", label: "Workshop · Crafting", img: "craft", x: 430, y: 1000 },
     { id: "almanac", label: "Old Salt's Almanac", img: "fishdex", x: 800, y: 1000 },
-    { id: "shop", label: "Tackle Shop", img: "bait", x: 1160, y: 1000 },
+    { id: "shop", label: "Tackle Shop", img: "/art/hud/tackle.webp", x: 1160, y: 1000 },
     { id: "market", label: "Market", img: "market", x: 1560, y: 1000 },
-    { id: "crews", label: "Crew HQ", img: "crew", x: 2000, y: 1000 },
+    { id: "crews", label: "Crew HQ", img: "crew", x: 2000, y: 1010 },
     { id: "achievements", label: "Hall of Achievements", img: "skills", x: 2440, y: 1000 },
     { id: "tournaments", label: "Tournament Board", img: "rankings", x: 1270, y: 1215 },
     { id: "quests", label: "Quest Board", img: "quests", x: 1830, y: 1215 },

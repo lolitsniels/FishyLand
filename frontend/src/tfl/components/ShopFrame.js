@@ -1,4 +1,3 @@
-import { Coins, Gem } from "lucide-react";
 import { fmt } from "../lib/api";
 
 // Shared shop layout: folder tabs, main column (feature banner + item grid), side column, wallet bar.
@@ -15,8 +14,8 @@ export function ShopFrame({ tabs, value, onChange, side, wallet, action, childre
         {side && <aside className="sf-side" data-testid={`${testid}-side`}>{side}</aside>}
       </div>
       <div className="sf-wallet" data-testid={`${testid}-wallet`}>
-        {wallet.gold != null && <Purse icon={<Coins size={16} />} label="Gold" n={wallet.gold} testid={`${testid}-gold`} />}
-        {wallet.pearls != null && <Purse icon={<Gem size={16} />} label="Pearls" n={wallet.pearls} testid={`${testid}-pearls`} />}
+        {wallet.gold != null && <Purse icon={<img src="/art/hud/gold.webp" alt="" className="w-5 h-5" />} label="Gold" n={wallet.gold} testid={`${testid}-gold`} />}
+        {wallet.pearls != null && <Purse icon={<img src="/art/hud/pearl.webp" alt="" className="w-5 h-5" />} label="Pearls" n={wallet.pearls} testid={`${testid}-pearls`} />}
         <div className="ml-auto">{action}</div>
       </div>
     </div>

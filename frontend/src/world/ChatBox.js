@@ -39,7 +39,7 @@ export function ChatBox() {
     e.preventDefault();
     const t = text.trim();
     if (!t) return;
-    try { await api.post(`/chat/${ch}`, { text: t }); setText(""); fx.bubbles[user.username] = { text: t, until: Date.now() + 6000 }; } catch (er) { toast.error(errMsg(er)); }
+    try { const r = await api.post(`/chat/${ch}`, { text: t }); setText(""); if (r.data?.id) { last.current = r.data.at || last.current; setRows((old) => [...old, r.data].slice(-80)); } fx.bubbles[user.username] = { text: t, until: Date.now() + 6000 }; } catch (er) { toast.error(errMsg(er)); }
   };
   return (
     <div className={`chatbox pointer-events-auto ${open ? "open" : ""}`} data-testid="chat-box" onKeyDown={(e) => e.stopPropagation()}>

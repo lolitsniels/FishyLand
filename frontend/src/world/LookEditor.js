@@ -26,7 +26,7 @@ export function LookEditor() {
           <div className="fr-panel fr-modal p-5 w-full max-w-[420px] rise">
             <h3 className="font-deco gold-text text-lg text-center mb-4">Your angler</h3>
             <CharacterPicker value={look} onChange={setLook} testid="look-picker" />
-            <p className="text-[11px] text-amber-100/60 mt-3">Outfits, wings and pets will arrive in the Pearl Shop later.</p>
+            <p className="text-[11px] text-amber-100/60 mt-3">Outfits, rod skins and pets will arrive in the Pearl Shop later.</p>
             <div className="flex justify-end gap-2 mt-4">
               <button type="button" className="fr-btn fr-btn-dark px-4 py-1.5 text-sm" onClick={() => setOpen(false)} data-testid="look-cancel">Cancel</button>
               <button type="button" className="fr-btn px-5 py-1.5 text-sm" disabled={busy || look === user.avatar} onClick={save} data-testid="look-save">{busy ? "Saving…" : "Save look"}</button>

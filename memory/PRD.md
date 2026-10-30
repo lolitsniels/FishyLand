@@ -52,6 +52,13 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   frame panel.webp, btn_gold/btn_dark buttons, tile.webp, close.webp, player card card.webp. Font: Noto Sans everywhere, Cinzel for titles. Fight message readable; dialogs solid.
   Testing iteration_9: all core flows pass; mobile issues fixed after.
 
+- 2026-06 (iter 10-11): Art direction -> modern stylized marina (front-facing buildings, sport boat, modern props, pavers) + nautical UI (teak/brass/navy panel 9-slice slice 195,
+  brass buttons, lifebuoy close, porthole player card card2.webp, Lilita One titles). Guild renamed Crew in UI. Travel Map = map only + expedition banner/pin badge.
+  Chat (world/ChatBox.js: global/crew/trade, polling, speech bubbles via fx.bubbles drawn in Scene makeBubble). Quick tackle slots (world/QuickTackle.js, POST /shop/equip).
+  Guestbook removed from Profile. Land props auto-settle onto dry ground (tilemap settle). Graphic dock/bridge posts (t_post.webp). One reel control in fights.
+  Gold/pearl images (/art/hud/gold.webp, pearl.webp) everywhere; tackle-box icon for Tackle Shop. Harbour-only pages blocked at waters (HARBOUR_ONLY in World.js);
+  water bar = Travel Map, Fishdex, Tackle Box, Quests, My Angler. Toasts/popups themed. Map rules in /app/memory/MAP_DESIGN.md.
+
 ## Backlog
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
 - P0: Living-map animations for the 12 waters (per-water props)

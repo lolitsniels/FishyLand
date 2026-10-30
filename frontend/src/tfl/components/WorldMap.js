@@ -4,8 +4,8 @@ import { fmt } from "../lib/api";
 
 // Pin positions on art/hud/world_map.webp (1264x848), in %.
 const PINS = {
-  harbour: [54.6, 42.5], millbrook: [43.5, 34], willow: [26, 22.5], greyfell: [50, 13], saltmarsh: [34, 52], harrow: [15, 47],
-  coral: [42.7, 75.5], blackwater: [85.5, 39], frozen: [85.5, 15.5], sunken: [71, 55.5], ghostlight: [88.6, 66], temple: [75, 81.5], cinder: [15, 80],
+  harbour: [54.6, 42.5], millbrook: [43.5, 34], willow: [26, 22.5], greyfell: [50, 17], saltmarsh: [34, 52], harrow: [15, 47],
+  coral: [42.7, 75.5], blackwater: [85.5, 39], frozen: [85.5, 19], sunken: [71, 55.5], ghostlight: [88.6, 66], temple: [75, 81.5], cinder: [15, 80],
 };
 const ROUTE = [[56, 50], [60, 60], [52, 66], [40, 62], [30, 58], [22, 64], [28, 72], [45, 88], [62, 70], [70, 62], [82, 52], [92, 50], [80, 46], [66, 48], [56, 50]];
 const goMode = (m) => window.dispatchEvent(new CustomEvent("fr-mode", { detail: m }));
