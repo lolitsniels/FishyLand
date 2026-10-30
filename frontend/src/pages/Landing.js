@@ -127,21 +127,23 @@ export default function Landing() {
         </div>
       </header>
       <main className="fl-main">
-        <div className="fl-mascot-row">
-          <img src="/art/hud/mascot.webp" alt="The Harbourmaster" className="fl-mascot" data-testid="lp-mascot" />
-          <div className="fl-bubble">Ahoy! Grab a rod, pick your angler and come fish with us. It's free, right in your browser.</div>
-        </div>
-        <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl-logo" data-testid="lp-logo" />
         <div className="fl-grid">
-          <section className="panel fl-card" data-testid="lp-board">
-            <h2 className="fl-h">{user ? "Ready to cast?" : "Sign up now!"}</h2>
-            {user ? (
-              <div className="flex flex-col items-center gap-3 text-center" data-testid="lp-welcome-back">
-                <div className="text-lg font-bold">Welcome back, {user.username}</div>
-                <button type="button" className="btn btn-gold" onClick={go} data-testid="lp-continue-big">Back to the harbour</button>
-              </div>
-            ) : <SignupBox go={go} />}
-          </section>
+          <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl-logo" data-testid="lp-logo" />
+          <div className="fl-side">
+            <div className="fl-mascot-row">
+              <img src="/art/hud/mascot.webp" alt="The Harbourmaster" className="fl-mascot" data-testid="lp-mascot" />
+              <div className="fl-bubble">Ahoy! Grab a rod, pick your angler and come fish with us. It's free, right in your browser.</div>
+            </div>
+            <section className="panel fl-card" data-testid="lp-board">
+              <h2 className="fl-h">{user ? "Ready to cast?" : "Sign up now!"}</h2>
+              {user ? (
+                <div className="flex flex-col items-center gap-3 text-center" data-testid="lp-welcome-back">
+                  <div className="text-lg font-bold">Welcome back, {user.username}</div>
+                  <button type="button" className="btn btn-gold" onClick={go} data-testid="lp-continue-big">Back to the harbour</button>
+                </div>
+              ) : <SignupBox go={go} />}
+            </section>
+          </div>
           <section className="fl-shots" data-testid="lp-shots">
             {HOME_SHOTS.map(([k, t]) => (
               <figure key={k} className="fl-shot" data-testid={`lp-shot-${k}`}><img src={`/art/shots/${k}.jpg`} alt={t} loading="lazy" /><figcaption>{t}</figcaption></figure>

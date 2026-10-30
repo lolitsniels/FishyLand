@@ -212,23 +212,24 @@ html body { --bg: #071427 !important; --bg-2: rgba(10, 28, 54, .78) !important; 
 .fr-modal [class*="bg-[var(--bg-2)]"] { border-radius: 6px; }
 
 /* FishyLand homepage */
-.fl-home { min-height: 100vh; color: #eaf3ff; font-family: var(--ui-font); background: linear-gradient(180deg, rgba(4, 18, 36, .55), rgba(4, 14, 30, .92)), url(/art/shots/harbour.jpg) center top / cover fixed; }
+.fl-home { min-height: 100vh; color: #eaf3ff; font-family: var(--ui-font); background: linear-gradient(180deg, rgba(4, 18, 36, .1) 0%, rgba(4, 18, 36, .05) 40%, rgba(4, 14, 30, .6) 100%), url(/art/hud/home_bg.webp) center top / cover fixed; }
 .fl-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; }
 .fl-logo-sm { height: 44px; width: auto; }
 .fl-online { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 12px; background: rgba(0, 0, 0, .45); }
 .fl-online i { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; }
 .fl-main { max-width: 1120px; margin: 0 auto; padding: 0 16px 30px; display: flex; flex-direction: column; align-items: center; }
-.fl-mascot-row { display: flex; align-items: flex-end; gap: 10px; margin-top: 4px; }
-.fl-mascot { height: 210px; width: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6)); }
-.fl-bubble { max-width: 300px; margin-bottom: 110px; padding: 10px 14px; border-radius: 14px; background: #fff6dc; color: #2a1a08; font-weight: 700; font-size: 14px; box-shadow: 0 6px 14px rgba(0, 0, 0, .5); position: relative; }
+.fl-side { grid-area: side; display: flex; flex-direction: column; align-items: stretch; }
+.fl-mascot-row { display: flex; align-items: flex-end; gap: 6px; padding-left: 10px; margin-bottom: -28px; position: relative; z-index: 2; }
+.fl-mascot { height: 210px; width: auto; transform: scaleX(-1); filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6)); }
+.fl-bubble { max-width: 230px; margin-bottom: 120px; padding: 10px 14px; border-radius: 14px; background: #fff6dc; color: #2a1a08; font-weight: 700; font-size: 14px; box-shadow: 0 6px 14px rgba(0, 0, 0, .5); position: relative; }
 .fl-bubble::before { content: ""; position: absolute; left: -10px; bottom: 16px; border: 10px solid transparent; border-right-color: #fff6dc; border-left: 0; }
-.fl-logo { width: min(520px, 86vw); height: auto; margin-top: -30px; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .6)); }
-.fl-grid { width: 100%; display: grid; gap: 18px; margin-top: 10px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .fl-grid { grid-template-columns: 400px minmax(0, 1fr); } }
+.fl-logo { grid-area: logo; justify-self: center; align-self: end; width: min(460px, 86vw); height: auto; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .6)); }
+.fl-grid { width: 100%; display: grid; gap: 18px; margin-top: 10px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "logo" "side" "shots"; }
+@media (min-width: 900px) { .fl-grid { grid-template-columns: 400px minmax(0, 1fr); grid-template-areas: "side logo" "side shots"; grid-template-rows: auto 1fr; column-gap: 28px; } }
 html body .panel.fl-card, html body .panel.fl-login { padding: 16px 18px !important; border: 30px solid transparent !important; border-image: url(/art/hud/panel.webp) 195 fill / 30px / 0 stretch !important; background: none !important; }
 .fl-login { width: min(92vw, 380px); }
 .fl-h { font: 400 26px "Lilita One", var(--ui-font) !important; color: #ffd27a; text-align: center; margin-bottom: 10px; text-shadow: 0 2px 0 #000; }
-.fl-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+.fl-shots { grid-area: shots; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
 .fl-shot { margin: 0; border-radius: 8px; overflow: hidden; border: 3px solid #e2b45a; box-shadow: 0 0 0 2px #3a240f, 0 8px 18px rgba(0, 0, 0, .55); background: #0a2a44; }
 .fl-shot img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; transition: transform .3s; }
 .fl-shot:hover img { transform: scale(1.04); }
