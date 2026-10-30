@@ -11,7 +11,7 @@ import TensionGame from "../tfl/components/TensionGame";
 import Modal from "../components/panels/Modal";
 import { Ring, Bar } from "../components/fr";
 import { useFight } from "./useFight";
-import { startMusic } from "../game/sfx";
+import { startMusic, setMusicPlace } from "../game/sfx";
 import CatchCard from "./CatchCard";
 import { fishArt } from "./useFight";
 import { toast } from "sonner";
@@ -96,6 +96,7 @@ export default function World() {
   const page = loc.pathname.replace(/^\/game\/?/, "").split("/")[0];
   const water = data?.waters?.find((x) => x.key === user?.water);
   const here = usePresence(placeOf(mode, user));
+  useEffect(() => { setMusicPlace(placeOf(mode, user)); }, [mode, user?.water]);
   useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
 
   const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(placeOf(m, user)).spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };

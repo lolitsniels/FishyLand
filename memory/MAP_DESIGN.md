@@ -33,3 +33,10 @@ Learned from user feedback. Follow these for every new map in `frontend/src/game
 - Image QA after every generation: composite on magenta and look. rembg can eat light-coloured walls (pastel houses) -> try `u2net` model if `isnet-general-use` leaves holes. Kill semi-transparent dithering (alpha < 200 -> 0). Round buttons: force alpha=255 inside the circle. Check bottom bands for leftover checkerboard.
 - Islands: water `{ invert: poly }` = sea everywhere outside the island (even-odd fill).
 - Travel map: no moving boat, no glow/cloud overlays; pins are round water thumbnails.
+
+## Round 15 (all 15 maps tiled)
+- Every water now has its own tiled map in `maps.js` (willow, greyfell, saltmarsh, harrow, coral, blackwater, frozen, sunken, ghostlight, temple, cinder). Biome tiles: t_snow/ice/moss/marsh/mud/rock/cave/ash/jungle/flag + waters t_lake/estuary/swamp/lagoon/deep/cavewater/jade/vent. Art pipeline: `scripts/biome_art.py`.
+- QA tool: `/game?mapview=1&mapcheck=1&map=<key>` renders any map and sets `window.__mapAudit` = { moved, dropped, onPath, wetBad, spots, spawn }. Every list must be empty and spawn true before shipping a map.
+- Tall props (jungle_tree/palm ~1.5x their width high) need y >= their height or the canopy is cut off at the map top. Props south of water: canopy must not paint over the water.
+- Frozen Reach: the frozen bay is walkable `ice` ground; fishing holes are small water circles; spots sit ~85px south of each hole, cast = hole centre.
+- Music: `public/audio/<map>.mp3` (ElevenLabs music via fal), played by `setMusicPlace()` in sfx.js. duel_pier and crew_island reuse harrow/coral until their own tracks are generated (scripts/gen_music.py duel_pier crew_island).

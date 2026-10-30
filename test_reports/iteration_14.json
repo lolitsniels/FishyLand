@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 14 (FishyLand rename round). Tested: new homepage (desktop 1920 + mobile 390), login modal, signup, the Inventory label, tapping another angler to open their profile, and the full 3-minute live duel result flow in the UI and the API. Everything requested passes. One environment issue: the dev server was serving a stale index.html with the title 'Fishing Realms'. A frontend restart fixed it, and the title now reads 'FishyLand · Fantasy Fishing MMO'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/duel/live/state", "issue": "_active() only matches duels whose end is later than now-300s. About 5 minutes after the duel ends, state goes back to 'idle' and DuelHud sends the player to the harbour without a click. That is fine for normal use, but the result does not stay 'until Back is pressed' forever."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Profile modal opened by tapping another angler", "issue": "The header says 'MY ANGLER' while showing TestAngler2's profile. The subtitle says 'Fishing at Millbrook Pond' while that player is in the harbour.", "selector": "/game/profile/TestAngler2", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Harbour canvas", "issues": ["Another angler standing on the spawn point overlaps your own character, and their hitArea catches the tap. Tapping your own spot opens their profile instead of walking."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter14_duel_done.py", "/app/test_reports/pytest/iter14_duel.xml"],
+  "action_items": [
+    "Optional: change the profile modal title to the angler's name or 'Angler' when it is not your own profile",
+    "Optional: remove the dead code in Landing.js (SHOTS, ABOUT, GUIDES, icon, Motes, the Users import are unused)",
+    "Optional: 'Fishing Realms' remains in a comment in src/tfl/tfl.css (not visible to users)"
+  ],
+  "critical_code_review_comments": [
+    "Landing.js: the SHOTS, ABOUT, GUIDES, icon and Motes constants and the Users icon import are unused after the redesign",
+    "duel_live._active uses a 300s grace window. Document it, or show a 'result expired' notice before the auto-redirect",
+    "public/index.html title changes need a frontend restart in dev (CRA does not hot reload it). Restarted during the test"
+  ],
+  "updated_files": ["/app/backend/tests/test_iter14_duel_done.py"],
+  "success_rate": {"backend": "100% (1/1 long e2e test with 9 assertions, plus manual checks)", "frontend": "100% of the requested flows"},
+  "verified": [
+    "Homepage loads lp-mascot, speech bubble, lp-logo, lp-board (teak panel.webp border-image) with the signup form, and 4 screenshots (harbour/river/map/shop), all with naturalWidth 960",
+    "No 'Fishing Realms' in visible text. Title is 'FishyLand · Fantasy Fishing MMO' after the restart",
+    "lp-login-toggle opens lp-login-modal. A click outside closes it. A wrong password shows 'Wrong name, email or password'. TestAngler login goes to /game in harbour mode",
+    "Mobile 390: scrollWidth is 390, no overflowing elements. A new account (TEST_fl6520) signed up and landed in /game with a welcome toast",
+    "menu-inventory reads 'Inventory'",
+    "Tapping TestAngler2's character on the canvas navigated to /game/profile/TestAngler2",
+    "UI duel: both players queued and matched, the scoreboard counted down, both saw 'Draw' and the result stayed for 15s+. A clicked Back and went to harbour mode while B still saw the result. B clicked Back and went to the harbour",
+    "API: after the end, both players get phase 'done' and result 'draw' for 20s of polling. After A leaves, A is idle and B is still 'done'. A can queue again fresh. After B leaves, B is idle"
+  ],
+  "test_credentials": "TestAngler / Angler#2026, TestAngler2 / Angler#2026 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Created account TEST_fl6520 via homepage signup",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run with: cd /app/backend/tests && timeout 290 python -m pytest test_iter14_duel_done.py -n 0 (takes about 3.5 min, keep it in the foreground; a background run gets killed when the bash call ends). To test tapping another angler, log A into the browser in harbour mode, read A's x/y from POST /api/world/pos as TestAngler2, then post TestAngler2 at A.x+170, A.y. On a 1920x1080 viewport, a click at (1130,600) hits B's figure."
+}

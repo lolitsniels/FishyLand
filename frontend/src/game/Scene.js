@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite, Text, DisplacementFilter, ColorMatrixFilter, Rectangle } from "pixi.js";
 import { AdvancedBloomFilter, GodrayFilter, GlowFilter } from "pixi-filters";
 import { fx } from "./fx";
 import { useGame } from "../store";
 import { gameReady } from "../portal";
 import { sceneFor, inPoly } from "./scenes";
-import { buildMap, placeObjects } from "./tilemap";
+import { buildMap, placeObjects, auditMap } from "./tilemap";
 import { TILED } from "./maps";
 import { lookSprite, parseLook, HAND } from "./look";
 import ROD_META from "./rodMeta.json";
@@ -285,7 +285,8 @@ function buildScene(app, tex, key, bgTex, mt) {
   const mode = key === "harbour" ? "harbour" : "water";
   TILED_ON = !!cfg.tiled;
   BG_W = cfg.tiled ? cfg.W : bgTex.width; BG_H = cfg.tiled ? cfg.H : 848;
-  const tm = cfg.tiled ? (MAP_CACHE.get(key) || MAP_CACHE.set(key, buildMap(cfg, mt.img)).get(key)) : null;
+  const tm = cfg.tiled ? cachedMap(key, cfg, mt) : null;
+  if (tm && QS.has("mapcheck")) window.__mapAudit = { key, ...auditMap(cfg, tm) };
   const canWalk = (x, y) => (tm ? tm.nav.walk(x, y) : inPoly(x, y, cfg.walk));
   const world = new Container();
   app.stage.addChild(world);
@@ -761,46 +762,78 @@ function buildScene(app, tex, key, bgTex, mt) {
   };
 }
 
+const QS = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+// Built maps are kept for the last few places visited; older ones release their GPU textures.
 const MAP_CACHE = new Map();
-const TEX_KEYS = ["grass", "sand", "dirt", "planks", "cobble", "water", "river", "post"];
+const KEEP = 4;
+function cachedMap(key, cfg, mt) {
+  let tm = MAP_CACHE.get(key);
+  if (!tm) tm = buildMap(cfg, mt.img);
+  MAP_CACHE.delete(key); MAP_CACHE.set(key, tm);
+  while (MAP_CACHE.size > KEEP) {
+    const [old, otm] = MAP_CACHE.entries().next().value;
+    MAP_CACHE.delete(old); otm.chunks.forEach((c) => c.tex.destroy(true));
+  }
+  return tm;
+}
+const texKeys = (cfg) => [...new Set([cfg.base || "grass", ...(cfg.ground || []).map((g) => g.tex), ...cfg.water.map((w) => w.bank || "sand"), cfg.water_tex || "water", "planks", "post"])];
 async function loadMapArt(cfg) {
-  const kinds = [...new Set(cfg.objects.map((o) => o.k))];
+  const keys = texKeys(cfg), kinds = [...new Set(cfg.objects.map((o) => o.k))];
   const [tx, ob] = await Promise.all([
-    Promise.all(TEX_KEYS.map((k) => Assets.load(`art/map/t_${k}.webp`))),
+    Promise.all(keys.map((k) => Assets.load(`art/map/t_${k}.webp`))),
     Promise.all(kinds.map((k) => Assets.load(`art/map/${k}.webp`))),
   ]);
   const img = {}, img_tex = {}, obj = {};
-  TEX_KEYS.forEach((k, i) => { tx[i].source.addressMode = "repeat"; img_tex[k] = tx[i]; img[k] = tx[i].source.resource; });
+  keys.forEach((k, i) => { tx[i].source.addressMode = "repeat"; img_tex[k] = tx[i]; img[k] = tx[i].source.resource; });
   kinds.forEach((k, i) => (obj[k] = ob[i]));
   return { mt: { img, img_tex, obj } };
 }
 
-// Build the other walkable maps in the background so switching maps is instant.
+// While idle: download every map's art, and pre-build the harbour so the trip back is instant.
 let warming = false;
 async function prewarm() {
   if (warming) return;
   warming = true;
-  for (const [k, cfg] of Object.entries(TILED)) {
-    if (MAP_CACHE.has(k)) continue;
-    const { mt } = await loadMapArt(cfg).catch(() => ({}));
-    if (!mt) continue;
-    await new Promise((res) => (window.requestIdleCallback || setTimeout)(res, { timeout: 800 }));
-    if (!MAP_CACHE.has(k)) MAP_CACHE.set(k, buildMap(cfg, mt.img));
+  const idle = () => new Promise((res) => (window.requestIdleCallback || setTimeout)(res, { timeout: 1500 }));
+  // fetch only fills the HTTP cache (no decoding), so phones don't hold every map in memory
+  for (const cfg of Object.values(TILED)) {
+    await idle();
+    const urls = [...texKeys(cfg).map((k) => `art/map/t_${k}.webp`), ...new Set(cfg.objects.map((o) => `art/map/${o.k}.webp`))];
+    await Promise.all(urls.map((u) => fetch(u).catch(() => {})));
   }
+  if (!MAP_CACHE.has("harbour")) { await idle(); const { mt } = await loadMapArt(TILED.harbour); if (!MAP_CACHE.has("harbour")) cachedMap("harbour", TILED.harbour, mt); }
   warming = false;
+}
+const nextFrame = () => new Promise((res) => requestAnimationFrame(() => setTimeout(res, 0)));
+
+function LoadingVeil({ place }) {
+  const thumb = TILED[place] && !["harbour", "crew_island", "duel_pier"].includes(place) ? `/art/waters/${place}_thumb.jpg` : "/art/waters/millbrook_thumb.jpg";
+  return (
+    <div className="absolute inset-0 z-[5] grid place-items-center bg-[#04121c]/90 transition-opacity" data-testid="map-loading">
+      <div className="flex flex-col items-center gap-3">
+        <img src={thumb} alt="" className="w-24 h-24 rounded-full object-cover border-4 border-[#c9a35a] shadow-xl animate-pulse" />
+        <div className="font-deco gold-text text-xl" data-testid="map-loading-text">Setting sail…</div>
+      </div>
+    </div>
+  );
 }
 
 export default function Scene({ place = "harbour" }) {
   const host = useRef(null);
   const rig = useRef({ app: null, tex: null, teardown: null, place, seq: 0 });
+  const [loading, setLoading] = useState(null);
   const mount = (r) => {
-    const seq = ++r.seq, key = r.place;
+    const seq = ++r.seq, key = (fx.mapView && QS.get("map")) || r.place;
     const cfg = sceneFor(key);
+    const slow = cfg.tiled && !MAP_CACHE.has(key);
+    if (slow) setLoading(key);
     const load = cfg.tiled ? loadMapArt(cfg) : Assets.load(cfg.bg).then((bg) => ({ bg }));
-    load.then(({ bg, mt }) => {
+    load.then(async ({ bg, mt }) => {
+      if (slow) await nextFrame();
       if (seq !== r.seq || !r.app) return;
       r.teardown?.(); r.teardown = buildScene(r.app, r.tex, key, bg, mt);
-      setTimeout(prewarm, 1200);
+      setLoading(null);
+      setTimeout(prewarm, 2500);
     });
   };
 
@@ -863,5 +896,10 @@ export default function Scene({ place = "harbour" }) {
       });
     };
   }, []);
-  return <div ref={host} className="absolute inset-0" data-testid="game-canvas" />;
+  return (
+    <>
+      <div ref={host} className="absolute inset-0" data-testid="game-canvas" />
+      {loading && <LoadingVeil place={loading} />}
+    </>
+  );
 }

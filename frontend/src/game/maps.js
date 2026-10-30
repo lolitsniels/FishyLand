@@ -143,4 +143,350 @@ export const DUEL_MAP = {
   sparkle: [640, 440, 920, 560], leap: [700, 500, 800, 450], life: {},
 };
 
-export const TILED = { harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP, duel_pier: DUEL_MAP };
+
+const home = (x, y) => ({ id: "harbour", label: "Back to Harbour", img: "map", x, y });
+const fish = (n, label, x, y, cast) => ({ id: `fish-${n}`, fish: true, label, x, y, cast });
+const many = (k, pts, w) => pts.map(([x, y], i) => ({ k: Array.isArray(k) ? k[i % k.length] : k, x, y, ...(w ? { w } : {}) }));
+
+// Willow River: a slow river across the middle, footbridge, a jetty and cottages on both banks.
+export const WILLOW_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 340, y: 800 }, weather: "leaves", water_tex: "river",
+  base: "grass",
+  ground: [
+    { tex: "dirt", line: [300, 780, 800, 830, 1300, 860, 1600, 950], width: 100 },
+    { tex: "dirt", line: [1100, 850, 1050, 600], width: 90 },
+    { tex: "dirt", line: [1600, 950, 2000, 1000, 2445, 1060], width: 90 },
+    { tex: "dirt", line: [1600, 1450, 1650, 1750, 2200, 1950, 2900, 1900], width: 100 },
+  ],
+  water: [{ line: [-100, 1300, 500, 1150, 1000, 1350, 1600, 1200, 2200, 1400, 2700, 1250, 3300, 1350], width: 320, bankW: 80 }],
+  docks: [{ poly: [2400, 1060, 2490, 1060, 2490, 1300, 2400, 1300], posts: [[2400, 1300], [2490, 1300], [2400, 1190], [2490, 1190]] }],
+  bridges: [{ a: [1600, 950], b: [1600, 1450], w: 96 }],
+  objects: [
+    { k: "house", x: 1050, y: 540, w: 280 }, { k: "barrels", x: 1230, y: 570, w: 100 }, { k: "house", x: 2500, y: 1880, w: 280, flip: true },
+    { k: "rowboat", x: 2660, y: 1330, w: 200 },
+    ...many("willow", [[550, 560], [1700, 620], [2800, 650], [3000, 1000], [800, 1750], [1250, 1950], [2000, 2200], [2900, 2150]]),
+    ...many("oak", [[200, 400], [1500, 300], [2300, 380], [3000, 400], [300, 2100], [1600, 2250]]),
+    ...many("pine", [[800, 250], [2700, 250], [1950, 420], [3050, 1950], [500, 2250]]),
+    ...many("reeds", [[700, 980], [1320, 1048], [2088, 1140], [1300, 1490], [2700, 1460]], 120),
+    ...many("bush", [[1400, 700], [2100, 800], [600, 1600], [2216, 1600]]),
+    { k: "lantern", x: 1485, y: 996 }, { k: "lantern", x: 1720, y: 1500 },
+    { k: "rocks", x: 2150, y: 900, w: 150 }, { k: "rocks", x: 400, y: 1700, w: 150 }, { k: "rocks", x: 3050, y: 1650, w: 140 },
+  ],
+  spots: [
+    home(240, 780),
+    fish(1, "Willow Bridge", 1600, 1200, [1780, 1240]),
+    fish(2, "North Bend", 1000, 1110, [1000, 1330]),
+    fish(3, "Jetty End", 2445, 1280, [2540, 1400]),
+    fish(4, "Gravel Run", 2900, 1510, [2900, 1300]),
+    fish(5, "West Shallows", 500, 1390, [500, 1170]),
+  ],
+  sparkle: [0, 1000, 3200, 600], leap: [800, 1100, 2000, 350], life: {},
+};
+
+// Greyfell Lake: a deep glacial lake under the fells, boathouse jetty on the south shore.
+export const GREYFELL_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 380, y: 2040 }, weather: "mist", water_tex: "lake",
+  base: "moss",
+  ground: [
+    { tex: "dirt", line: [300, 2050, 900, 2000, 1700, 2020, 2500, 1980, 2900, 1700, 2900, 900], width: 100 },
+    { tex: "dirt", line: [1700, 2020, 1700, 1640], width: 90 },
+  ],
+  water: [{ smooth: [800, 1000, 880, 720, 1120, 540, 1480, 470, 1850, 530, 2150, 480, 2460, 630, 2610, 900, 2540, 1220, 2280, 1430, 1950, 1510, 1700, 1530, 1400, 1480, 1100, 1380, 880, 1220], bankW: 60, bank: "rock" }],
+  docks: [{ poly: [1650, 1380, 1750, 1380, 1750, 1640, 1650, 1640], posts: [[1650, 1380], [1750, 1380], [1650, 1500], [1750, 1500]] }],
+  objects: [
+    { k: "boathouse", x: 1300, y: 1955, w: 360 }, { k: "stone_cottage", x: 2150, y: 1940, w: 290 }, { k: "barrels", x: 1520, y: 1955, w: 100 },
+    { k: "rowboat", x: 1900, y: 1440, w: 200 },
+    ...many("cairn", [[1000, 300], [2300, 280], [600, 1500]]),
+    ...many("pine", [[300, 300], [500, 700], [250, 1200], [2900, 300], [3050, 700], [3050, 1300], [800, 2250], [2600, 2250]]),
+    { k: "rocks", x: 1100, y: 200, w: 170 }, { k: "rocks", x: 2600, y: 1450, w: 150 },
+    { k: "cliff_rock", x: 2000, y: 250, w: 230 }, { k: "cliff_rock", x: 450, y: 1800, w: 200 },
+    { k: "lantern", x: 1600, y: 1720 }, { k: "lantern", x: 1800, y: 1720 },
+  ],
+  spots: [
+    home(220, 2000),
+    fish(1, "Boathouse Jetty", 1700, 1400, [1700, 1150]),
+    fish(2, "West Shingle", 700, 1000, [950, 1000]),
+    fish(3, "East Point", 2670, 900, [2400, 900]),
+    fish(4, "North Crag", 1700, 390, [1700, 650]),
+  ],
+  sparkle: [800, 480, 1800, 1040], leap: [1000, 600, 1400, 800], life: {},
+};
+
+// Saltmarsh Estuary: a tidal channel and a side creek, boardwalks and stilt huts.
+export const SALTMARSH_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 360, y: 1500 }, weather: "gulls", water_tex: "estuary",
+  base: "marsh",
+  ground: [
+    { tex: "planks", line: [300, 1500, 1000, 1300, 1000, 1010], width: 90 },
+    { tex: "planks", line: [1000, 1300, 1700, 1500], width: 90 },
+    { tex: "planks", line: [2100, 1500, 2700, 1600, 2950, 1600], width: 90 },
+    { tex: "planks", line: [1000, 480, 1500, 470, 2050, 490], width: 90 },
+  ],
+  water: [
+    { line: [-100, 600, 600, 800, 1300, 700, 2000, 1000, 2700, 900, 3300, 1100], width: 340, bankW: 80 },
+    { line: [2000, 1000, 1900, 1500, 2100, 2000, 2000, 2500], width: 200, bankW: 70 },
+  ],
+  bridges: [{ a: [1000, 480], b: [1000, 1010], w: 96 }, { a: [1700, 1500], b: [2100, 1500], w: 96 }],
+  objects: [
+    { k: "stilt_hut", x: 650, y: 1340, w: 300 }, { k: "stilt_hut", x: 1800, y: 425, w: 300, flip: true }, { k: "stilt_hut", x: 2550, y: 1490, w: 300 },
+    { k: "rowboat", x: 1320, y: 730, w: 200 },
+    ...many("marsh_grass", [[400, 1010], [1400, 1000], [2350, 1250], [700, 2000], [1500, 2100], [2600, 2100], [1300, 300], [2500, 300], [3000, 700]]),
+    ...many("reeds", [[200, 1050], [1250, 1060], [2950, 1350], [1650, 1750]], 120),
+    ...many("bush", [[500, 1900], [1200, 1800], [2800, 1900], [600, 300]]),
+    { k: "lantern", x: 900, y: 1070 }, { k: "lantern", x: 890, y: 430 }, { k: "lantern", x: 1660, y: 1610 }, { k: "lantern", x: 2140, y: 1610 },
+  ],
+  spots: [
+    home(230, 1500),
+    fish(1, "Channel Bridge", 1000, 745, [1200, 760]),
+    fish(2, "Creek Crossing", 1900, 1500, [1975, 1700]),
+    fish(3, "Mudflat Point", 2500, 1170, [2500, 950]),
+    fish(4, "North Reach", 1600, 590, [1600, 820]),
+    fish(5, "Creek Mouth", 1930, 2000, [2100, 2000]),
+  ],
+  sparkle: [0, 500, 3200, 700], leap: [1100, 600, 1600, 400], life: {},
+};
+
+// Harrow Point: wind-beaten cliffs, a lighthouse headland and a sea pier.
+export const HARROW_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 340, y: 1000 }, weather: "spray", water_tex: "lake",
+  base: "grass",
+  ground: [
+    { tex: "rock", smooth: [1900, 1150, 2400, 1050, 2800, 1250, 2500, 1500, 2000, 1450] },
+    { tex: "dirt", line: [300, 1000, 900, 1100, 1500, 1150, 2000, 1300, 2300, 1430], width: 100 },
+    { tex: "dirt", line: [1500, 1150, 1250, 1550, 1200, 1830], width: 90 },
+  ],
+  water: [{ smooth: [2400, -200, 3500, -200, 3500, 2700, -200, 2700, -200, 1900, 600, 1850, 1200, 1950, 1700, 1800, 2000, 1550, 2600, 1600, 2900, 1350, 2700, 1050, 2300, 950, 2350, 500, 2450, 0], bankW: 90, bank: "rock" }],
+  docks: [{ poly: [1150, 1820, 1250, 1820, 1250, 2250, 1150, 2250], posts: [[1150, 2250], [1250, 2250], [1150, 2050], [1250, 2050]] }],
+  objects: [
+    { k: "lighthouse", x: 2500, y: 1360, w: 250 }, { k: "coast_hut", x: 1000, y: 1045, w: 300 },
+    { k: "charter_boat", x: 1700, y: 2150, w: 480 },
+    { k: "cliff_rock", x: 600, y: 500 }, { k: "cliff_rock", x: 1700, y: 400 }, { k: "cliff_rock", x: 1600, y: 1650, w: 220 }, { k: "cliff_rock", x: 2050, y: 700, w: 220 },
+    { k: "rocks", x: 400, y: 1500, w: 160 }, { k: "rocks", x: 1900, y: 1000, w: 150 },
+    ...many("pine", [[300, 300], [800, 250], [1400, 300], [2000, 250]]),
+    ...many("bush", [[700, 1300], [1700, 1350], [300, 1600]]),
+    { k: "lantern", x: 1080, y: 1790 },
+  ],
+  spots: [
+    home(220, 1000),
+    fish(1, "Harrow Pier", 1200, 2230, [1350, 2160]),
+    fish(2, "Lighthouse Point", 2790, 1350, [3050, 1350]),
+    fish(3, "Kelp Gully", 600, 1760, [600, 2050]),
+    fish(4, "North Rocks", 2230, 800, [2500, 800]),
+    fish(5, "Breaker Ledge", 2300, 1490, [2300, 1750]),
+  ],
+  sparkle: [0, 1800, 3200, 600], leap: [2400, 1500, 700, 700], life: {},
+};
+
+// Coral Shoals: a sandy reef island with a palm-grove heart, dive shop and a reef pier.
+export const CORAL_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 1600, y: 1900 }, weather: "bubbles", water_tex: "lagoon",
+  base: "sand",
+  ground: [
+    { tex: "jungle", smooth: [900, 700, 1800, 600, 2500, 900, 2400, 1400, 1600, 1550, 900, 1400] },
+    { tex: "planks", line: [1600, 1990, 1600, 1700], width: 90 },
+    { tex: "planks", line: [900, 1700, 2400, 1700], width: 90 },
+  ],
+  water: [{ invert: [420, 560, 800, 380, 1250, 330, 1700, 390, 2150, 320, 2600, 480, 2950, 760, 3010, 1150, 2850, 1550, 2650, 1880, 2200, 2020, 1750, 2110, 1300, 2030, 850, 2060, 450, 1800, 280, 1450, 300, 1000], bankW: 60 }],
+  docks: [{ poly: [1550, 1980, 1650, 1980, 1650, 2330, 1550, 2330], posts: [[1550, 2330], [1650, 2330], [1550, 2180], [1650, 2180]] }],
+  objects: [
+    { k: "beach_hut", x: 1250, y: 1650, w: 330 }, { k: "beach_hut", x: 2050, y: 1650, w: 330, flip: true },
+    { k: "parasol", x: 1000, y: 1850 }, { k: "parasol", x: 2250, y: 1850 },
+    { k: "rowboat", x: 1430, y: 2250, w: 200 },
+    ...many("palm", [[600, 900], [1100, 650], [1500, 520], [2000, 520], [2500, 800], [2700, 1300], [500, 1300], [2550, 1650]]),
+    ...many("jungle_tree", [[1500, 1100], [1900, 1000], [1200, 1000]]),
+    ...many("bush", [[2200, 1250], [1000, 1250], [1750, 1350]]),
+    { k: "lantern", x: 1480, y: 1940 },
+  ],
+  spots: [
+    home(1720, 1900),
+    fish(1, "Reef Pier", 1600, 2310, [1800, 2250]),
+    fish(2, "West Flats", 360, 1200, [130, 1200]),
+    fish(3, "Turtle Point", 2870, 1300, [3110, 1300]),
+    fish(4, "North Drop-off", 1700, 470, [1700, 200]),
+  ],
+  sparkle: [0, 0, 3200, 2400], leap: [200, 1950, 2800, 400], life: {},
+};
+
+// Blackwater Mangroves: two dark channels split the land into three banks joined by root bridges.
+export const BLACKWATER_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 360, y: 430 }, weather: "fireflies", water_tex: "swamp",
+  base: "mud",
+  ground: [
+    { tex: "dirt", line: [300, 420, 700, 520, 700, 690], width: 90 },
+    { tex: "dirt", line: [700, 520, 1500, 420, 2300, 450, 2700, 520, 2700, 600], width: 90 },
+    { tex: "dirt", line: [700, 1110, 800, 1350, 1300, 1450, 1300, 1570], width: 90 },
+    { tex: "dirt", line: [2700, 1010, 2600, 1400, 2300, 1700, 2500, 2100], width: 90 },
+    { tex: "dirt", line: [2600, 1400, 2950, 1480], width: 80 },
+    { tex: "dirt", line: [1300, 2030, 1000, 2200, 500, 2150], width: 90 },
+  ],
+  water: [
+    { line: [-100, 700, 700, 900, 1400, 700, 2100, 1000, 2700, 800, 3300, 950], width: 260, bankW: 60, bank: "dirt" },
+    { line: [2100, 1000, 1900, 1500, 1300, 1800, 700, 1700, -100, 1900], width: 240, bankW: 60, bank: "dirt" },
+  ],
+  bridges: [{ a: [700, 690], b: [700, 1110], w: 96 }, { a: [1300, 1570], b: [1300, 2030], w: 96 }, { a: [2700, 600], b: [2700, 1010], w: 96 }],
+  objects: [
+    { k: "swamp_shack", x: 1150, y: 1320, w: 300 }, { k: "swamp_shack", x: 2950, y: 1400, w: 300, flip: true },
+    { k: "rowboat", x: 1050, y: 810, w: 190 },
+    ...many("mangrove", [[300, 1300], [1600, 1350], [2000, 200], [1100, 250], [2900, 300], [500, 2260], [2900, 2000], [2050, 2200]]),
+    ...many("ghost_tree", [[1900, 300], [250, 2150]]),
+    ...many("reeds", [[412, 1030], [1700, 590], [2400, 1160], [985, 1574]], 120),
+    { k: "lantern", x: 600, y: 640 }, { k: "lantern", x: 810, y: 1150 }, { k: "lantern", x: 2590, y: 1060 },
+  ],
+  spots: [
+    home(230, 420),
+    fish(1, "Root Bridge", 700, 900, [900, 860]),
+    fish(2, "Junction Pool", 1750, 1250, [1990, 1250]),
+    fish(3, "Black Bend", 2300, 1160, [2300, 950]),
+    fish(4, "Heron Bank", 700, 1900, [700, 1700]),
+    fish(5, "North Shallows", 1500, 520, [1500, 720]),
+  ],
+  sparkle: [0, 500, 3200, 1500], leap: [800, 600, 1600, 600], life: {},
+};
+
+// The Frozen Reach: a frozen bay you can walk on, fishing holes cut through the ice, open sea to the north.
+const hole = (x, y) => ({ circle: [x, y, 70, 40], bankW: 14, bank: "snow" });
+export const FROZEN_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 420, y: 2100 }, weather: "snow", water_tex: "lake",
+  base: "snow",
+  ground: [{ tex: "ice", smooth: [600, 500, 1800, 350, 2800, 600, 2900, 1400, 2200, 1900, 1000, 1850, 500, 1300] }],
+  water: [
+    { smooth: [-200, -200, 3400, -200, 3400, 250, 2400, 300, 1600, 220, 800, 300, -200, 250], bankW: 50, bank: "ice" },
+    hole(1100, 900), hole(1700, 700), hole(2300, 1000), hole(1500, 1400), hole(2400, 1550),
+  ],
+  objects: [
+    { k: "ice_shack", x: 1330, y: 960 }, { k: "ice_shack", x: 1950, y: 760 }, { k: "ice_shack", x: 2580, y: 1060, flip: true }, { k: "ice_shack", x: 1250, y: 1460 },
+    ...many("snow_pine", [[200, 500], [400, 900], [250, 1400], [500, 1800], [3000, 500], [3050, 1000], [3000, 1700], [2700, 2100], [1800, 2200], [1000, 2200]]),
+    { k: "snowman", x: 560, y: 2050 }, { k: "cairn", x: 2900, y: 2150 },
+  ],
+  spots: [
+    home(300, 2100),
+    fish(1, "Hole One", 1100, 985, [1100, 900]),
+    fish(2, "Shack Hole", 1700, 785, [1700, 700]),
+    fish(3, "Deep Hole", 2300, 1085, [2300, 1000]),
+    fish(4, "South Hole", 1500, 1485, [1500, 1400]),
+    fish(5, "Far Hole", 2400, 1635, [2400, 1550]),
+    fish(6, "Floe Edge", 2000, 390, [2000, 140]),
+  ],
+  sparkle: [0, 0, 3200, 300], leap: [0, 0, 3200, 260], life: {},
+};
+
+// The Sunken Deep: a lone rock in the open ocean with a research station and charter pier.
+export const SUNKEN_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 2150, y: 1300 }, weather: "stars", water_tex: "deep",
+  base: "rock",
+  ground: [
+    { tex: "planks", line: [1500, 1210, 1500, 1650], width: 90 },
+    { tex: "planks", line: [1500, 1300, 2000, 1220, 2400, 1205], width: 90 },
+  ],
+  water: [{ invert: [700, 820, 1000, 680, 1450, 640, 1850, 700, 2250, 780, 2480, 1000, 2500, 1300, 2250, 1560, 1900, 1700, 1500, 1760, 1100, 1700, 760, 1530, 600, 1250], bankW: 60, bank: "sand" }],
+  docks: [
+    { poly: [2380, 1150, 3050, 1150, 3050, 1260, 2380, 1260], posts: posts(2560, 3050, 1265, 160) },
+    { poly: [1450, 1650, 1550, 1650, 1550, 2150, 1450, 2150], posts: [[1450, 2150], [1550, 2150], [1450, 1950], [1550, 1950]] },
+  ],
+  objects: [
+    { k: "research_hut", x: 1500, y: 1150 }, { k: "barrels", x: 2300, y: 1120, w: 100 },
+    { k: "charter_boat", x: 2760, y: 1130 }, { k: "charter_boat", x: 500, y: 2000, w: 460, flip: true },
+    { k: "cliff_rock", x: 900, y: 1000, w: 220 }, { k: "cliff_rock", x: 2100, y: 900, w: 220 },
+    { k: "rocks", x: 1000, y: 1500, w: 150 }, { k: "rocks", x: 2000, y: 1550, w: 150 }, { k: "bush", x: 1200, y: 1300 },
+    { k: "lantern", x: 2340, y: 1320 }, { k: "lantern", x: 1380, y: 1600 },
+  ],
+  spots: [
+    { ...home(2250, 1300), label: "Boat to Harbour" },
+    fish(1, "Charter Pier End", 3030, 1205, [3100, 1400]),
+    fish(2, "South Jetty", 1500, 2130, [1500, 2300]),
+    fish(3, "West Rocks", 730, 1100, [450, 1100]),
+    fish(4, "North Ledge", 1500, 740, [1500, 450]),
+  ],
+  sparkle: [0, 0, 3200, 2400], leap: [100, 100, 3000, 2200], life: {},
+};
+
+// Ghostlight Cavern: an underground lake lit by glowing fungus, crossed by a long causeway.
+export const GHOSTLIGHT_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 420, y: 2100 }, weather: "fireflies", water_tex: "cavewater",
+  base: "cave",
+  ground: [
+    { tex: "dirt", line: [400, 2100, 1000, 2050, 1600, 1960], width: 100 },
+    { tex: "dirt", line: [1600, 420, 2200, 300, 2800, 350], width: 90 },
+  ],
+  water: [{ smooth: [800, 600, 1600, 500, 2500, 700, 2700, 1300, 2200, 1800, 1300, 1850, 700, 1400], bankW: 50, bank: "rock" }],
+  bridges: [{ a: [1600, 1960], b: [1600, 420], w: 96 }],
+  objects: [
+    { k: "cave_camp", x: 900, y: 1985 },
+    ...many("glow_shroom", [[500, 600], [300, 1300], [1100, 2250], [2400, 2000], [2900, 1800], [3000, 700], [2200, 200]]),
+    ...many("stalagmite", [[200, 400], [1000, 300], [2900, 300], [3000, 1200], [2600, 2200], [200, 1700]]),
+    ...many("crystal", [[1300, 2200], [2800, 1600], [700, 300]]),
+    { k: "lantern", x: 1700, y: 2010 }, { k: "lantern", x: 1490, y: 400 },
+  ],
+  spots: [
+    home(300, 2100),
+    fish(1, "Causeway", 1600, 1150, [1850, 1150]),
+    fish(2, "Glow Shore", 590, 1000, [850, 1000]),
+    fish(3, "East Grotto", 2790, 1300, [2500, 1300]),
+    fish(4, "Crystal Beach", 2100, 1900, [2100, 1650]),
+  ],
+  sparkle: [700, 500, 2000, 1350], leap: [900, 700, 1600, 900], life: {},
+};
+
+// The Drowned Temple: a jungle temple whose stone plaza steps down into a jade lake.
+export const TEMPLE_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 340, y: 610 }, weather: "leaves", water_tex: "jade",
+  base: "jungle",
+  ground: [
+    { tex: "flag", circle: [1600, 900, 420, 120] },
+    { tex: "flag", line: [300, 600, 800, 680, 1190, 880], width: 100 },
+    { tex: "flag", line: [2010, 880, 2400, 680, 2900, 600], width: 100 },
+  ],
+  water: [{ smooth: [520, 1250, 850, 1080, 1200, 1030, 1600, 990, 2000, 1030, 2350, 1060, 2700, 1250, 2820, 1550, 2700, 1850, 2350, 2080, 1900, 2150, 1400, 2120, 950, 2080, 600, 1880, 470, 1550], bankW: 60, bank: "flag" }],
+  docks: [{ poly: [1550, 1850, 1650, 1850, 1650, 2250, 1550, 2250], posts: [[1550, 1850], [1650, 1850], [1550, 1990], [1650, 1990]] }],
+  objects: [
+    { k: "temple", x: 1600, y: 760 }, { k: "pillar", x: 1150, y: 760 }, { k: "pillar", x: 2050, y: 760 },
+    { k: "statue", x: 2900, y: 1100 }, { k: "statue", x: 400, y: 1000 },
+    ...many("jungle_tree", [[130, 480], [700, 500], [2500, 500], [3060, 480], [250, 1500], [200, 2050], [3000, 1500], [3000, 2100]]),
+    ...many("bush", [[1000, 550], [2200, 550], [2600, 2300], [1000, 2310]]),
+  ],
+  spots: [
+    home(220, 600),
+    fish(1, "Temple Steps", 1600, 935, [1600, 1200]),
+    fish(2, "West Koi Pool", 380, 1500, [650, 1500]),
+    fish(3, "East Bank", 2880, 1500, [2600, 1500]),
+    fish(4, "Jade Pier", 1600, 1870, [1600, 1650]),
+  ],
+  sparkle: [500, 1000, 2300, 1150], leap: [600, 1100, 2100, 1000], life: {},
+};
+
+// The Cinder Trench: a black basalt coast over glowing vents, two piers and a monitoring outpost.
+export const CINDER_MAP = {
+  tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 360, y: 710 }, weather: "embers", water_tex: "vent",
+  base: "ash",
+  ground: [
+    { tex: "rock", line: [300, 700, 900, 900, 1000, 1450], width: 100 },
+    { tex: "rock", line: [900, 900, 1700, 800, 2300, 600, 2550, 500], width: 90 },
+  ],
+  water: [{ smooth: [-200, 1500, 300, 1470, 700, 1430, 1000, 1540, 1300, 1600, 1700, 1530, 2000, 1380, 2250, 1150, 2380, 900, 2620, 700, 2650, 420, 2780, 150, 2800, -200, 3400, -200, 3400, 2600, -200, 2600], bankW: 70, bank: "ash" }],
+  docks: [
+    { poly: [950, 1450, 1050, 1450, 1050, 1900, 950, 1900], posts: [[950, 1900], [1050, 1900], [950, 1720], [1050, 1720]] },
+    { poly: [2550, 450, 2950, 450, 2950, 550, 2550, 550], posts: [[2950, 450], [2950, 550], [2800, 555]] },
+  ],
+  objects: [
+    { k: "vent_hut", x: 1300, y: 780 },
+    ...many("basalt", [[500, 1200], [1500, 1200], [2000, 1000], [700, 300], [1900, 300]]),
+    ...many("dead_tree", [[300, 1100], [1100, 300], [2100, 200], [400, 400], [1750, 1150]]),
+    { k: "cliff_rock", x: 1700, y: 450, w: 220 },
+    { k: "lantern", x: 870, y: 1430 },
+  ],
+  spots: [
+    home(230, 700),
+    fish(1, "Vent Pier", 1000, 1880, [1000, 2150]),
+    fish(2, "Ember Jetty", 2930, 500, [3050, 700]),
+    fish(3, "Obsidian Shore", 1600, 1470, [1600, 1750]),
+    fish(4, "Ash Point", 2250, 960, [2500, 1000]),
+    fish(5, "Black Sand", 300, 1390, [300, 1700]),
+  ],
+  sparkle: [0, 1500, 3200, 900], leap: [200, 1700, 2800, 600], life: {},
+};
+
+export const TILED = {
+  harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP, duel_pier: DUEL_MAP,
+  willow: WILLOW_MAP, greyfell: GREYFELL_MAP, saltmarsh: SALTMARSH_MAP, harrow: HARROW_MAP, coral: CORAL_MAP, blackwater: BLACKWATER_MAP,
+  frozen: FROZEN_MAP, sunken: SUNKEN_MAP, ghostlight: GHOSTLIGHT_MAP, temple: TEMPLE_MAP, cinder: CINDER_MAP,
+};

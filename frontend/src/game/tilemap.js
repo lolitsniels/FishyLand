@@ -22,14 +22,43 @@ export const OBJ = {
   rowboat: { w: 230, fp: [0, 0], bob: 1.2, wet: true },
   ship: { w: 820, fp: [0, 0], bob: 2, wet: true },
   bridge: { w: 700, fp: [0, 0], ground: true },
+  boathouse: { rect: true, w: 360, fp: [0.9, 0.5] },
+  stone_cottage: { rect: true, w: 290, fp: [0.88, 0.55], smoke: [0.64, 0.05] },
+  cairn: { w: 90, fp: [0.7, 0.25] },
+  stilt_hut: { rect: true, w: 330, fp: [0.9, 0.5] },
+  marsh_grass: { w: 130, fp: [0, 0] },
+  lighthouse: { rect: true, w: 250, fp: [0.9, 0.36], glow: [0.47, 0.09] },
+  cliff_rock: { w: 250, fp: [0.86, 0.4] },
+  coast_hut: { rect: true, w: 310, fp: [0.9, 0.5] },
+  palm: { w: 250, fp: [0.12, 0.05] },
+  beach_hut: { rect: true, w: 330, fp: [0.9, 0.5] },
+  parasol: { w: 170, fp: [0.7, 0.25] },
+  mangrove: { w: 320, fp: [0.3, 0.1] },
+  swamp_shack: { rect: true, w: 310, fp: [0.88, 0.5] },
+  ice_shack: { rect: true, w: 220, fp: [0.9, 0.5], smoke: [0.67, 0.03] },
+  snow_pine: { w: 150, fp: [0.3, 0.08] },
+  snowman: { w: 100, fp: [0.6, 0.3] },
+  charter_boat: { w: 520, fp: [0, 0], bob: 1.5, wet: true },
+  research_hut: { rect: true, w: 340, fp: [0.9, 0.5] },
+  glow_shroom: { w: 150, fp: [0.6, 0.25] },
+  stalagmite: { w: 200, fp: [0.7, 0.3] },
+  crystal: { w: 150, fp: [0.7, 0.3] },
+  cave_camp: { rect: true, w: 290, fp: [0.88, 0.5] },
+  temple: { rect: true, w: 560, fp: [0.92, 0.55] },
+  jungle_tree: { w: 300, fp: [0.18, 0.06] },
+  statue: { rect: true, w: 130, fp: [0.8, 0.35] },
+  pillar: { rect: true, w: 110, fp: [0.8, 0.3] },
+  basalt: { w: 190, fp: [0.8, 0.35] },
+  dead_tree: { w: 230, fp: [0.2, 0.08] },
+  vent_hut: { rect: true, w: 320, fp: [0.9, 0.5] },
+  ghost_tree: { w: 260, fp: [0.2, 0.08] },
 };
-export const TERRAIN = ["grass", "sand", "dirt", "planks", "cobble"];
 
 const CELL = 16;
 const CHUNK = 1024;
 
-const TEX_K = { grass: 0.45, sand: 0.4, dirt: 0.4, planks: 0.35, cobble: 0.26 };
-const pattern = (ctx, img, k = 0.5) => { const p = ctx.createPattern(img, "repeat"); p.setTransform(new DOMMatrix().scale(k)); return p; };
+const TEX_K = { grass: 0.45, sand: 0.4, dirt: 0.4, planks: 0.35, cobble: 0.26, flag: 0.3, rock: 0.25, cave: 0.3, mud: 0.32 };
+const pattern = (ctx, img, k = 0.4) => { const p = ctx.createPattern(img, "repeat"); p.setTransform(new DOMMatrix().scale(k)); return p; };
 const pathPoly = (ctx, pts) => { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.closePath(); };
 const pathLine = (ctx, pts) => { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); };
 // Smooth closed shape (Catmull-Rom through the points) so coasts and plazas look organic.
@@ -58,15 +87,15 @@ export function buildMap(map, img) {
   const { W, H } = map;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
-  ctx.fillStyle = pattern(ctx, img[map.base || "grass"], TEX_K[map.base || "grass"]); ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = pattern(ctx, img[map.base || "grass"], TEX_K[map.base || "grass"] ?? 0.4); ctx.fillRect(0, 0, W, H);
   // soft edge shadow for every ground shape first, then all fills, so overlapping paths merge without seams
   ctx.save(); ctx.strokeStyle = ctx.fillStyle = "rgba(30,22,10,.22)"; ctx.filter = "blur(6px)"; ctx.translate(0, 6);
   for (const s of map.ground || []) { if (s.line) { shape(ctx, s); ctx.lineWidth = s.width + 10; ctx.lineCap = ctx.lineJoin = "round"; ctx.stroke(); } else { shape(ctx, s); ctx.lineWidth = 10; ctx.fill(); ctx.stroke(); } }
   ctx.restore();
-  for (const s of map.ground || []) { ctx.fillStyle = ctx.strokeStyle = pattern(ctx, img[s.tex], TEX_K[s.tex]); paint(ctx, s); }
+  for (const s of map.ground || []) { ctx.fillStyle = ctx.strokeStyle = pattern(ctx, img[s.tex], TEX_K[s.tex] ?? 0.4); paint(ctx, s); }
   // banks under the water edge, then cut the water out so the animated water layer shows through
   for (const s of map.water) {
-    ctx.save(); ctx.strokeStyle = pattern(ctx, img[s.bank || "sand"], TEX_K.sand); ctx.fillStyle = ctx.strokeStyle;
+    ctx.save(); ctx.strokeStyle = pattern(ctx, img[s.bank || "sand"], TEX_K[s.bank || "sand"] ?? 0.4); ctx.fillStyle = ctx.strokeStyle;
     if (s.line) { shape(ctx, s); ctx.lineWidth = s.width + (s.bankW ?? 90); ctx.lineCap = ctx.lineJoin = "round"; ctx.stroke(); }
     else { shape(ctx, s); ctx.lineWidth = (s.bankW ?? 90) * 2; ctx.lineJoin = "round"; ctx.stroke(); }
     ctx.restore();
@@ -129,11 +158,11 @@ export function buildMap(map, img) {
     if (dry(o.x, o.y)) return o;
     for (let r = 16; r <= 480; r += 16) for (let k = 0; k < 16; k++) {
       const x = o.x + Math.cos((k * Math.PI) / 8) * r, y = o.y + Math.sin((k * Math.PI) / 8) * r;
-      if (dry(x, y)) return { ...o, x, y };
+      if (dry(x, y)) return { ...o, x, y, _moved: true };
     }
-    return null;
+    return { ...o, _dropped: true };
   };
-  const objects = map.objects.map(settle).filter(Boolean);
+  const settled = map.objects.map(settle), objects = settled.filter((o) => !o._dropped);
   g.fillStyle = g.strokeStyle = "#fff";
   for (const d of map.docks || []) { pathPoly(g, d.poly); g.fill(); }
   for (const b of map.bridges || []) { pathLine(g, [...b.a, ...b.b]); g.lineWidth = b.w - 18; g.stroke(); }
@@ -158,7 +187,35 @@ export function buildMap(map, img) {
     c.getContext("2d").drawImage(cv, -x, -y);
     chunks.push({ x, y, tex: Texture.from(c) });
   }
-  return { chunks, nav: { ...makeNav(grid, gw, gh), isWater }, objects };
+  return { chunks, nav: { ...makeNav(grid, gw, gh), isWater }, objects, settled };
+}
+
+// Layout QA for /game?mapview=1&mapcheck=1: lists every rule a map breaks (empty lists = clean).
+export function auditMap(map, tm) {
+  const { W, H } = map, k = 8, gw = Math.ceil(W / k), gh = Math.ceil(H / k);
+  const c = document.createElement("canvas"); c.width = gw; c.height = gh;
+  const g = c.getContext("2d"); g.scale(1 / k, 1 / k); g.fillStyle = g.strokeStyle = "#fff"; g.lineCap = g.lineJoin = "round";
+  for (const s of (map.ground || []).filter((s) => s.line)) paint(g, s);
+  for (const d of map.docks || []) { pathPoly(g, d.poly); g.fill(); }
+  for (const b of map.bridges || []) { pathLine(g, [...b.a, ...b.b]); g.lineWidth = b.w; g.stroke(); }
+  const px = g.getImageData(0, 0, gw, gh).data;
+  const onGround = (x, y) => { const cx = Math.floor(x / k), cy = Math.floor(y / k); return cx >= 0 && cy >= 0 && cx < gw && cy < gh && px[(cy * gw + cx) * 4] > 127; };
+  const name = (o) => `${o.k}@${Math.round(o.x)},${Math.round(o.y)}`;
+  const onPath = tm.objects.filter((o) => {
+    const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
+    if (!fw || def.wet) return false;
+    const rx = (w * fw) / 2 * 0.85, ry = (w * fh) * 0.85;
+    return [[o.x, o.y - 6], [o.x - rx, o.y - 6], [o.x + rx, o.y - 6], [o.x, o.y - ry], [o.x - rx, o.y - ry], [o.x + rx, o.y - ry]].some(([x, y]) => onGround(x, y));
+  }).map(name);
+  const wetBad = tm.objects.filter((o) => OBJ[o.k].wet && !tm.nav.isWater(o.x, o.y - 10)).map(name);
+  const spots = map.spots.map((sp) => ({
+    id: sp.id, walk: tm.nav.walk(sp.x, sp.y), reach: !!tm.nav.path(map.spawn, { x: sp.x, y: sp.y }),
+    cast: sp.cast ? tm.nav.isWater(...sp.cast) && !tm.nav.walk(...sp.cast) : null,
+  })).filter((s) => !s.walk || !s.reach || s.cast === false);
+  return {
+    moved: tm.settled.filter((o) => o._moved).map((o) => `${o.k}->${Math.round(o.x)},${Math.round(o.y)}`),
+    dropped: tm.settled.filter((o) => o._dropped).map(name), onPath, wetBad, spots, spawn: tm.nav.walk(map.spawn.x, map.spawn.y),
+  };
 }
 
 function makeNav(grid, gw, gh) {
