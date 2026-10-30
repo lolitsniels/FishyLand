@@ -47,7 +47,7 @@ export const HARBOUR_MAP = {
     { id: "contracts", label: "Anchor Tavern · Contracts", img: "daily", x: 900, y: 1640 },
     { id: "pearl-shop", label: "Pearl Shop", img: "pass", x: 2120, y: 1640 },
     { id: "boat", label: "Sea Serpent · Travel", img: "map", x: 3260, y: 1665 },
-    { id: "duel", label: "Duel Pier", img: "guild", x: 1550, y: 2110 },
+    { id: "duel", label: "Duel Pier", img: "guild", x: 1550, y: 2040 },
   ],
   sparkle: [0, 1850, 3600, 550], leap: [2900, 1800, 600, 500],
   life: { rings: [[2840, 1745], [3120, 1745], [3380, 1745], [1480, 2170], [1620, 2170], [2900, 1590], [3300, 1590]] },

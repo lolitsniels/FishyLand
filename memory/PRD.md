@@ -46,6 +46,12 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   4 spots with cast targets). Other 11 waters still old single-image scenes (awaiting user approval). ShopFrame (tabs/banner/grid/side/wallet)
   on Tackle Shop, Pearl Shop (coming-soon cosmetics), Market. ?mapview=1 shows whole map. Testing iteration 8 (forced summary): all flows pass; fixes applied after.
 
+- 2026-06 (iter 9): Painted animated world Travel Map (components/WorldMap.js: 13 pins, boat route, clouds, shimmer, popover travel; "fr-mode" window event switches harbour/water).
+  Harbour re-laid out (high street + plaza + notice boards + promenade + piers); building footprints cover the full body; objects in water auto-dropped; fish leaps/sparkles only on water;
+  Millbrook plank bridge drawn on its walkway. Painted UI in public/ui.css (loaded last in index.html; CSS urls to /art must live there, not in src css):
+  frame panel.webp, btn_gold/btn_dark buttons, tile.webp, close.webp, player card card.webp. Font: Noto Sans everywhere, Cinzel for titles. Fight message readable; dialogs solid.
+  Testing iteration_9: all core flows pass; mobile issues fixed after.
+
 ## Backlog
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
 - P0: Living-map animations for the 12 waters (per-water props)

@@ -1,0 +1,41 @@
+{
+  "summary": "Frontend-only test of iteration-9 features (backend skipped as requested). I ran Playwright at 1920x1080 and 390x844, logged in as TestAngler through the API token. Working: the painted Travel Map (13 pins, animated boat, popovers, Travel, Fish-here, Sail to the Harbour, locked-water reasons, card list still rendered below); harbour collisions and tap-to-walk auto-open for all 7 signposts; the Millbrook bridge and its 4 fishing spots; the player card; the readable fight message; the solid Fishdex species dialog; painted modal frames and buttons; the close button. No page errors and no horizontal page overflow at 390. Issues found: the map popover is clipped on mobile; Inventory action buttons overflow at 390; the Change look button overlaps the profile meta line; the Shop purse footer is see-through on mobile; plus minor polish items.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "WorldMap popover (mobile 390)", "issue": "The popover has a fixed 230px width inside a 338px-wide map that has overflow:hidden. For pins in the lower half it is drawn upward (translate -100%). Clicking the Ghostlight pin put the popover at y=9 when the map top is at y=91, and its right edge at 388 when the map ends at 364. The thumbnail and title are cut off at the top and right.", "selector": "[data-testid=map-popover]", "priority": "MEDIUM"},
+      {"component": "Inventory Keepnet (mobile 390)", "issue": "The bulk-action row (ml-auto flex) goes past the modal edge (right=398 px). 'Make live bait' is visibly cut off. In the per-fish card action rows, 'List' is clipped at the left and the 'Mount' / 'Sell to vendor' labels overflow their buttons (scrollWidth > clientWidth). Cause: on .btn-sm the 20px border-image sides plus !px-2 leave too little content width.", "selector": "[data-testid^=mount-fish-], .ml-auto.flex.gap-2", "priority": "MEDIUM"},
+      {"component": "Profile hero (1920 and 390)", "issue": "The 'Change look' button (absolute, -bottom-2, centred under the avatar) is wider than the avatar. It covers the start of the location/joined line ('...llbrook Pond · joined') and the 'Show up to 3 achievement badges' link.", "selector": "[data-testid=change-look-button]", "priority": "MEDIUM"},
+      {"component": "Tackle Shop purse footer (mobile 390)", "issue": "The Gold/Pearls/Player Market footer floats over the scrolling item list without a solid background. Item cards show through behind the gold and pearls chips.", "selector": "[data-testid=page-modal] footer/purse", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Travel Map 390", "issues": ["Pin labels overlap each other ('Millbrook Pond' over 'Willow River', 'Saltmarsh Estuary' over 'Harrow Point') and are clipped at the map edges ('kwater Mangroves', 'ostlight Cavern', 'e Cinder Trench'). Consider hiding labels below ~500px, or shortening them and clamping them inside the map."]},
+      {"screen": "Travel Map 1920", "issues": ["The Millbrook popover covers the Harbour pin label and the Saltmarsh label. Minor."]},
+      {"screen": "Harbour 1920x1080", "issues": ["The camera clamps at the bottom of the map, so the Duel Pier signpost sits right under the walk-hint chip and its label is hidden."]},
+      {"screen": "Millbrook", "issues": ["The sparkle region [300,0,2500,2400] covers the whole map and sparkles are not filtered with isWater, so star sparkles show on grass. Ambient leap start points are water-checked, but the arc drifts up to 50px sideways and the end point is not checked."]},
+      {"screen": "Inventory 1920", "issues": ["'Mount' label text spills slightly into the gold end caps of the painted button. Still readable."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "WorldMap: on narrow maps, make the popover width responsive (e.g. min(230px, 70%)), or render it outside the overflow:hidden .wm container (or as a bottom sheet on mobile). Clamp its top/left so it stays fully inside the map.",
+    "Inventory mobile: let the bulk-action row wrap (flex-wrap, no ml-auto overflow) and give the card action buttons enough width (drop !px-2 on .btn-sm or shrink the border-image side width for small buttons).",
+    "Profile: move the 'Change look' button out of the meta line (put it below the hero or make it a small icon button) so it no longer covers the location/joined text.",
+    "Shop mobile: give the purse footer a solid or painted background.",
+    "Optional polish: hide or reduce map pin labels at 390; filter sparkles with tm.nav.isWater on tiled maps; move the walk-hint chip so it does not cover the Duel Pier signpost."
+  ],
+  "critical_code_review_comments": [
+    "Waters.js puts `import { WorldMap }` in the middle of the file, after component definitions. Hoisting makes it work, but move it to the top with the other imports.",
+    "Waters.js passes mode from sessionStorage.getItem('fr_mode') read at render time. This is not reactive state; it only works because the modal re-renders on navigation. Pass the mode down from World.js instead.",
+    "WorldMap 'map-fish-here' in water mode reads 'You are here' but is still an active button that closes the modal. Consider disabling it or relabelling it 'Fish here'.",
+    "The unlock/can-travel logic in WorldMap.info() is a copy of the logic in the Waters card list (DRY). Extract a shared helper.",
+    "The harbour nav grid and tilemap logic look sound. Buildings, fountain, lanterns (rx16/ry14) and trees all block correctly in testing."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "skipped", "frontend": "88%"},
+  "seed_data_creation": "None. TestAngler travelled willow -> harbour -> millbrook through the map and ended on millbrook (water mode). One fish fight was started at Millbrook fish-1 (energy 100 -> 98).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Login: POST /api/auth/login {username,password} -> token, then set localStorage owo_token. Set sessionStorage fr_mode before loading /game. ?mapview=1 fits the whole map to the screen: at 1920x1080 the harbour scale is 0.45 with x-offset 150, Millbrook is 0.45 with x-offset 240, so screen = (off + wx*0.45, wy*0.45). Clicking a signpost there walks to it and auto-opens its page (works for shop, market, crews, quests, pearl-shop, boat). Duel is under the action bar in mapview; use normal view (sc=1.1, camera: cx=960-me.x*1.1, cy=594-(me.y-60)*1.1, clamped). Walking takes 5-20s in headless. Collisions verified with window.__fx.me teleport + held arrow keys. Bridge: tap-to-walk from spawn to (1900,1000) crosses it; keyboard crossing works with Right+Up and Left+Down (it slides along the deck); a single arrow key walks off onto the bank. Fight: teleport to fish-1 (1520,1065) and dispatch pointerdown on cast-fish-button."
+}

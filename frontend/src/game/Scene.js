@@ -387,6 +387,8 @@ function buildScene(app, tex, key, bgTex, mt) {
     const s = new Sprite(star);
     s.anchor.set(0.5); s.blendMode = "add";
     s.x = sx + Math.random() * sw0; s.y = sy + Math.random() * sh0; s._p = Math.random() * 10; s._s = 1 + Math.random() * 3;
+    for (let k = 0; tm && k < 10 && !tm.nav.isWater(s.x, s.y); k++) { s.x = sx + Math.random() * sw0; s.y = sy + Math.random() * sh0; }
+    if (tm && !tm.nav.isWater(s.x, s.y)) s.visible = false;
     s.scale.set(0.25 + Math.random() * 0.5);
     fxLayer.addChild(s); sparkles.push(s);
   }
