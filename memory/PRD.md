@@ -30,9 +30,12 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   Rebuilt core menus: Shop (gear/bait art cards with tier frames), Tackle Box (loadout bar + keepnet tiles + tackle cards), Fishdex (hero progress,
   water chip strip, collectible cards), Travel Map (art map cards), Profile (hero + portrait + stat tiles). 46 new gear/bait/crate icons in /art/gear.
   Modals full screen on phones, rendered outside the scaled HUD; Escape closes nested dialogs first; missing legacy art falls back to game art.
+- 2026-06: Harbour doubled to 2528px wide (art/harbour_wide.jpg, outpainted west quarter: Bait Hut, Fountain, Anchor Tavern, beach).
+  New signposts: Crafting, Achievements, Fountain of Fame (leaderboards), Anchor Tavern (contracts), Old Salt's Almanac. Camera scrolls with the angler.
 - Testing: iteration_4 (menus) 88% → remaining issues fixed and self-verified; iteration_3 — backend 12/12, frontend all flows pass (testing agent fixed i18n init + reCAPTCHA no-key)
 
 ## Backlog
+- P0: Widen the 12 waters the same way (outpaint each scene, extend piers/shores, new fishing spots)
 - P1: Unique art for 416 species (currently 10 shared stand-in images, hue-shifted); achievement badges, boss and avatar art (currently fallbacks)
 - P1: Chat bubbles / emotes between players in the harbour; show peers' cosmetics
 - P1: Portal (Playgama/GameDistribution) build re-wire to the new App (PortalApp removed during port)

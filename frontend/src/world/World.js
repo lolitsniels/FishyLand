@@ -79,7 +79,7 @@ export default function World() {
   const fightEnc = useGame((st) => st.fightEnc);
   const result = useGame((st) => st.result);
   const ph = useGame((st) => st.phase);
-  const [mode, setMode] = useState(() => (fx.mode = sessionStorage.getItem("fr_mode") || fx.mode));
+  const [mode, setMode] = useState(() => { fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(fx.mode === "harbour" ? "harbour" : "water").spawn }; return fx.mode; });
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
@@ -136,9 +136,11 @@ export default function World() {
           <button type="button" className="fr-btn fr-btn-dark absolute right-3 px-4 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
         )}
         {nearSpot && idle && !page && (
-          <button type="button" className="fr-btn absolute left-1/2 -translate-x-1/2 bottom-[150px] px-6 py-2 pointer-events-auto pop" onClick={() => fx.openSpot(nearSpot.id)} data-testid="spot-prompt">
-            {nearSpot.label} <span className="opacity-70 text-xs">[E]</span>
-          </button>
+          <div className="absolute inset-x-0 bottom-[150px] flex justify-center">
+            <button type="button" className="fr-btn px-6 py-2 pointer-events-auto pop whitespace-nowrap" onClick={() => fx.openSpot(nearSpot.id)} data-testid="spot-prompt">
+              {nearSpot.label} <span className="opacity-70 text-xs">[E]</span>
+            </button>
+          </div>
         )}
         {mode === "harbour" && !nearSpot && idle && !page && <Hint>Tap to walk or use WASD · visit a signpost · board the Sea Serpent to travel</Hint>}
         {mode === "water" && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}

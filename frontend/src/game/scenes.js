@@ -1,23 +1,35 @@
 // Per-location layout: background art, walkable floor, animated water, signposts, fishing spots and weather.
+// The harbour is two screens wide: the original docks (shifted right by X0) plus a new west quarter.
+const X0 = 1264;
+const sx = (pts) => pts.map((v, i) => (i % 2 ? v : v + X0));
 const HARBOUR = {
-  bg: "art/harbour.jpg",
+  bg: "art/harbour_wide.jpg",
   scale: 0.6,
-  spawn: { x: 450, y: 620 },
-  walk: [20, 520, 150, 500, 250, 462, 420, 432, 600, 455, 800, 482, 900, 392, 995, 392, 1000, 610, 820, 612, 770, 650, 740, 848, 120, 848, 20, 760],
-  water: [[800, 650, 1000, 625, 1170, 685, 1264, 620, 1264, 848, 820, 848], [1225, 300, 1264, 300, 1264, 620, 1232, 620]],
+  spawn: { x: 1700, y: 620 },
+  walk: [
+    20, 600, 60, 500, 200, 480, 310, 470, 440, 472, 600, 488, 740, 470, 900, 458, 1000, 468, 1100, 505, 1210, 505, 1240, 485, 1300, 505,
+    ...sx([150, 500, 250, 462, 420, 432, 600, 455, 800, 482, 900, 392, 995, 392, 1000, 610, 820, 612, 770, 650, 740, 800]),
+    1440, 800, 760, 800, 720, 762, 520, 762, 480, 800, 380, 800, 330, 760, 300, 740, 150, 700, 60, 650,
+  ],
+  water: [sx([800, 650, 1000, 625, 1170, 685, 1264, 620, 1264, 848, 820, 848]), sx([1225, 300, 1264, 300, 1264, 620, 1232, 620]), [0, 715, 150, 760, 300, 848, 0, 848], [0, 250, 120, 250, 190, 330, 0, 330]],
   falls: [], mist: [],
-  sparkle: [800, 620, 464, 228],
-  leap: [830, 680, 360, 130],
+  sparkle: [X0 + 800, 620, 464, 228],
+  leap: [X0 + 830, 680, 360, 130],
   weather: "gulls",
   spots: [
-    { id: "shop", label: "Tackle Shop", img: "bait", x: 170, y: 505 },
-    { id: "market", label: "Market", img: "market", x: 360, y: 470 },
-    { id: "crews", label: "Guild Hall", img: "crew", x: 600, y: 468 },
-    { id: "quests", label: "Quest Board", img: "quests", x: 748, y: 492 },
-    { id: "boat", label: "Sea Serpent · Travel", img: "rod", x: 985, y: 520 },
-    { id: "pearl-shop", label: "Pearl Shop", img: "pass", x: 200, y: 625 },
-    { id: "tournaments", label: "Tournaments", img: "rankings", x: 400, y: 722 },
-    { id: "duel", label: "Duel Pier", img: "guild", x: 875, y: 590 },
+    { id: "shop", label: "Tackle Shop", img: "bait", x: X0 + 170, y: 505 },
+    { id: "market", label: "Market", img: "market", x: X0 + 360, y: 470 },
+    { id: "crews", label: "Guild Hall", img: "crew", x: X0 + 600, y: 468 },
+    { id: "quests", label: "Quest Board", img: "quests", x: X0 + 748, y: 492 },
+    { id: "boat", label: "Sea Serpent · Travel", img: "rod", x: X0 + 985, y: 520 },
+    { id: "pearl-shop", label: "Pearl Shop", img: "pass", x: X0 + 200, y: 625 },
+    { id: "tournaments", label: "Tournaments", img: "rankings", x: X0 + 400, y: 722 },
+    { id: "duel", label: "Duel Pier", img: "guild", x: X0 + 875, y: 590 },
+    { id: "contracts", label: "Anchor Tavern · Contracts", img: "daily", x: 1060, y: 500 },
+    { id: "leaderboards", label: "Fountain of Fame", img: "rankings", x: 800, y: 510 },
+    { id: "achievements", label: "Achievements", img: "skills", x: 600, y: 520 },
+    { id: "crafting", label: "Bait Hut · Crafting", img: "craft", x: 390, y: 500 },
+    { id: "almanac", label: "Old Salt's Almanac", img: "fishdex", x: 200, y: 630 },
   ],
 };
 

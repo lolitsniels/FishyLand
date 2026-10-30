@@ -6,7 +6,8 @@ import { useGame } from "../store";
 import { gameReady } from "../portal";
 import { sceneFor, inPoly } from "./scenes";
 
-const BG_W = 1264, BG_H = 848;
+let BG_W = 1264;
+const BG_H = 848;
 const FEET = { x: 470, y: 592 };
 const ANGLER_H = 185;
 const K = ANGLER_H / 250;
@@ -136,6 +137,7 @@ function makeWeather(type, layer, soft) {
 function buildScene(app, tex, key, bgTex) {
   const cfg = sceneFor(key);
   const mode = key === "harbour" ? "harbour" : "water";
+  BG_W = bgTex.width;
   const world = new Container();
   app.stage.addChild(world);
   const soft = softTex(), star = starTex();
@@ -333,7 +335,7 @@ function buildScene(app, tex, key, bgTex) {
     const sw = app.renderer.width / app.renderer.resolution, sh = app.renderer.height / app.renderer.resolution;
     const small = Math.min(sw, sh) < 560;
     const zoom = mode === "harbour" ? Math.min(sw / 900, sh / 560) : Math.min(sw / 760, sh / 470);
-    cam.sc = Math.max(sw / BG_W, sh / BG_H, small ? zoom : 0);
+    cam.sc = Math.max(sw / BG_W, sh / BG_H, small ? zoom : 0, mode === "harbour" ? sw / 1400 : 0);
     cam.sw = sw; cam.sh = sh; cam.small = small;
     world.scale.set(cam.sc);
     cam.x = null;

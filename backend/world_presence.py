@@ -14,7 +14,7 @@ _pos: dict = {}
 
 class PosIn(BaseModel):
     loc: str = Field(max_length=40)
-    x: float = Field(ge=0, le=1300)
+    x: float = Field(ge=0, le=3000)
     y: float = Field(ge=0, le=900)
     phase: Optional[str] = Field(default="idle", max_length=12)
 
