@@ -4,7 +4,7 @@
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
  */
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { api, errMsg, fmt, wt, ln, RARITIES } from "../../lib/api";
@@ -15,7 +15,7 @@ import { GearIcon } from "../../components/GearIcon";
 import { FishPlate } from "../../components/FishPlate";
 import { Durability, RepairButton } from "../../components/Durability";
 import { enhName } from "../../components/EnhanceBench";
-import { Recycle, Fish, Package, Wrench, FlaskConical, Info } from "lucide-react";
+import { Recycle, Info } from "lucide-react";
 import { SizePips, BaitInfoDialog, useBaitValue } from "../../components/BaitInfo";
 import { t as tt } from "../../i18n";
 import { PassBox } from "../../components/PremiumShop";
@@ -25,6 +25,7 @@ import { RodInfoDialog } from "../../components/RodInfoDialog";
 import { Candles, FishWorth, isHallow, HW_CANDLES } from "./Halloween";
 import { sfxAchievements } from "../../lib/sound";
 import { LinkChatBtn } from "../../components/ChatItem";
+import { GameTabs, Slot, tierRarity } from "../../components/GameUI";
 
 export function ListDialog({ item, onClose, onListed }) {
   const [price, setPrice] = useState(Math.round(item.value * 1.2));
@@ -45,7 +46,19 @@ export function ListDialog({ item, onClose, onListed }) {
 }
 
 const PAGE_SIZE = 50;
-const INV_TABS = [["fish", "Keepnet", Fish], ["bait", "Bait box", Package], ["tackle", "Tackle box", Wrench], ["ingredients", "Ingredients", FlaskConical], ["other", "Crates & more", Recycle]];
+
+function Loadout({ user, lookups, onInfo, onBait }) {
+  const slots = ["rod", "reel", "line"].map((k) => [k, lookups?.gearById[user.gear?.[k]]]);
+  const bait = lookups?.baitById[user.active_bait];
+  return (
+    <div className="g-hero !min-h-0 p-3 flex flex-wrap items-end justify-center gap-3 sm:gap-5" style={{ backgroundImage: `url(/art/waters/${user.water}_thumb.jpg)` }} data-testid="loadout-bar">
+      <div className="g-portrait !w-[86px] !h-[86px] hidden sm:block"><img src="/art/angler.png" alt="" /></div>
+      {slots.map(([k, g]) => <Slot key={k} cap={tt(k)} id={g?.id} name={g ? enhName(g.name, user.enhance?.[g.id]) : ""} rarity={g?.legendary ? "legendary" : tierRarity(g?.tier)} onClick={() => g && onInfo(g)} testid={`loadout-${k}`}><Durability id={g?.id} /></Slot>)}
+      <Slot cap={tt("bait")} id={bait?.id} name={bait ? `${bait.name} ×${user.bait[bait.id] || 0}` : ""} rarity={tierRarity(Math.ceil((bait?.luck || 0) / 3) + 1)} onClick={onBait} testid="loadout-bait" />
+    </div>
+  );
+}
+const INV_TABS = [["fish", "Keepnet", "gear/bait_live.webp"], ["bait", "Bait box", "gear/bait_worm.webp"], ["tackle", "Tackle box", "inventory"], ["ingredients", "Ingredients", "gear/craft_salted.webp"], ["other", "Crates & more", "pass"]];
 
 export function Pager({ cur, pages, total, onPage }) {
   const from = (cur - 1) * PAGE_SIZE + 1, to = Math.min(cur * PAGE_SIZE, total);
@@ -181,12 +194,8 @@ export default function Inventory() {
 
   return (
     <div className="space-y-3 fade-in" data-testid="inventory-page">
-      <div className="panel">
-        <div className="flex flex-wrap gap-1 px-3 pt-2 border-b border-[var(--border)]" data-testid="inventory-tabs">
-          {INV_TABS.map(([id, label, Icon]) => { const count = id === "fish" ? (inv?.total ?? inv?.fish.length) : id === "bait" ? baitRows.reduce((a, [, n]) => a + n, 0) : id === "tackle" ? user.owned_gear.length : id === "ingredients" ? ingRows.reduce((a, [, n]) => a + n, 0) : null; return (
-            <button key={id} className={`px-3 py-1.5 text-[11px] uppercase tracking-wider border-b-2 -mb-px inline-flex items-center gap-1.5 ${tab === id ? "border-[var(--gold)] text-[var(--gold)]" : "border-transparent text-[var(--muted)] hover:text-[var(--text)]"}`} onClick={() => setTab(id)} data-testid={`inventory-tab-${id}`}><Icon size={13} />{tt(label)}{count != null && <span className="num text-[10px] opacity-70">{fmt(count)}</span>}</button>); })}
-        </div>
-      </div>
+      <Loadout user={user} lookups={lookups} onInfo={setRodInfo} onBait={() => setTab("bait")} />
+      <GameTabs testid="inventory-tab" value={tab} onChange={setTab} tabs={INV_TABS.map(([id, label, img]) => [id, label, img, fmt((id === "fish" ? (inv?.total ?? inv?.fish.length) : id === "bait" ? baitRows.reduce((a, [, n]) => a + n, 0) : id === "tackle" ? user.owned_gear.length : id === "ingredients" ? ingRows.reduce((a, [, n]) => a + n, 0) : null) ?? "") || null])} />
       {tab === "fish" && (
         <Panel icon="net" title={tt("Keepnet")} right={<span>{fmt(inv?.total ?? inv?.fish.length ?? 0)} {tt("fish ·")} <Link to="/game/profile" className="underline">{tt("trophy wall")} {inv?.mounted ?? 0}/{inv?.max_trophies ?? 6}</Link></span>} testId="keepnet-panel">
           <div className="flex flex-wrap gap-2 items-center mb-2">
@@ -204,22 +213,24 @@ export default function Inventory() {
           </div>
           {inv && inv.total > inv.shown && <div className="text-[11.5px] text-[#ffcfa8] mb-2" data-testid="inventory-truncated">{tt("Your keepnet holds")} {fmt(inv.total)} {tt("fish, showing the newest")} {fmt(inv.shown)}{tt(". Sell or list some and the older ones surface.")}</div>}
           {!inv ? <Empty>{tt("Loading...")}</Empty> : fish.length === 0 ? <Empty>{tt("Your keepnet is empty. Go catch something.")}</Empty> : (
-            <table className="table" data-testid="inventory-table">
-              <thead><tr><th></th><th>{tt("Fish")}</th><th>{tt("Water")}</th><th className="r">{tt("Weight")}</th><th className="r">{tt("Length")}</th><th className="r">{tt("Value")}</th><th></th></tr></thead>
-              <tbody>
-                {pageFish.map((f) => (
-                  <tr key={f.id} data-testid={`inv-row-${f.id}`}>
-                    <td><input type="checkbox" checked={sel.has(f.id)} onChange={() => toggle(f.id)} data-testid={`inv-check-${f.id}`} /></td>
-                    <td><span className="inline-flex items-center gap-1.5"><FishPlate speciesId={f.species_id} name={f.name} className="w-9 h-5" /><span className={`rar-${f.rarity} font-medium`}>{f.name}</span></span>{f.variant !== "normal" && <span className="tag tag-variant ml-1.5">{f.variant}</span>}{lookups?.fishById[f.species_id]?.baitable && <span className="text-[10px] text-[#8fd0f0] ml-1.5" title={tt("Can be used as live bait and as a crafting ingredient")}>{tt("crafting/bait")}</span>}{wantedFor(wanted, f) && <WantedTag c={wantedFor(wanted, f)} className="ml-1.5" />}</td>
-                    <td className="text-[var(--text-2)] text-xs">{lookups?.waterByKey[f.water]?.name}</td>
-                    <td className="num r">{wt(f.weight)}</td>
-                    <td className="num r">{ln(f.length_cm)}</td>
-                    <td className="r"><FishWorth f={f} /></td>
-                    <td className="r whitespace-nowrap">{!isHallow(f.species_id) && <><button className="btn btn-sm" onClick={() => setListing(f)} data-testid={`list-fish-${f.id}`}>{tt("List")}</button> </>}<button className="btn btn-sm" title={tt("Mount on trophy wall")} disabled={inv.mounted >= inv.max_trophies} onClick={() => mount(f)} data-testid={`mount-fish-${f.id}`}>{tt("Mount")}</button> <LinkChatBtn item={{ kind: "fish", ref: f.id }} label={`${f.name} ${wt(f.weight)}`} testId={`link-chat-fish-${f.id}`} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="g-grid-sm" data-testid="inventory-table">
+              {pageFish.map((f) => (
+                <div key={f.id} className={`g-card rc-${f.rarity} !p-2 !gap-1 cursor-pointer ${sel.has(f.id) ? "sel" : ""}`} onClick={() => toggle(f.id)} data-testid={`inv-row-${f.id}`}>
+                  <input type="checkbox" className="absolute top-2 left-2 z-[1]" checked={sel.has(f.id)} onChange={() => toggle(f.id)} onClick={(e) => e.stopPropagation()} data-testid={`inv-check-${f.id}`} />
+                  {f.variant !== "normal" && <span className="badge !text-[#f0a35b] !border-[#f0a35b]">{f.variant}</span>}
+                  <div className="art !h-[64px]"><FishPlate speciesId={f.species_id} name={f.name} className="w-full h-[60px] !border-0 !bg-transparent" /></div>
+                  <div className={`name !text-[12px] truncate rar-${f.rarity}`}>{f.name}</div>
+                  <div className="text-[10.5px] text-[var(--text-2)] truncate">{lookups?.waterByKey[f.water]?.name}</div>
+                  <div className="flex items-center justify-between text-[11px] num"><span>{wt(f.weight)}</span><FishWorth f={f} /></div>
+                  {(lookups?.fishById[f.species_id]?.baitable || wantedFor(wanted, f)) && <div className="flex flex-wrap gap-1">{lookups?.fishById[f.species_id]?.baitable && <span className="text-[9.5px] text-[#8fd0f0]">{tt("crafting/bait")}</span>}{wantedFor(wanted, f) && <WantedTag c={wantedFor(wanted, f)} />}</div>}
+                  <div className="flex gap-1 justify-center mt-0.5" onClick={(e) => e.stopPropagation()}>
+                    {!isHallow(f.species_id) && <button className="btn btn-sm !px-2" onClick={() => setListing(f)} data-testid={`list-fish-${f.id}`}>{tt("List")}</button>}
+                    <button className="btn btn-sm !px-2" title={tt("Mount on trophy wall")} disabled={inv.mounted >= inv.max_trophies} onClick={() => mount(f)} data-testid={`mount-fish-${f.id}`}>{tt("Mount")}</button>
+                    <LinkChatBtn item={{ kind: "fish", ref: f.id }} label={`${f.name} ${wt(f.weight)}`} testId={`link-chat-fish-${f.id}`} />
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
           {pages > 1 && <Pager cur={cur} pages={pages} total={fish.length} onPage={setPage} />}
         </Panel>
@@ -255,9 +266,26 @@ export default function Inventory() {
       )}
       {tab === "tackle" && (
         <Panel icon="inventory" title={tt("Tackle box")} right={<RepairButton />} testId="tackle-box">
-          <table className="table"><tbody>
-            {user.owned_gear.map((id) => { const g = lookups?.gearById[id]; const slot = id.split("_")[0]; const eq = user.gear[slot] === id; return <Fragment key={id}><tr><td><span className="flex flex-wrap items-center gap-2"><span className="cursor-pointer" onClick={g ? () => setRodInfo(g) : undefined} title={tt("Click for all bonuses")} data-testid={`inv-rod-info-${id}`}><GearIcon id={id} /></span><span className="min-w-0"><span className="label !text-[9.5px] mr-1">{slot}</span>{enhName(g?.name, user.enhance?.[id])}{g?.tier != null && <span className="text-[var(--muted)] text-[10px] ml-1.5" data-testid={`tier-${id}`}>T{g.tier}</span>}{g?.bound && <span className="tag tag-bound !text-[9.5px] ml-1.5" data-testid={`inv-untradable-${id}`}>{tt("Untradable")}</span>}<div className="flex flex-wrap items-center gap-x-2 gap-y-1"><Durability id={id} /><RepairButton gearId={id} compact testId={`repair-${id}`} /></div></span></span></td><td className="r whitespace-nowrap">{eq ? <span className="text-[11px] text-[var(--gold)]">{tt("equipped")}</span> : <><button className="btn btn-sm" onClick={() => equip(id)} data-testid={`equip-${id}`}>{tt("Equip")}</button> {g?.price > 0 && !g.bound && !user.is_guest && <button className="btn btn-sm" onClick={() => setStack({ kind: "gear", id, name: enhName(g.name, user.enhance?.[id]), owned: 1, bound: g.bound, hint: gearMarketHint(g), detail: `T${g.tier} · ${user.durability?.[id] ?? 100}/100` })} data-testid={`sell-gear-${id}`}>{tt("Sell")}</button>}</>} <LinkChatBtn item={{ kind: "gear", ref: id }} label={enhName(g?.name, user.enhance?.[id])} testId={`link-chat-gear-${id}`} /></td></tr>{(user.spare_copies?.[id] || []).map((c, n) => <tr key={`${id}-${n}`} data-testid={`inv-gear-copy-${id}-${n}`}><td><span className="flex flex-wrap items-center gap-2"><span className="cursor-pointer" onClick={g ? () => setRodInfo(g) : undefined}><GearIcon id={id} /></span><span className="min-w-0"><span className="label !text-[9.5px] mr-1">{slot}</span>{enhName(g?.name, c.enhance)}{g?.tier != null && <span className="text-[var(--muted)] text-[10px] ml-1.5">T{g.tier}</span>}<div className="flex items-center gap-2"><span className="inline-block w-12 h-1.5 bg-[#2a2420]"><span className="block h-full" style={{ width: `${c.durability}%`, background: c.durability > 50 ? "#5ad07f" : c.durability > 20 ? "#e0b341" : "#e0645a" }} /></span><span className="num text-[11px] text-[var(--text-2)]">{c.durability}/100</span></div></span></span></td><td className="r whitespace-nowrap"><button className="btn btn-sm" onClick={() => equip(id, n)} data-testid={`equip-copy-${id}-${n}`}>{tt("Equip")}</button> {!user.is_guest && <button className="btn btn-sm" onClick={() => setStack({ kind: "gear", id, copy: n, name: enhName(g?.name, c.enhance), owned: 1, hint: gearMarketHint(g), detail: `T${g?.tier} · ${c.durability}/100` })} data-testid={`sell-gear-copy-${id}-${n}`}>{tt("Sell")}</button>} <LinkChatBtn item={{ kind: "gear", ref: id, copy_idx: n }} label={enhName(g?.name, c.enhance)} testId={`link-chat-gear-copy-${id}-${n}`} /></td></tr>)}</Fragment>; })}
-          </tbody></table>
+          <div className="g-grid">
+            {user.owned_gear.flatMap((id) => { const g = lookups?.gearById[id]; const slot = id.split("_")[0]; const eq = user.gear[slot] === id; const rc = g?.legendary ? "legendary" : tierRarity(g?.tier); return [
+              <div key={id} className={`g-card rc-${rc}`} data-testid={`tackle-card-${id}`}>
+                <span className="tier">T{g?.tier}</span>{eq && <span className="badge">{tt("Equipped")}</span>}
+                <button type="button" className="art" onClick={g ? () => setRodInfo(g) : undefined} data-testid={`inv-rod-info-${id}`}><img src={`/art/gear/${id}.webp`} alt={g?.name} /></button>
+                <div className="name"><span className="label !text-[9.5px] mr-1">{slot}</span>{enhName(g?.name, user.enhance?.[id])}{g?.bound && <span className="tag tag-bound !text-[9.5px] ml-1.5" data-testid={`inv-untradable-${id}`}>{tt("Untradable")}</span>}</div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1"><Durability id={id} /><RepairButton gearId={id} compact testId={`repair-${id}`} /></div>
+                <div className="flex flex-wrap justify-end gap-1 mt-auto">{eq ? null : <><button className="btn btn-sm btn-gold" onClick={() => equip(id)} data-testid={`equip-${id}`}>{tt("Equip")}</button>{g?.price > 0 && !g.bound && !user.is_guest && <button className="btn btn-sm" onClick={() => setStack({ kind: "gear", id, name: enhName(g.name, user.enhance?.[id]), owned: 1, bound: g.bound, hint: gearMarketHint(g), detail: `T${g.tier} · ${user.durability?.[id] ?? 100}/100` })} data-testid={`sell-gear-${id}`}>{tt("Sell")}</button>}</>}<LinkChatBtn item={{ kind: "gear", ref: id }} label={enhName(g?.name, user.enhance?.[id])} testId={`link-chat-gear-${id}`} /></div>
+              </div>,
+              ...(user.spare_copies?.[id] || []).map((c, n) => (
+                <div key={`${id}-${n}`} className={`g-card rc-${rc}`} data-testid={`inv-gear-copy-${id}-${n}`}>
+                  <span className="tier">T{g?.tier}</span><span className="badge !border-[#8fd0f0] !text-[#cff6ff]">{tt("Spare")}</span>
+                  <button type="button" className="art" onClick={g ? () => setRodInfo(g) : undefined}><img src={`/art/gear/${id}.webp`} alt={g?.name} /></button>
+                  <div className="name">{enhName(g?.name, c.enhance)}</div>
+                  <div className="flex items-center gap-2"><span className="inline-block w-14 h-1.5 bg-[#2a2420] rounded-full overflow-hidden"><span className="block h-full" style={{ width: `${c.durability}%`, background: c.durability > 50 ? "#5ad07f" : c.durability > 20 ? "#e0b341" : "#e0645a" }} /></span><span className="num text-[11px] text-[var(--text-2)]">{c.durability}/100</span></div>
+                  <div className="flex flex-wrap justify-end gap-1 mt-auto"><button className="btn btn-sm btn-gold" onClick={() => equip(id, n)} data-testid={`equip-copy-${id}-${n}`}>{tt("Equip")}</button>{!user.is_guest && <button className="btn btn-sm" onClick={() => setStack({ kind: "gear", id, copy: n, name: enhName(g?.name, c.enhance), owned: 1, hint: gearMarketHint(g), detail: `T${g?.tier} · ${c.durability}/100` })} data-testid={`sell-gear-copy-${id}-${n}`}>{tt("Sell")}</button>}<LinkChatBtn item={{ kind: "gear", ref: id, copy_idx: n }} label={enhName(g?.name, c.enhance)} testId={`link-chat-gear-copy-${id}-${n}`} /></div>
+                </div>
+              )),
+            ]; })}
+          </div>
           <div className="text-[11px] text-[var(--muted)] mt-2">{tt("Every fish fought wears each equipped item by 1 point. Worn-out tackle (0/100) still works but at 70% strength. Repairs cost a flat amount per point by tier (5g at T2 up to 50g at T9); village starter gear is fixed for free.")} {tt("Tackle you no longer use can be sold to the vendor (40% of shop price, less when worn) or listed on the Market with its enhancement level. Unequip it first.")}</div>
         </Panel>
       )}

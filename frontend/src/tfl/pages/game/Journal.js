@@ -13,6 +13,7 @@ import { SpeciesModal } from "../../components/SpeciesModal";
 import { BossJournal } from "../../components/Boss";
 import { t as tt } from "../../i18n";
 import { LeviathanJournal } from "../../components/CrewBoss";
+import { GameTabs } from "../../components/GameUI";
 
 export function MasteryBar({ m, count, testId }) {
   const max = m.level >= 10;
@@ -49,23 +50,27 @@ export default function Journal() {
 
   return (
     <div className="space-y-3 fade-in" data-testid="journal-page">
-      <div className="flex gap-1" data-testid="journal-tabs">
-        <button className={`btn btn-sm ${tab === "species" ? "btn-gold" : ""}`} onClick={() => setTab("species")} data-testid="journal-tab-species">{tt("Species")}</button>
-        <button className={`btn btn-sm ${tab === "leviathans" ? "btn-gold" : ""}`} onClick={() => setTab("leviathans")} data-testid="journal-tab-leviathans">{tt("Crew Bosses")}</button>
-        <button className={`btn btn-sm ${tab === "bosses" ? "btn-gold" : ""}`} onClick={() => setTab("bosses")} data-testid="journal-tab-bosses">{tt("☠ Bosses")}</button>
-      </div>
+      <GameTabs testid="journal-tab" value={tab} onChange={setTab} tabs={[["species", "Species", "fishdex"], ["leviathans", "Crew Bosses", "crew"], ["bosses", "Bosses", "guild"]]} />
       {tab === "leviathans" ? <LeviathanJournal /> : tab === "bosses" ? <BossJournal /> : <>
-      <Panel icon="journal" title={tt("Fish journal")} right={<span className="num" data-testid="journal-progress">{found} / {total} {tt("discovered")}{secretsFound > 0 && <span className="text-[#c9a7f0]" data-testid="journal-secrets-found"> + {secretsFound} secret</span>}</span>}>
-        <Bar value={found} max={total} color="var(--gold)" className="!h-2" />
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3 text-center">
-          {RARITIES.map((r) => { const s = byRarity(r); return <div key={r}><div className={`num rar-${r}`}>{s.have}<span className="text-[var(--muted)]">/{s.all}</span></div><div className="label !text-[9.5px]">{r}</div></div>; })}
+      <div className="g-hero p-4 flex flex-col justify-end" style={{ backgroundImage: `url(/art/waters/${water === "all" ? user.water : water}.jpg)` }} data-testid="journal-hero">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="label !text-[#cff6ff]">{water === "all" ? tt("All waters") : data?.waters.find((w) => w.key === water)?.name}</div>
+            <div className="font-deco gold-text text-2xl" data-testid="journal-progress">{found} / {total} <span className="text-base">{tt("discovered")}</span>{secretsFound > 0 && <span className="text-[#c9a7f0] text-sm" data-testid="journal-secrets-found"> + {secretsFound} secret</span>}</div>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {RARITIES.map((r) => { const s = byRarity(r); return <div key={r} className={`g-stat rc-${r} !py-1 text-center min-w-[62px]`} style={{ borderColor: "var(--rc)" }}><div className={`num rar-${r} text-[15px]`}>{s.have}<span className="text-[var(--muted)] text-[11px]">/{s.all}</span></div><div className="k !text-[8.5px]">{r}</div></div>; })}
+          </div>
         </div>
-      </Panel>
+        <Bar value={found} max={total} color="linear-gradient(90deg,#f6c445,#fff3b0)" className="!h-2.5 mt-3" />
+      </div>
+      <div className="g-chips" data-testid="journal-water-filter">
+        <button type="button" className={`g-chip !bg-[#2a190c] ${water === "all" ? "on" : ""}`} onClick={() => setWater("all")} data-testid="journal-water-all"><span className="!static !bg-none h-full grid place-items-center">{tt("All waters")}</span></button>
+        {data?.waters.map((w) => { const open = user.unlocked_waters.includes(w.key); return (
+          <button key={w.key} type="button" disabled={!open} className={`g-chip ${water === w.key ? "on" : ""} ${open ? "" : "locked"}`} style={{ backgroundImage: `url(/art/waters/${w.key}_thumb.jpg)` }} onClick={() => setWater(w.key)} title={open ? w.name : `${w.name} (locked)`} data-testid={`journal-water-${w.key}`}><span>{w.name}</span></button>
+        ); })}
+      </div>
       <div className="flex flex-wrap gap-2 items-center">
-        <select className="input !w-auto" value={water} onChange={(e) => setWater(e.target.value)} data-testid="journal-water-filter">
-          <option value="all">{tt("All waters")}</option>
-          {data?.waters.map((w) => <option key={w.key} value={w.key} disabled={!user.unlocked_waters.includes(w.key)}>{w.name}{!user.unlocked_waters.includes(w.key) ? tt(" (locked)") : ""}</option>)}
-        </select>
         <select className="input !w-auto" value={filter} onChange={(e) => setFilter(e.target.value)} data-testid="journal-rarity-filter">
           <option value="all">{tt("All rarities")}</option>
           {RARITIES.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -73,34 +78,28 @@ export default function Journal() {
         <input className="input !w-48" placeholder={tt("Search species...")} value={q} onChange={(e) => setQ(e.target.value)} data-testid="journal-search" />
         <span className="text-[12px] text-[var(--muted)] ml-auto">{list.length} {tt("entries")}{q && water !== "all" ? tt(" · all waters") : ""}</span>
       </div>
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-1.5" data-testid="journal-grid">
+      <div className="g-grid-sm" data-testid="journal-grid">
         {list.map((f) => {
           const j = journal[f.id];
           return (
-            <div key={f.id}
-                 className={`journal-cell flex gap-2 ${j ? "discovered cursor-pointer hover:border-[var(--gold)]" : "undiscovered"}`}
-                 onClick={j ? () => setOpenId(f.id) : undefined}
-                 role={j ? "button" : undefined}
-                 tabIndex={j ? 0 : undefined}
+            <div key={f.id} className={`g-card rc-${j ? f.rarity : "common"} !p-2 !gap-1 ${j ? "cursor-pointer" : "opacity-80 !border-dashed"}`}
+                 onClick={j ? () => setOpenId(f.id) : undefined} role={j ? "button" : undefined} tabIndex={j ? 0 : undefined}
                  onKeyDown={j ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(f.id); } } : undefined}
                  data-testid={`journal-entry-${f.id}`}>
-              <FishPlate speciesId={f.id} name={f.name} silhouette={!j} className="w-[84px] h-[60px] shrink-0" />
-              <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className={`font-medium truncate ${j ? `rar-${f.rarity}` : ""}`}>{j ? f.name : "???"}</span>
-                <span className="inline-flex items-center gap-1 shrink-0">{j && f.secret && <span className="tag text-[#c9a7f0] border-[#6b4f9a]" title={tt("Secret catch: only bites during its own quiet hours")} data-testid={`journal-secret-${f.id}`}>{tt("secret")}</span>}<Rarity r={f.rarity} tag className={j ? "" : "opacity-50"} /></span>
-              </div>
+              {j && f.secret && <span className="badge !text-[#c9a7f0] !border-[#6b4f9a]" data-testid={`journal-secret-${f.id}`}>{tt("secret")}</span>}
+              {j && <span className="tier !text-[9px]">×{j.count}</span>}
+              <div className="art !h-[70px]"><FishPlate speciesId={f.id} name={f.name} silhouette={!j} className="w-full h-[64px] !border-0 !bg-transparent" /></div>
+              <div className={`name !text-[12px] truncate ${j ? `rar-${f.rarity}` : "!text-[var(--muted)]"}`}>{j ? f.name : "???"}</div>
+              <Rarity r={f.rarity} tag className={`self-start !text-[9px] ${j ? "" : "opacity-50"}`} />
               {j ? (
-                <div className="text-[11.5px] text-[var(--text-2)] mt-0.5">
-                  <span className="italic">{f.blurb}</span>
-                  <div className="num mt-0.5">{tt("best")} {wt(j.best_kg)} {tt("· caught ×")}{j.count}{j.variants.filter((v) => v !== "normal").length > 0 && <span className="tag tag-variant ml-1">{j.variants.filter((v) => v !== "normal").join(", ")}</span>}</div>
+                <div className="text-[10.5px] text-[var(--text-2)]">
+                  <div className="num">{tt("best")} {wt(j.best_kg)}{j.variants.filter((v) => v !== "normal").length > 0 && <span className="tag tag-variant ml-1 !text-[9px]">{j.variants.filter((v) => v !== "normal").join(", ")}</span>}</div>
                   {j.mastery && <MasteryBar m={j.mastery} count={j.count} testId={`mastery-${f.id}`} />}
-                  {f.bait_only && <div className="mt-0.5 text-[var(--ok)]" title={tt("This species only takes these baits")} data-testid={`journal-bait-${f.id}`}>{tt("Takes only:")} {f.bait_only.map((b) => lookups?.baitById[b]?.name || b).join(", ")}</div>}
+                  {f.bait_only && <div className="mt-0.5 text-[var(--ok)] truncate" title={f.bait_only.map((b) => lookups?.baitById[b]?.name || b).join(", ")} data-testid={`journal-bait-${f.id}`}>{tt("Takes only:")} {f.bait_only.map((b) => lookups?.baitById[b]?.name || b).join(", ")}</div>}
                 </div>
               ) : (
-                <div className="text-[11.5px] mt-0.5">{data.waters.find((w) => w.key === f.water)?.name} · {f.behavior} · {wtRange(f.min_kg, f.max_kg)}</div>
+                <div className="text-[10.5px] text-[var(--muted)] truncate">{f.behavior} · {wtRange(f.min_kg, f.max_kg)}</div>
               )}
-              </div>
             </div>
           );
         })}

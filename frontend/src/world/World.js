@@ -154,22 +154,22 @@ export default function World() {
           {BAR_R.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <Ring img="settings" label="More" size={46} testid="menu-more" onClick={() => setMore(true)} />
         </div>
-        {more && (
-          <div className="pointer-events-auto"><Modal title="Menu" testid="more-modal" width={620} onClose={() => setMore(false)}>
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-4 py-2 justify-items-center">
-              {[...MORE, ...(user.is_admin ? ["admin"] : [])].map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
-            </div>
-            <div className="flex justify-center mt-3">
-              <button type="button" className="fr-btn fr-btn-dark px-5 py-1.5 text-sm flex items-center gap-2" onClick={async () => { await logout(); nav("/"); }} data-testid="logout-button"><LogOut size={14} /> Log out</button>
-            </div>
-          </Modal></div>
-        )}
-        {page && page !== "fish" && (
-          <div className="pointer-events-auto"><Modal title={title} testid="page-modal" width={980} onClose={() => nav("/game")}>
-            <div className="tfl-skin"><Outlet /></div>
-          </Modal></div>
-        )}
       </div>
+      {more && (
+        <Modal title="Menu" testid="more-modal" width={620} onClose={() => setMore(false)}>
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-4 py-2 justify-items-center">
+            {[...MORE, ...(user.is_admin ? ["admin"] : [])].map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
+          </div>
+          <div className="flex justify-center mt-3">
+            <button type="button" className="fr-btn fr-btn-dark px-5 py-1.5 text-sm flex items-center gap-2" onClick={async () => { await logout(); nav("/"); }} data-testid="logout-button"><LogOut size={14} /> Log out</button>
+          </div>
+        </Modal>
+      )}
+      {page && page !== "fish" && (
+        <Modal title={title} testid="page-modal" width={980} onClose={() => nav("/game")}>
+          <div className="tfl-skin"><Outlet /></div>
+        </Modal>
+      )}
     </div>
   );
 }

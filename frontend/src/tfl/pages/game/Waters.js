@@ -21,7 +21,7 @@ const MOODS = [[0.15, "Calm", "#7fc9a0"], [0.45, "Choppy", "#e0b341"], [0.8, "Ro
 function WaterMood({ w }) {
   const [, label, col] = MOODS.find(([max]) => (w.pressure || 0) <= max);
   return (
-    <div className="absolute bottom-2 left-2 flex items-center gap-1.5 text-[10.5px] bg-[rgba(10,9,8,.85)] px-2 py-0.5 border" style={{ borderColor: col }} data-testid={`water-mood-${w.key}`}>
+    <div className="flex items-center gap-1.5 text-[10.5px] bg-[rgba(10,9,8,.85)] px-2 py-0.5 border rounded-full" style={{ borderColor: col }} data-testid={`water-mood-${w.key}`}>
       <span className="uppercase tracking-widest" style={{ color: col }}>{tt(label)}</span>
       <span className="inline-flex gap-[2px]">{[0, 0.2, 0.5, 0.85].map((s, i) => <span key={i} className="w-2 h-1.5" style={{ background: (w.pressure || 0) >= s ? col : "#2a2420" }} />)}</span>
       {w.rough_pct >= 2 && <span className="text-[var(--text-2)]">+{w.rough_pct}%</span>}
@@ -68,21 +68,19 @@ export default function Waters() {
           const pool = data.fish.filter((f) => f.water === w.key && !f.secret);
           const canUnlock = w.premium ? !!user.premium && user.level >= w.level : user.level >= w.level && user.gold >= w.fee;
           return (
-            <section key={w.key} className={`panel overflow-hidden ${here ? "panel-gold" : ""}`} data-testid={`water-card-${w.key}`}>
-              <div className="aspect-[16/9] bg-cover bg-center relative" style={{ backgroundImage: `url(/art/waters/${w.key}_thumb.jpg)`, filter: unlocked ? "none" : "grayscale(.7) brightness(.6)" }}>
-                {!unlocked && <div className="absolute top-2 right-2 text-[11px] flex items-center gap-1 bg-[rgba(10,9,8,.8)] px-2 py-0.5 border border-[var(--border)]"><Lock size={11} /> {tt("Lv")} {w.level}</div>}
-                {here && <div className="absolute top-2 left-2 text-[10.5px] uppercase tracking-widest bg-[rgba(10,9,8,.85)] text-[var(--gold)] px-2 py-0.5 border border-[var(--gold-dim)]">{tt("You are here")}</div>}
-                {ev?.active?.water === w.key && <div className="absolute bottom-9 left-2 text-[10.5px] uppercase tracking-widest bg-[rgba(10,9,8,.85)] text-[var(--energy)] px-2 py-0.5 border border-[var(--energy)]" data-testid={`expedition-badge-${w.key}`}>{tt("Expedition active")}</div>}
-                <WaterMood w={w} />
+            <section key={w.key} className={`panel g-map-card overflow-hidden ${here ? "panel-gold" : ""}`} data-testid={`water-card-${w.key}`}>
+              <div className="relative overflow-hidden">
+              <div className="art" style={{ backgroundImage: `url(/art/waters/${w.key}_thumb.jpg)`, filter: unlocked ? "none" : "grayscale(.75) brightness(.55)" }} />
+                {!unlocked && <div className="absolute inset-0 grid place-items-center z-[1]"><div className="g-stat flex items-center gap-1.5 !bg-black/70 font-cinzel font-bold text-[#ffe9a3]"><Lock size={14} /> {tt("Lv")} {w.level}</div></div>}
+                {here && <div className="absolute top-2 left-2 z-[2] fr-chip px-2 text-[10.5px] font-cinzel font-bold text-[#ffe9a3]">{tt("You are here")}</div>}
+                {ev?.active?.water === w.key && <div className="absolute bottom-12 left-2 z-[2] text-[10.5px] uppercase tracking-widest bg-[rgba(10,9,8,.85)] text-[var(--energy)] px-2 py-0.5 rounded-full border border-[var(--energy)]" data-testid={`expedition-badge-${w.key}`}>{tt("Expedition active")}</div>}
+                <div className="absolute top-2 right-2 z-[2]"><WaterMood w={w} /></div>
                 <CageSlot water={w} here={here} unlocked={unlocked} st={cages} onChange={reloadCages} />
-                {progress?.[w.key]?.complete && <div className="absolute top-2 right-2 text-[10.5px] uppercase tracking-widest bg-[rgba(10,9,8,.85)] text-[var(--gold)] px-2 py-0.5 border border-[var(--gold-dim)]" data-testid={`water-complete-${w.key}`}>{tt("Complete")}</div>}
+                {progress?.[w.key]?.complete && <div className="absolute top-9 right-2 z-[2] fr-chip px-2 text-[10.5px] font-cinzel text-[var(--gold)]" data-testid={`water-complete-${w.key}`}>{tt("Complete")}</div>}
+                <div className="title"><div className="font-deco gold-text text-[17px] leading-tight">{w.name}</div><div className="text-[11px] text-[#cff6ff] font-cinzel">{w.type}</div></div>
               </div>
               <div className="p-3">
-                <div className="flex items-baseline justify-between">
-                  <div className="font-display text-[16px] text-[#f4ead2]">{w.name}</div>
-                  <div className="text-[11px] text-[var(--muted)]">{w.type}</div>
-                </div>
-                <p className="text-[12.5px] text-[var(--text-2)] mt-1">{w.desc}</p>
+                <p className="text-[12.5px] text-[var(--text-2)]">{w.desc}</p>
                 <div className="mt-1.5"><ConditionLine c={cond[w.key]} /></div>
                 <div className="flex items-center gap-2 mt-2 text-[11px]">
                   <span className="text-[var(--muted)]">{pool.length} {tt("species:")}</span>

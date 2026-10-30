@@ -16,7 +16,6 @@ import { FishPlate } from "../../components/FishPlate";
 import { toast } from "sonner";
 import { friendsChanged } from "../../components/FriendsPanel";
 import { BossPlaque } from "../../components/Boss";
-import { Avatar } from "../../components/Avatar";
 import AvatarModal from "../../components/CosmeticsModal";
 import { Pearls, AdminBadge, ModBadge, SupporterBadge, PremiumBadge } from "../../components/ui-bits";
 import { ProfileTackle } from "../../components/RodSkin";
@@ -60,16 +59,17 @@ export default function Profile() {
   const water = lookups?.waterByKey[p.water];
   return (
     <div className="space-y-3 fade-in" data-testid="profile-page">
-      <div className="water-hero !min-h-[170px] !h-auto" style={{ backgroundImage: `url(${water?.image})` }}>
-        <div className="absolute inset-x-0 bottom-0 p-3 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+      <div className="g-hero !min-h-[210px] flex flex-col justify-end" style={{ backgroundImage: `url(/art/waters/${p.water}.jpg)` }} data-testid="profile-hero">
+        <div className="p-4 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div className="flex items-end gap-3 min-w-0 flex-1">
             <div className="relative shrink-0">
-              <Avatar id={p.avatar} name={p.avatar_name} size="lg" gold frame={p.frame} testId="profile-avatar" />
+              <div className="g-portrait" data-testid="profile-avatar"><img src="/art/angler.png" alt={p.username} /></div>
+              <span className="absolute -top-1 -left-1 fr-chip px-2 text-[11px] font-cinzel font-black text-amber-200" data-testid="profile-level-badge">Lv.{p.level}</span>
               {mine && <button className="absolute -bottom-1 -right-1 btn btn-sm !px-1.5 !py-0.5 !text-[10px]" onClick={() => setCosOpen("portrait")} title={tt("Change appearance")} data-testid="profile-change-avatar-button">{tt("Change")}</button>}
             </div>
             <div className="min-w-0 flex-1">
               <div className="label label-gold truncate">{p.title} {tt("· Level")} {p.level}{p.crew && <> · <button className="underline" onClick={() => nav(`/game/crews/${p.crew.id}`)}>[{p.crew.tag}] {p.crew.name}</button></>}</div>
-              <div className="font-display text-xl md:text-2xl text-[#f4ead2] truncate flex items-center gap-2" style={p.name_colour_hex ? { color: p.name_colour_hex } : undefined} data-testid="profile-username">{p.username}{p.is_admin && <AdminBadge className="!text-[9.5px]" data-testid="profile-admin-badge" />}{p.is_mod && <ModBadge data-testid="profile-mod-badge" />}{p.supporter && <SupporterBadge size={14} data-testid="profile-supporter-badge" />}{p.premium && <PremiumBadge size={14} data-testid="profile-premium-badge" />}</div>
+              <div className="font-deco gold-text text-2xl md:text-3xl truncate flex items-center gap-2" style={p.name_colour_hex ? { color: p.name_colour_hex } : undefined} data-testid="profile-username">{p.username}{p.is_admin && <AdminBadge className="!text-[9.5px]" data-testid="profile-admin-badge" />}{p.is_mod && <ModBadge data-testid="profile-mod-badge" />}{p.supporter && <SupporterBadge size={14} data-testid="profile-supporter-badge" />}{p.premium && <PremiumBadge size={14} data-testid="profile-premium-badge" />}</div>
               {p.badges?.length > 0 && <div className="flex items-center gap-1.5 my-1" data-testid="profile-badges">{p.badges.map((b) => <AchievementBadge key={b.id} id={b.id} size={36} title={`${b.name}: ${b.desc}`} />)}</div>}
               {mine && !p.badges?.length && <button className="text-[11px] text-[var(--muted)] underline my-0.5" onClick={() => nav("/game/achievements")} data-testid="profile-badges-hint">{tt("Show up to 3 achievement badges here")}</button>}
               <div className="text-[11.5px] md:text-[12px] text-[var(--text-2)] truncate">{p.avatar_name && <span className="text-[var(--muted)]">"{p.avatar_name}" · </span>}{tt("Fishing at")} {water?.name} {tt("· joined")} {ago(p.created_at)} {tt("· last seen")} {ago(p.last_seen)}</div>
@@ -110,7 +110,7 @@ export default function Profile() {
       )}
       <div className="grid md:grid-cols-2 gap-3">
         <Panel icon="rankings" title={tt("Record")}>
-          <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 profile-stats">
             <Stat label={tt("Fish landed")} value={fmt(s.catches)} />
             <Stat label={tt("Escaped")} value={fmt(s.escaped)} />
             <Stat label={tt("Species discovered")} value={<>{s.species} <span className="text-xs text-[var(--muted)]">/ {data?.fish.length}</span></>} />

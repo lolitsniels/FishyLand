@@ -1,5 +1,6 @@
 import "@/App.css";
 import "./tfl/tfl.css";
+import "./tfl/game-skin.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { GameProvider, useGame } from "./tfl/context/GameContext";
