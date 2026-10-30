@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -12,8 +12,8 @@ const UPDATED = "2026-09-22";
 export default function Terms() {
   return (
     <LegalLayout slug="terms" title="Terms of Service" updated={UPDATED}
-      description="The rules for playing Fishing Realms: accounts, fair play, virtual currency and purchases, user content, and what happens if the rules are broken.">
-      <p>These Terms of Service ("Terms") are an agreement between you and the operator of Fishing Realms ("we", "us") covering your use of thefishinglands.com and the game it hosts (the "Service"). By creating an account, playing as a guest, or otherwise using the Service you agree to these Terms and to our <Link to="/privacy" className="text-[var(--gold)] hover:underline">Privacy Policy</Link>. If you do not agree, please do not use the Service.</p>
+      description="The rules for playing FishyLand: accounts, fair play, virtual currency and purchases, user content, and what happens if the rules are broken.">
+      <p>These Terms of Service ("Terms") are an agreement between you and the operator of FishyLand ("we", "us") covering your use of thefishinglands.com and the game it hosts (the "Service"). By creating an account, playing as a guest, or otherwise using the Service you agree to these Terms and to our <Link to="/privacy" className="text-[var(--gold)] hover:underline">Privacy Policy</Link>. If you do not agree, please do not use the Service.</p>
 
       <H2 id="eligibility">1. Eligibility</H2>
       <p>You must be at least 13 years old to play. If you are under the age of majority where you live, you confirm that a parent or guardian has reviewed and agreed to these Terms on your behalf. Purchases may only be made by adults or with a parent's or guardian's permission.</p>
@@ -27,7 +27,7 @@ export default function Terms() {
       </UL>
 
       <H2 id="fair-play">3. Fair play</H2>
-      <p>Fishing Realms is a shared world, so cheating harms every other player. You agree not to:</p>
+      <p>FishyLand is a shared world, so cheating harms every other player. You agree not to:</p>
       <UL>
         <li>use bots, macros, scripts, auto-clickers or any automation to cast, fight fish, trade or chat;</li>
         <li>exploit bugs, tamper with requests to the server, or interfere with the tension-fight or duel verification;</li>
@@ -50,7 +50,7 @@ export default function Terms() {
       <p>You keep ownership of the text you write in the game. You grant us a worldwide, royalty-free licence to store, display and reproduce it as part of running the Service (for example showing your chat message to other players or your crew description on a public profile). We may remove any content that breaks these Terms without notice.</p>
 
       <H2 id="ip">6. Our content</H2>
-      <p>The game, its name, artwork, fish, worlds, text, code and design are protected by copyright and other laws and belong to the operator of Fishing Realms. You may not copy, scrape, redistribute or create derivative works from them without written permission. Screenshots and videos of your own gameplay for personal, non-commercial or review purposes are welcome.</p>
+      <p>The game, its name, artwork, fish, worlds, text, code and design are protected by copyright and other laws and belong to the operator of FishyLand. You may not copy, scrape, redistribute or create derivative works from them without written permission. Screenshots and videos of your own gameplay for personal, non-commercial or review purposes are welcome.</p>
 
       <H2 id="ads">7. Advertising</H2>
       <p>The Service is free to play and supported by advertising, including ads served by Google AdSense. Ads are clearly separated from game content. Clicking your own ads repeatedly, encouraging others to click ads, or using tools that manipulate ad delivery is prohibited.</p>

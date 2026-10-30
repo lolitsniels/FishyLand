@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -8,9 +8,9 @@ import { Link } from "react-router-dom";
 import { GuideLayout, H2, H3, GameCard, Compare, Faq, faqLd } from "./GuideShared";
 
 const QA = [
-  ["What games are like Russian Fishing 4?", "Fishing Planet is the closest free simulator. Call of the Wild: The Angler is a paid open-world option. If you like RF4's persistent economy but want something much lighter, Fishing Realms is a free browser fishing MMO."],
-  ["Is there an easier game than Russian Fishing 4?", "Yes. RF4 is known for its complex tackle setups and slow progression. Fishing Realms keeps the parts RF4 players like, such as a shared world, an economy and rare fish to chase, but you can learn it in a minute and play in short sessions."],
-  ["Can I play a fishing game like RF4 in a browser?", "Not a full 3D simulator, but Fishing Realms is a free fishing MMO that runs in any browser, including on phones, with no download."],
+  ["What games are like Russian Fishing 4?", "Fishing Planet is the closest free simulator. Call of the Wild: The Angler is a paid open-world option. If you like RF4's persistent economy but want something much lighter, FishyLand is a free browser fishing MMO."],
+  ["Is there an easier game than Russian Fishing 4?", "Yes. RF4 is known for its complex tackle setups and slow progression. FishyLand keeps the parts RF4 players like, such as a shared world, an economy and rare fish to chase, but you can learn it in a minute and play in short sessions."],
+  ["Can I play a fishing game like RF4 in a browser?", "Not a full 3D simulator, but FishyLand is a free fishing MMO that runs in any browser, including on phones, with no download."],
 ];
 
 export default function RussianFishing4Alternatives() {
@@ -28,7 +28,7 @@ export default function RussianFishing4Alternatives() {
       </p>
       <p>Here are the games RF4 players actually move to, depending on what they want more or less of.</p>
 
-      <H2>Russian Fishing 4 vs Fishing Realms</H2>
+      <H2>Russian Fishing 4 vs FishyLand</H2>
       <Compare testId="compare-rf4" them="Russian Fishing 4" rows={[
         ["Price", "Free to play, premium account and shop", "Free, optional cosmetics and Angler Pass"],
         ["Install", "PC client", "None, runs in your browser"],
@@ -54,7 +54,7 @@ export default function RussianFishing4Alternatives() {
 
       <H2>The six alternatives</H2>
       <div className="grid md:grid-cols-2 gap-3 not-prose">
-        <GameCard name="Fishing Realms" tag="Browser MMO · Free" verdict="RF4 players who want the chase and the economy without the homework.">
+        <GameCard name="FishyLand" tag="Browser MMO · Free" verdict="RF4 players who want the chase and the economy without the homework.">
           Full disclosure: this is our game. You still hunt rare fish, upgrade tackle and trade on a live market, but every bite is a quick tension-bar fight you can learn in seconds.
           Crews, bosses and crates with ultra-rare rods give you long-term goals. No download, works on your phone. <Link to="/" className="underline">Try it free</Link>.
         </GameCard>
@@ -79,7 +79,7 @@ export default function RussianFishing4Alternatives() {
       <H3>You want another full simulator</H3>
       <p>Fishing Planet, or Fishing Sim World if you love tournaments.</p>
       <H3>You want the economy and rare-fish chase, but in short sessions</H3>
-      <p><Link to="/" className="text-[var(--gold)] underline">Fishing Realms</Link>. Log in, land a few fish, check the market, and you're done in ten minutes.</p>
+      <p><Link to="/" className="text-[var(--gold)] underline">FishyLand</Link>. Log in, land a few fish, check the market, and you're done in ten minutes.</p>
       <H3>You want to relax</H3>
       <p>Stardew Valley or Call of the Wild: The Angler.</p>
 

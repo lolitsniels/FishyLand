@@ -8,7 +8,7 @@ const pct = (v) => (v == null ? "-" : `${v}%`);
 function summary(s) {
   const r = s.retention;
   return [
-    `Fishing Realms (thefishinglands.com), browser fishing MMO. Stats from our server, ${s.generated_at.slice(0, 10)}:`,
+    `FishyLand (thefishinglands.com), browser fishing MMO. Stats from our server, ${s.generated_at.slice(0, 10)}:`,
     `- MAU (unique players, last 30 days): ${s.mau}`,
     `- DAU: ${s.dau_7} average over the last 7 days, ${s.dau_30} over 30 days (peak ${s.dau_peak})`,
     `- WAU: ${s.wau}  |  DAU/MAU: ${pct(s.stickiness)}`,

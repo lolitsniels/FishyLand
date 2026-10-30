@@ -21,7 +21,7 @@ def _iso(d):
 
 
 async def _active(uid: str):
-    return await db.live_duels.find_one({"players.id": uid, "state": {"$ne": "done"}, "end": {"$gt": _iso(_now() - timedelta(seconds=30))}})
+    return await db.live_duels.find_one({"players": {"$elemMatch": {"id": uid, "left": {"$ne": True}}}, "end": {"$gt": _iso(_now() - timedelta(seconds=300))}})
 
 
 def _view(m, uid):
@@ -91,8 +91,9 @@ async def live_leave(user=Depends(get_current_user)):
     m = await _active(uid)
     if m and _now() < datetime.fromisoformat(m["start"]):
         raise HTTPException(400, "The duel is about to start")
-    if m and m.get("paid"):
-        await db.live_duels.update_one({"id": m["id"]}, {"$set": {"state": "done"}})
+    if m and _now() >= datetime.fromisoformat(m["end"]):
+        await _settle(m)
+        await db.live_duels.update_one({"id": m["id"], "players.id": uid}, {"$set": {"players.$.left": True}})
     return {"ok": True}
 
 

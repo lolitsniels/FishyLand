@@ -136,7 +136,7 @@ The event ends on **1 November**. Everything you earn stays yours forever, Soul 
 async def seed_halloween_news():
     # One-time per database: posts the Halloween launch notice on top of the existing notices.
     if await db.meta.find_one({"key": "news_halloween_2026"}): return
-    await db.news.insert_one({"title": "Halloween comes to Fishing Realms!", "body": HALLOWEEN_NEWS, "image": "/art/halloween_banner.jpg", "pinned": True,
+    await db.news.insert_one({"title": "Halloween comes to FishyLand!", "body": HALLOWEEN_NEWS, "image": "/art/halloween_banner.jpg", "pinned": True,
                               "author": "Harbourmaster", "created_at": _iso()})
     await db.meta.insert_one({"key": "news_halloween_2026", "at": _iso()})
 
@@ -186,7 +186,7 @@ These never appear in the Tackle Shop:
 Pull a legendary or mythic rod and the whole harbour sees a banner with your name on it. Full odds are in the Wiki under Crates, and crate prices are tracked in the Almanac.
 
 ## A whole new look
-Fishing Realms is now fully **pixel art**. Every fish, water, boss, rod and portrait has been redrawn, and the most visible art (waters, banners, bosses and top fish) got a second, cleaner pass. The water pictures now show in full.
+FishyLand is now fully **pixel art**. Every fish, water, boss, rod and portrait has been redrawn, and the most visible art (waters, banners, bosses and top fish) got a second, cleaner pass. The water pictures now show in full.
 
 ## Smaller changes
 - **Buy as many copies of a rod as you like.** Every copy has its own row, wear and enhancement, and you can equip or sell any of them.

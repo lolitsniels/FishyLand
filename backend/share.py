@@ -67,19 +67,19 @@ async def share_catch(request: Request, s: int, w: float = 0, u: str = "", v: st
         n = f"{variant} {f['name']}".strip()
         fish = ("an " if n[0].lower() in "aeiou" else "a ") + n
     title = f"{who} slew the boss {f['name']}: {size}" if s in BOSS_IDS else f"{who} landed {fish}: {size}, {f['rarity'].title()}"
-    desc = "Catch it yourself in Fishing Realms, a free multiplayer fishing MMO in your browser."
+    desc = "Catch it yourself in FishyLand, a free multiplayer fishing MMO in your browser."
     dest = f"{site()}/?ref={code}" if code else f"{site()}/"
     img = f"{site()}/api/share/img/{s}.jpg"
     me = escape(f"{site()}/api/share/catch?{request.url.query}", quote=True)
     t, dsc, de, im = escape(title), escape(desc), escape(dest, quote=True), escape(img, quote=True)
     html = f"""<!doctype html><html><head><meta charset="utf-8"><title>{t}</title>
-<meta property="og:type" content="website"><meta property="og:site_name" content="Fishing Realms">
+<meta property="og:type" content="website"><meta property="og:site_name" content="FishyLand">
 <meta property="og:title" content="{t}"><meta property="og:description" content="{dsc}">
 <meta property="og:image" content="{im}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:url" content="{me}"><meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{dsc}"><meta name="twitter:image" content="{im}">
 <meta http-equiv="refresh" content="0;url={de}"></head>
-<body style="background:#141110;color:#eee;font-family:sans-serif"><a href="{de}" style="color:#ff7a35">{t}. Play Fishing Realms</a></body></html>"""
+<body style="background:#141110;color:#eee;font-family:sans-serif"><a href="{de}" style="color:#ff7a35">{t}. Play FishyLand</a></body></html>"""
     return HTMLResponse(html)
 
 

@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -54,7 +54,7 @@ export function NotificationSettings() {
   return (
     <div className="space-y-2" data-testid="settings-notifications">
       <div className="font-display text-[13px] text-[#f4ead2]">{tt("Browser notifications")}</div>
-      {!supported ? <div className="text-[11.5px] text-[var(--muted)]" data-testid="settings-push-unsupported">{tt("This browser can't show notifications from Fishing Realms.")}</div>
+      {!supported ? <div className="text-[11.5px] text-[var(--muted)]" data-testid="settings-push-unsupported">{tt("This browser can't show notifications from FishyLand.")}</div>
       : user.is_guest ? <div className="text-[11.5px] text-[#f59a5c]">{tt("Claim your account first to receive alerts.")}</div>
       : (
         <>

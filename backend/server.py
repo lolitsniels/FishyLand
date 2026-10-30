@@ -2756,7 +2756,7 @@ ACHIEVEMENTS = [
     _ach("species_50", "Naturalist", "Discover 50 species.", 800, "Naturalist", lambda c: c["species"] >= 50),
     _ach("species_100", "Collector", "Discover 100 species.", 3000, "Collector", lambda c: c["species"] >= 100),
     _ach("species_200", "Archivist", "Discover 200 species.", 10000, "Archivist", lambda c: c["species"] >= 200),
-    _ach("species_all", "The Complete Journal", "Discover every species in Fishing Realms.", 100000, "Keeper of the Journal", lambda c: c["species"] >= len(FISH)),
+    _ach("species_all", "The Complete Journal", "Discover every species in FishyLand.", 100000, "Keeper of the Journal", lambda c: c["species"] >= len(FISH)),
     _ach("first_rare", "Something Special", "Discover a rare species.", 100, None, lambda c: c["rare"] >= 1),
     _ach("contracts_10", "Reliable Hands", "Fill 10 harbour contracts.", 400, None, lambda c: c["contracts"] >= 10),
     _ach("contracts_50", "Contractor", "Fill 50 harbour contracts.", 2500, "Contractor", lambda c: c["contracts"] >= 50),
@@ -4164,7 +4164,7 @@ import crates  # noqa: E402,F401
 import random_events  # noqa: E402
 import moderation  # noqa: E402
 import testwater  # noqa: E402
-# sig_images (forum signatures) not used in Fishing Realm
+# sig_images (forum signatures) not used in FishyLand
 import cosmetic_shop  # noqa: E402,F401
 
 app.include_router(api)

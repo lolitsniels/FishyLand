@@ -4,7 +4,7 @@ import { CopyField, useCopy } from "./shared";
 const ORIGIN = window.location.origin;  // same host serves /api, so shared images point at the live domain
 
 function Item({ id, title, desc, img, w, h, link, copied, copy }) {
-  const html = `<a href="${link}" target="_blank"><img src="${img}" width="${w}" height="${h}" alt="My angler in Fishing Realms" style="border:0"></a>`;
+  const html = `<a href="${link}" target="_blank"><img src="${img}" width="${w}" height="${h}" alt="My angler in FishyLand" style="border:0"></a>`;
   const bb = `[url=${link}][img]${img}[/img][/url]`;
   return (
     <section className="space-y-2" data-testid={`recruit-${id}`}>

@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -70,15 +70,15 @@ export default function Welcome() {
   if (START_SCREEN) return <PortalStart />;
   return (
     <div className="lp-page" data-testid="welcome-page">
-      <Seo title="Fishing Realms, Free Fishing MMO in Your Browser" description="Play Fishing Realms free in your browser. Hundreds of fish, real players, a live economy and legendary catches. Free to play, no pay to win, no download." path="/" type="website"
-        jsonLd={{ "@context": "https://schema.org", "@type": "VideoGame", name: "Fishing Realms", url: SITE_URL + "/", genre: ["MMO", "Fishing", "Browser game"], gamePlatform: ["Web browser", "iOS", "Android"], applicationCategory: "Game", operatingSystem: "Any (web browser)", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, description: "A persistent browser-based fishing MMO with hundreds of species and a shared player-driven economy." }} />
+      <Seo title="FishyLand, Free Fishing MMO in Your Browser" description="Play FishyLand free in your browser. Hundreds of fish, real players, a live economy and legendary catches. Free to play, no pay to win, no download." path="/" type="website"
+        jsonLd={{ "@context": "https://schema.org", "@type": "VideoGame", name: "FishyLand", url: SITE_URL + "/", genre: ["MMO", "Fishing", "Browser game"], gamePlatform: ["Web browser", "iOS", "Android"], applicationCategory: "Game", operatingSystem: "Any (web browser)", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, description: "A persistent browser-based fishing MMO with hundreds of species and a shared player-driven economy." }} />
       <div className="lp-bg" aria-hidden="true"><div className="lp-bg-town" style={{ backgroundImage: "url(/art/landing_water.webp)" }} /><PixelSea /><CatchPops list={catches} /></div>
       <TopBar stats={stats} user={user} />
 
       <main className="lp-stage">
         <CatchTicker list={catches} />
         <div className="lp-intro">
-          <h1 className="lp-logo-wrap"><img src="/art/landing_logo.webp" alt="Fishing Realms" className="lp-logo" data-testid="lp-logo" /></h1>
+          <h1 className="lp-logo-wrap"><img src="/art/landing_logo.webp" alt="FishyLand" className="lp-logo" data-testid="lp-logo" /></h1>
           <p className="lp-plate" data-testid="lp-tagline">Grab a rod and join thousands of anglers in one shared world. Catch hundreds of species, fight legendary bosses, trade on the Market and become the most famous angler in the Lands.<span className="lp-p2w" data-testid="lp-no-p2w">Free to play, never pay to win.</span><button type="button" className="lp-watch" onClick={() => window.dispatchEvent(new Event("lp-trailer"))} data-testid="lp-watch-trailer"><span className="lp-tri right" />Watch the trailer</button></p>
         </div>
 
@@ -106,7 +106,7 @@ export default function Welcome() {
 
       <footer className="lp-footer" data-testid="lp-footer">
         <div className="lp-footer-in">
-          <span className="lp-footer-brand">© Fishing Realms</span>
+          <span className="lp-footer-brand">© FishyLand</span>
           <nav>
             <Link to="/about" data-testid="wl-footer-about">About</Link>
             <Link to="/contact" data-testid="wl-footer-contact">Contact</Link>

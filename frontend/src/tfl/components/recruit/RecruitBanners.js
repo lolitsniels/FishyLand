@@ -7,7 +7,7 @@ const GROUPS = [
   ["Small & tall", [["468x60", 468, 60], ["160x600", 160, 600]]],
 ];
 const src = (size, bmm, anim) => bmm ? `/art/ad/browsermmorpg/tfl_${size}${anim ? ".gif" : "_last.png"}` : `/art/banners/v2/tfl_${size}.${anim ? "gif" : "png"}`;
-const html = (link, file, w, h) => `<a href="${link}" target="_blank"><img src="${window.location.origin}${file}" width="${w}" height="${h}" alt="Fishing Realms, free fishing MMO in your browser" style="border:0"></a>`;
+const html = (link, file, w, h) => `<a href="${link}" target="_blank"><img src="${window.location.origin}${file}" width="${w}" height="${h}" alt="FishyLand, free fishing MMO in your browser" style="border:0"></a>`;
 const bb = (link, file) => `[url=${link}][img]${window.location.origin}${file}[/img][/url]`;
 
 function Banner({ link, size, w, h, bmm, copied, copy }) {
@@ -18,7 +18,7 @@ function Banner({ link, size, w, h, bmm, copied, copy }) {
       <div className="flex flex-wrap gap-3 items-start">
         {[true, false].map((anim) => (
           <figure key={String(anim)} className="space-y-1 max-w-full">
-            <div className="overflow-x-auto max-w-full"><img src={src(size, bmm, anim)} width={show} height={Math.round(h * show / w)} alt={`Fishing Realms ${size}`} className="max-w-none border border-[var(--border-2)] pixelated" loading="lazy" /></div>
+            <div className="overflow-x-auto max-w-full"><img src={src(size, bmm, anim)} width={show} height={Math.round(h * show / w)} alt={`FishyLand ${size}`} className="max-w-none border border-[var(--border-2)] pixelated" loading="lazy" /></div>
             <figcaption className="text-[10.5px] uppercase tracking-wider text-[var(--muted)]">{anim ? tt("Animated GIF") : tt("Static PNG")}</figcaption>
             <div className="flex flex-wrap gap-1">
               <button className="btn btn-sm" onClick={() => copy(`h-${size}-${anim}`, html(link, src(size, bmm, anim), w, h), "HTML")} data-testid={`recruit-banner-html-${size}-${anim ? "anim" : "static"}`}>{copied === `h-${size}-${anim}` ? tt("Copied") : tt("Copy HTML")}</button>

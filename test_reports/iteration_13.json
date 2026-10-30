@@ -1,0 +1,48 @@
+{
+  "summary": "Iteration 13 (live Fishing Duel, re-login to harbour, map switching, painted icons and navy palette, Sea Serpent, no external links). Backend: new test_iter13_live_duel.py, 3/3 pass. Covered: queue gives waiting then matched; countdown phase; both players get the same match id; leave during countdown returns 400; a fish landed via cast and land during the live window adds kg, catches and best, and the foe sees it; the winner got +500 gold (4570 -> 5070). Frontend: two-context duel works. Both players switch to data-mode=duel, the chip reads 'Duel Pier', the scoreboard shows both names and kg, and the timer goes from 'Starts in N' to m:ss, kept in sync on both sides. fish-1..4 all show the cast hint and FISH is enabled. In-app quests nav is blocked. CRITICAL BUG: the result screen is broken. When the timer ends, player 1 saw duel-result for about 1-2s before being sent to the harbour, and player 2 never saw it at all. Re-login from water mode lands in the harbour. Switching harbour -> Millbrook -> harbour renders in under 400ms. Menus have no px-icon or crispEdges svgs and no broken images. The game pages have no external a[href^=http] links.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "/api/duel/live/state (duel_live._settle/_active)", "issue": "_settle sets state='done' globally when it pays the winner, and _active filters out state 'done'. So the first state or queue poll after the end (by either player) settles the match. Every later poll then returns {state:'idle'} for BOTH players. Reproduced via curl: TestAngler's poll got phase done/win, then TestAngler2 immediately got state 'idle', and vice versa. As a result the loser or second poller never receives phase='done', result or reward.", "priority": "CRITICAL"}
+    ],
+    "minor": [
+      {"endpoint": "/api/duel/live/queue", "issue": "No level gate. DUEL_LEVEL=10 exists for the old duel, but a level-6 TestAngler can queue for the live duel. Confirm this is intended."},
+      {"endpoint": "/api/fish/land -> duel_live.record_catch", "issue": "A hex_hook twin catch is not added to the duel kg. Only the main weight is recorded. Probably fine, but confirm."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "DuelHud result screen", "issue": "Follows from the backend bug. When the state goes to idle, the 'gone' counter calls goMode('harbour') after 3 polls. So the winner sees duel-result for about 1-2s and the other player is dropped to the harbour with no Victory/Defeat/Draw screen. duel-back-harbour is effectively unreachable. Observed live: at end, res1=True and res2=False with p2 already in harbour mode; 1s later both were in harbour with no result.", "selector": "[data-testid=duel-result]", "priority": "CRITICAL"},
+      {"component": "Harbour Sea Serpent", "issue": "The ship sprite uses flip:true. The bow now points right, to the sea, and the dock posts are drawn in front, but the 'Sea Serpent' name on the hull is mirrored and reads backwards.", "selector": "maps.js HARBOUR_MAP objects ship flip", "priority": "LOW"},
+      {"component": "World duel mode", "issue": "Reloading the page during a duel resets fr_mode duel -> harbour (World.js line 91), so the player loses the duel HUD. They can only rejoin by opening /game/duel and pressing Find again. Also, Travel Map (menu-waters) is still on the duel action bar: clicking it left the URL at /game/waters (mode stayed duel).", "selector": "[data-testid=menu-waters]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Duel cast from UI", "issue": "Not verified. Pressing Space or FISH on fish-1 did not show fight-panel within 10s, twice. It may have been a 'nothing' bite or a long bite delay. The backend cast and land path into duel kg is verified.", "affected_selectors": ["[data-testid=cast-fish-button]", "[data-testid=fight-panel]"]}
+    ],
+    "design_issues": [
+      {"screen": "/game/achievements", "issues": ["Locked achievement cards use .journal-cell with background rgba(26,15,7,0.9), which is brown, from game-skin.css line 65. This is not the navy palette (103 cards)."]},
+      {"screen": "General", "issues": ["fr-btn-dark (brown gradient #3b2514 to #1a0f07) and the sonner toast background #1a0f07 are still brown.", "The player card (top-left) and the modal outer frame are wood/brown. Confirm this is intended.", "In the duel, both players spawn at the same point (1100,1230), so their name labels overlap ('TeTestAngler2')."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter13_live_duel.py", "/app/test_reports/pytest/iter13.xml"],
+  "action_items": [
+    "CRITICAL: fix live-duel end-of-match. Keep done matches visible to each player until that player acknowledges them, e.g. a per-player 'seen'/'left' flag set by /duel/live/leave. Do not set a global state='done' in _settle, and include settled matches in _active for a grace window.",
+    "Frontend DuelHud: once phase=done has been shown, do not auto-goMode('harbour') on idle polls. Only leave via duel-back-harbour.",
+    "Hide Travel Map (menu-waters) in duel mode, or make sure the /game/waters redirect fires.",
+    "Optionally restore duel mode on reload when /duel/live/state returns an active match.",
+    "Fix the mirrored 'Sea Serpent' hull text: use a pre-flipped asset instead of flipping the sprite.",
+    "Convert the remaining brown surfaces (.journal-cell, fr-btn-dark, toasts) to navy if a single palette is required."
+  ],
+  "critical_code_review_comments": [
+    "duel_live._settle: the global state='done' write is the root cause of the missing result screen (see RCA).",
+    "DuelHud startIn uses the client clock (new Date(m.start) - Date.now()). With clock skew the countdown is wrong. Use seconds_left minus 180 from the server instead.",
+    "duel_live.record_catch matches on start<=now<end only, without state. This is fine, but there is no index on live_duels players.id.",
+    "duel_live.live_queue has a race: two simultaneous queues can each find nothing and both wait. This is acceptable because they match on the next 2s poll."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter13_live_duel.py"],
+  "success_rate": {"backend": "100% (3/3 pytest); end-of-match visibility bug found via curl", "frontend": "~80% (duel result screen broken; others pass)"},
+  "seed_data_creation": "Ran several live duels between TestAngler and TestAngler2. TestAngler won one, +500 gold (now 5070), and landed 1 Yellow Perch.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Run: cd /app/backend/tests && python -m pytest test_iter13_live_duel.py -n 0. The queue test waits for any leftover match to clear, up to about 4 min. Login returns 'token', not access_token. Cast returns {result:'hooked', encounter:{id,stamina}}. Land body: {encounter_id, success:true, elapsed:stamina+0.5, game_time, holds:[[..]]} after sleeping about 0.8*stamina. For the UI duel, use 2 contexts with the token in localStorage owo_token and fr_mode=harbour. Open /game/duel and click duel-find on both. In the second context use state='attached' waits, because visibility waits flake while Pixi renders. To verify the result-screen fix you must wait the full 3 min plus 6s.",
+  "rca of the issue": "Repro: match the two players and let 180s pass. The first /duel/live/state call after end runs _settle, which pays the winner and sets state:'done'. _active() then excludes the match, so the next call from either user returns {state:'idle'}. DuelHud counts 3 idle polls (gone>2) and dispatches fr-mode harbour, which unmounts the result overlay. The second player never got phase=done. Fix: drop the state:'done' write in _settle (keep paid:true). Have _active return the match while end > now-GRACE and the user is not in m.left[]. /duel/live/leave adds the user to left[]. In the frontend, stop auto-leaving after a done result."
+}

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="3.579" timestamp="2026-10-30T19:39:48.322769+00:00" hostname="agent-env-d5c78ec4-2846-489b-a5f8-964300cb4243"><testcase classname="tests.test_iter13_live_duel.TestLiveDuel" name="test_state_requires_auth" time="1.224" /><testcase classname="tests.test_iter13_live_duel.TestLiveDuel" name="test_queue_match_state_leave" time="2.271" /><testcase classname="tests.test_iter13_live_duel.TestLiveDuel" name="test_landed_fish_adds_kg" time="0.002"><failure message="ModuleNotFoundError: No module named 'sim'">test_iter13_live_duel.py:65: in test_landed_fish_adds_kg
+    from e2e_fishing import controller_holds
+/app/scripts/e2e_fishing.py:4: in &lt;module&gt;
+    import sim as S
+E   ModuleNotFoundError: No module named 'sim'</failure></testcase></testsuite></testsuites>

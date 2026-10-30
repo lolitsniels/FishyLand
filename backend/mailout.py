@@ -15,7 +15,7 @@ from emails import send_email, shell, site_url, email_configured
 SEND_GAP_SEC = 0.6  # stays under Resend's per-second rate limit
 RECIPIENTS = {"email": {"$nin": [None, ""]}, "banned": {"$in": [None, False]}}
 
-HALLOWEEN_SUBJECT = "Halloween has come to Fishing Realms"
+HALLOWEEN_SUBJECT = "Halloween has come to FishyLand"
 HALLOWEEN_BODY = """Ahoy {username},
 
 The Marsh Witch has set up her stall by the water, and strange things are biting.
@@ -56,7 +56,7 @@ def to_html(body: str, username: str) -> str:
 
 def build(m: MailIn, username: str):
     html = shell(m.subject, to_html(m.body, username), ("Go fishing", f"{site_url()}/?login=1"),
-                 "You are receiving this because you have an account on Fishing Realms.", greeting="Ahoy from the harbour!")
+                 "You are receiving this because you have an account on FishyLand.", greeting="Ahoy from the harbour!")
     return html, re.sub(r"\*\*(.+?)\*\*", r"\1", m.body.replace("{username}", username))
 
 

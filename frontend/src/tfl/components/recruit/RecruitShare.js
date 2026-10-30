@@ -13,16 +13,16 @@ const TARGETS = [
 ];
 
 const MESSAGES = (link, user) => [
-  ["short", tt("Short"), `Come fish with me in Fishing Realms, a free fishing MMO you play right in your browser 🎣 ${link}`],
-  ["brag", tt("Show off"), `Just hit level ${user.level} in Fishing Realms with ${user.stats?.catches ?? 0} fish landed. Free browser fishing MMO with bosses, crews and duels. Join me: ${link}`],
-  ["crew", tt("Crew invite"), `Looking for anglers to join my crew in Fishing Realms! Free to play in your browser, no download. Start here and we both get rewards: ${link}`],
+  ["short", tt("Short"), `Come fish with me in FishyLand, a free fishing MMO you play right in your browser 🎣 ${link}`],
+  ["brag", tt("Show off"), `Just hit level ${user.level} in FishyLand with ${user.stats?.catches ?? 0} fish landed. Free browser fishing MMO with bosses, crews and duels. Join me: ${link}`],
+  ["crew", tt("Crew invite"), `Looking for anglers to join my crew in FishyLand! Free to play in your browser, no download. Start here and we both get rewards: ${link}`],
 ];
 
 export default function RecruitShare({ link, user }) {
   const [copied, copy] = useCopy();
-  const text = tt("Come fish with me in Fishing Realms, a free fishing MMO in your browser. Join with my link:");
+  const text = tt("Come fish with me in FishyLand, a free fishing MMO in your browser. Join with my link:");
   const u = encodeURIComponent(link), t = encodeURIComponent(text);
-  const native = async () => { try { await navigator.share({ title: "Fishing Realms", text, url: link }); } catch {} };
+  const native = async () => { try { await navigator.share({ title: "FishyLand", text, url: link }); } catch {} };
   return (
     <div className="space-y-4 text-[12.5px]" data-testid="recruit-share-tab">
       <div className="space-y-2">

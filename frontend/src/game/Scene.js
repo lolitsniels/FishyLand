@@ -141,6 +141,9 @@ function makePeer(p) {
   const bubble = makeBubble(); bubble.y = -ANGLER_H - 30;
   c.addChild(f.c, name, status, bubble);
   c.x = p.x; c.y = p.y;
+  c.eventMode = "static"; c.cursor = "pointer";
+  c.hitArea = new Rectangle(-40, -ANGLER_H, 80, ANGLER_H + 10);
+  c.on("pointertap", (e) => { e.stopPropagation(); window.dispatchEvent(new CustomEvent("fr-profile", { detail: p.username })); });
   return { c, fig: f.c, f, name, status, bubble, uname: p.username, tx: p.x, ty: p.y, seen: 0 };
 }
 

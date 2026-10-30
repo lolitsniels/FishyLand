@@ -210,3 +210,29 @@ img.px-icon { display: inline-block; vertical-align: middle; filter: drop-shadow
 html body { --bg: #071427 !important; --bg-2: rgba(10, 28, 54, .78) !important; --bg-deep: #040c1a !important; --panel: rgba(12, 30, 58, .85) !important; --panel-2: rgba(18, 42, 78, .8) !important;
   --panel-hi: rgba(30, 64, 110, .85) !important; --border: rgba(226, 180, 90, .32) !important; --border-2: rgba(226, 180, 90, .55) !important; }
 .fr-modal [class*="bg-[var(--bg-2)]"] { border-radius: 6px; }
+
+/* FishyLand homepage */
+.fl-home { min-height: 100vh; color: #eaf3ff; font-family: var(--ui-font); background: linear-gradient(180deg, rgba(4, 18, 36, .55), rgba(4, 14, 30, .92)), url(/art/shots/harbour.jpg) center top / cover fixed; }
+.fl-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; }
+.fl-logo-sm { height: 44px; width: auto; }
+.fl-online { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 12px; background: rgba(0, 0, 0, .45); }
+.fl-online i { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; }
+.fl-main { max-width: 1120px; margin: 0 auto; padding: 0 16px 30px; display: flex; flex-direction: column; align-items: center; }
+.fl-mascot-row { display: flex; align-items: flex-end; gap: 10px; margin-top: 4px; }
+.fl-mascot { height: 210px; width: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6)); }
+.fl-bubble { max-width: 300px; margin-bottom: 110px; padding: 10px 14px; border-radius: 14px; background: #fff6dc; color: #2a1a08; font-weight: 700; font-size: 14px; box-shadow: 0 6px 14px rgba(0, 0, 0, .5); position: relative; }
+.fl-bubble::before { content: ""; position: absolute; left: -10px; bottom: 16px; border: 10px solid transparent; border-right-color: #fff6dc; border-left: 0; }
+.fl-logo { width: min(520px, 86vw); height: auto; margin-top: -30px; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .6)); }
+.fl-grid { width: 100%; display: grid; gap: 18px; margin-top: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .fl-grid { grid-template-columns: 400px minmax(0, 1fr); } }
+html body .panel.fl-card, html body .panel.fl-login { padding: 16px 18px !important; border: 30px solid transparent !important; border-image: url(/art/hud/panel.webp) 195 fill / 30px / 0 stretch !important; background: none !important; }
+.fl-login { width: min(92vw, 380px); }
+.fl-h { font: 400 26px "Lilita One", var(--ui-font) !important; color: #ffd27a; text-align: center; margin-bottom: 10px; text-shadow: 0 2px 0 #000; }
+.fl-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+.fl-shot { margin: 0; border-radius: 8px; overflow: hidden; border: 3px solid #e2b45a; box-shadow: 0 0 0 2px #3a240f, 0 8px 18px rgba(0, 0, 0, .55); background: #0a2a44; }
+.fl-shot img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; transition: transform .3s; }
+.fl-shot:hover img { transform: scale(1.04); }
+.fl-shot figcaption { padding: 6px 10px; font-weight: 700; font-size: 12.5px; color: #fff3cf; background: rgba(6, 16, 32, .9); }
+.fl-foot { display: flex; gap: 16px; justify-content: center; padding: 16px; font-size: 12.5px; color: #a9c1e0; }
+.fl-foot a:hover { color: #ffd27a; }
+@media (max-width: 640px) { .fl-mascot { height: 150px; } .fl-bubble { margin-bottom: 70px; font-size: 12.5px; max-width: 200px; } .fl-shots { grid-template-columns: 1fr; } }

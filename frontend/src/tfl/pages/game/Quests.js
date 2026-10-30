@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -96,7 +96,7 @@ export default function Quests() {
         </Panel>
       </div>
       <Panel icon="journal" title={tt("The Harbourmaster's Ledger")} right={<span className="num" data-testid="story-progress">{storyDone} / {d.story.length} {tt("chapters")}</span>} testId="story-quests">
-        <p className="text-[12px] text-[var(--text-2)] mb-2">{tt("Long-standing requests from the folk of Fishing Realms. Each entry unlocks the next once completed.")}</p>
+        <p className="text-[12px] text-[var(--text-2)] mb-2">{tt("Long-standing requests from the folk of FishyLand. Each entry unlocks the next once completed.")}</p>
         <div className="space-y-1.5">{d.story.map((q) => <StoryQuest key={q.id} q={q} onAccept={accept} busy={busy} />)}</div>
       </Panel>
     </div>

@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -44,7 +44,7 @@ export function GuidesIndex() {
         <h1 className="font-display text-3xl md:text-4xl text-[#f4ead2]">Fishing game guides</h1>
         <p className="mt-4 text-[14px] text-[var(--text-2)]">
           Short, opinionated write-ups on the best fishing games worth your time: the browser MMOs, the cozy 2D
-          collectors, and the deep simulators. We built <Link to="/" className="text-[var(--gold)] hover:underline">Fishing Realms</Link>,
+          collectors, and the deep simulators. We built <Link to="/" className="text-[var(--gold)] hover:underline">FishyLand</Link>,
           but these pages are here to help you find whichever fishing game actually fits how you want to play, not to sell you ours.
         </p>
         <ul className="mt-8 grid md:grid-cols-2 gap-3" data-testid="guide-index-list">
@@ -75,8 +75,8 @@ export function GuideLayout({ slug, title, description, updated, children, jsonL
     description,
     url: SITE_URL + canonical,
     dateModified: updated,
-    author: { "@type": "Organization", name: "Fishing Realms" },
-    publisher: { "@type": "Organization", name: "Fishing Realms", logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png" } },
+    author: { "@type": "Organization", name: "FishyLand" },
+    publisher: { "@type": "Organization", name: "FishyLand", logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png" } },
     mainEntityOfPage: SITE_URL + canonical,
   };
   const breadcrumb = {
@@ -101,7 +101,7 @@ export function GuideLayout({ slug, title, description, updated, children, jsonL
             <span className="text-[var(--text-2)]">{title}</span>
           </nav>
           <h1 className="font-display text-3xl md:text-4xl text-[#f4ead2]">{title}</h1>
-          <p className="text-[11.5px] text-[var(--muted)] mt-1">Updated {new Date(updated).toLocaleDateString("en-GB", { year: "numeric", month: "long" })} · by the crew at Fishing Realms</p>
+          <p className="text-[11.5px] text-[var(--muted)] mt-1">Updated {new Date(updated).toLocaleDateString("en-GB", { year: "numeric", month: "long" })} · by the crew at FishyLand</p>
           {HERO[slug] && (
             <figure className="mt-5" data-testid={`guide-hero-${slug}`}>
               <img src={HERO[slug][0]} alt={HERO[slug][1]} width="1440" height="900" fetchpriority="high" className="w-full h-auto max-h-[340px] object-cover object-top border border-[var(--border)]" />
@@ -111,7 +111,7 @@ export function GuideLayout({ slug, title, description, updated, children, jsonL
           <div className="prose-mmo mt-6 space-y-5 text-[14px] text-[#ddd5cc] leading-relaxed">{children}</div>
           <p className="text-[10.5px] text-[var(--muted)] mt-6">Game images are store artwork of their respective owners, used with permission. All trademarks belong to their owners.</p>
           <aside className="mt-10 panel panel-gold p-4">
-            <div className="font-display text-[13px] text-[var(--gold)] uppercase tracking-widest">Try Fishing Realms</div>
+            <div className="font-display text-[13px] text-[var(--gold)] uppercase tracking-widest">Try FishyLand</div>
             <p className="text-[12.5px] text-[var(--text-2)] mt-1">Free, no install, no launcher. Cast at Millbrook Pond in under a minute, your gold, journal and gear persist forever.</p>
             <Link to="/" className="btn btn-gold btn-sm mt-3 inline-block" data-testid={`guide-cta-${slug}`}>Create your angler</Link>
           </aside>
@@ -126,20 +126,20 @@ export function GuideLayout({ slug, title, description, updated, children, jsonL
 
 const S = "/art/screens/";
 const HERO = {
-  "fishao-alternatives": [S + "journal.jpg", "The Fish Journal in Fishing Realms: 340+ species to collect, a lot like the old Fishao book"],
-  "games-like-fishao": [S + "harbor.jpg", "The Harbour in Fishing Realms, a free pixel art fishing MMO in your browser"],
-  "best-browser-fishing-games": [S + "fishing_anim.webp", "Landing a fish in Fishing Realms, playing right in a browser tab"],
-  "fishing-mmo": [S + "rankings.jpg", "Shared rankings in Fishing Realms fishing MMO"],
-  "online-fishing-games": [S + "waters.jpg", "The waters of Fishing Realms, from starter ponds to the deep sea"],
-  "games-like-fishing-planet": [S + "waters.jpg", "Twelve waters to unlock in Fishing Realms, a free alternative to Fishing Planet"],
-  "russian-fishing-4-alternatives": [S + "fishing_anim.webp", "The tension-bar fight in Fishing Realms: easy to learn, hard to master"],
-  "call-of-the-wild-the-angler-alternatives": [S + "shop.jpg", "Rods, reels and lines in Fishing Realms Tackle Shop"],
+  "fishao-alternatives": [S + "journal.jpg", "The Fish Journal in FishyLand: 340+ species to collect, a lot like the old Fishao book"],
+  "games-like-fishao": [S + "harbor.jpg", "The Harbour in FishyLand, a free pixel art fishing MMO in your browser"],
+  "best-browser-fishing-games": [S + "fishing_anim.webp", "Landing a fish in FishyLand, playing right in a browser tab"],
+  "fishing-mmo": [S + "rankings.jpg", "Shared rankings in FishyLand fishing MMO"],
+  "online-fishing-games": [S + "waters.jpg", "The waters of FishyLand, from starter ponds to the deep sea"],
+  "games-like-fishing-planet": [S + "waters.jpg", "Twelve waters to unlock in FishyLand, a free alternative to Fishing Planet"],
+  "russian-fishing-4-alternatives": [S + "fishing_anim.webp", "The tension-bar fight in FishyLand: easy to learn, hard to master"],
+  "call-of-the-wild-the-angler-alternatives": [S + "shop.jpg", "Rods, reels and lines in FishyLand Tackle Shop"],
 };
 
 // Store art (Steam capsules) used with the developers' permission; matched by the card's game name.
 const G = "/art/guides/games/";
 const GAME_ART = [
-  [/^Fishing Realms/, S + "fishing_anim.webp", "Fishing Realms: landing a fish in the tension-bar fight"],
+  [/^FishyLand/, S + "fishing_anim.webp", "FishyLand: landing a fish in the tension-bar fight"],
   [/^Webfishing/, G + "webfishing.webp", "Webfishing"], [/^Fishing Planet/, G + "fishing-planet.webp", "Fishing Planet"],
   [/^Call of the Wild: The Angler/, G + "cotw-angler.webp", "Call of the Wild: The Angler"], [/^Ultimate Fishing Simulator 2/, G + "ufs2.webp", "Ultimate Fishing Simulator 2"],
   [/^Stardew Valley/, G + "stardew-valley.webp", "Stardew Valley"], [/^Russian Fishing 4/, G + "russian-fishing-4.webp", "Russian Fishing 4"],
@@ -170,7 +170,7 @@ export function Compare({ them, rows, testId }) {
   return (
     <div className="overflow-x-auto not-prose my-3" data-testid={testId}>
       <table className="table min-w-[520px] text-[12.5px]">
-        <thead><tr><th></th><th>{them}</th><th>Fishing Realms</th></tr></thead>
+        <thead><tr><th></th><th>{them}</th><th>FishyLand</th></tr></thead>
         <tbody>{rows.map(([k, a, b]) => <tr key={k}><td className="text-[var(--muted)] whitespace-nowrap">{k}</td><td>{a}</td><td>{b}</td></tr>)}</tbody>
       </table>
     </div>

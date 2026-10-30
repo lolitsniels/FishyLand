@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -103,7 +103,7 @@ export default function Vote() {
   if (!d) return <Empty>{tt("Loading...")}</Empty>;
   return (
     <div className="space-y-3 fade-in" data-testid="vote-page">
-      <Panel icon="vote" title={<span className="inline-flex items-center gap-2">{tt("Vote for Fishing Realms")}</span>} right={<span className="num">{tt("your votes ·")} {fmt(d.total)}</span>}>
+      <Panel icon="vote" title={<span className="inline-flex items-center gap-2">{tt("Vote for FishyLand")}</span>} right={<span className="num">{tt("your votes ·")} {fmt(d.total)}</span>}>
         <p className="text-[12.5px] text-[var(--text-2)] m-clamp">{tt("Every vote on a game toplist brings new anglers to the docks. Click a site below, cast your vote there, and the harbour pays you the moment the toplist confirms it, usually within a few seconds. You can vote on each site again once its timer runs out.")}</p>
         {d.sites.length === 0 ? <Empty>{tt("No vote sites are listed yet.")}</Empty> : (
           <div className="grid sm:grid-cols-2 gap-3 mt-3">

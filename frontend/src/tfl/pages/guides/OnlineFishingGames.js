@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -21,7 +21,7 @@ export default function OnlineFishingGames() {
       </p>
 
       <H2>Best for: a persistent shared world</H2>
-      <GameCard name="Fishing Realms" tag="Browser · Free">
+      <GameCard name="FishyLand" tag="Browser · Free">
         <p>A persistent fishing MMO in a browser tab. Twelve waters, 340+ species, live player market, crews, seasonal bosses. Your progress is on the same
           server as everyone else's, records, world feed and prices are all live.</p>
         <p className="mt-2 text-[12px] text-[var(--gold-dim)]">Play free at <Link to="/" className="underline">thefishinglands.com</Link>.</p>
@@ -75,7 +75,7 @@ export default function OnlineFishingGames() {
         <table className="table min-w-[560px] text-[12.5px]">
           <thead><tr><th>Game</th><th>Platform</th><th>Price</th><th>Best moment</th></tr></thead>
           <tbody>
-            <tr><td>Fishing Realms</td><td>Browser</td><td>Free</td><td>Landing a legendary while the world feed shouts your name.</td></tr>
+            <tr><td>FishyLand</td><td>Browser</td><td>Free</td><td>Landing a legendary while the world feed shouts your name.</td></tr>
             <tr><td>Webfishing</td><td>PC</td><td>Cheap</td><td>Sitting quietly with friends while someone sings on voice chat.</td></tr>
             <tr><td>Fishing Planet</td><td>PC/PS/Xbox</td><td>F2P</td><td>Correctly reading a lake and landing a proper trophy bass.</td></tr>
             <tr><td>Fishing Sim World</td><td>PC/PS/Xbox</td><td>Paid</td><td>Winning a live online Bassmaster tour event.</td></tr>
@@ -93,7 +93,7 @@ export default function OnlineFishingGames() {
         <li><Link to="/guides/fishao-alternatives" className="text-[var(--gold)] underline">Fishao alternatives</Link></li>
       </ul>
 
-      <H3>Give Fishing Realms a try</H3>
+      <H3>Give FishyLand a try</H3>
       <p>We built it because we couldn't find a modern browser MMO that took fishing as seriously as we wanted. <Link to="/" className="text-[var(--gold)] underline">Create an angler in under a minute</Link> and see if it fits.</p>
     </GuideLayout>
   );

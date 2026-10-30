@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -12,8 +12,8 @@ const UPDATED = "2026-09-22";
 export default function Privacy() {
   return (
     <LegalLayout slug="privacy" title="Privacy Policy" updated={UPDATED}
-      description="How Fishing Realms collects, uses and protects your data: accounts, cookies, advertising (Google AdSense), payments, reCAPTCHA, push notifications and your rights.">
-      <p>This Privacy Policy explains what information the operator of Fishing Realms ("we", "us") collects when you visit thefishinglands.com or play the game, why we collect it, and the choices you have. Fishing Realms is a free browser game; we collect as little personal data as we can while still running a persistent multiplayer world.</p>
+      description="How FishyLand collects, uses and protects your data: accounts, cookies, advertising (Google AdSense), payments, reCAPTCHA, push notifications and your rights.">
+      <p>This Privacy Policy explains what information the operator of FishyLand ("we", "us") collects when you visit thefishinglands.com or play the game, why we collect it, and the choices you have. FishyLand is a free browser game; we collect as little personal data as we can while still running a persistent multiplayer world.</p>
 
       <H2 id="collect">1. Information we collect</H2>
       <H3>Information you give us</H3>
@@ -75,7 +75,7 @@ export default function Privacy() {
       </UL>
 
       <H2 id="children">9. Children</H2>
-      <p>Fishing Realms is intended for players aged 13 and over. We do not knowingly collect personal information from children under 13. If you believe a child has created an account, contact us at <Mail /> and we will remove it.</p>
+      <p>FishyLand is intended for players aged 13 and over. We do not knowingly collect personal information from children under 13. If you believe a child has created an account, contact us at <Mail /> and we will remove it.</p>
 
       <H2 id="security">10. Security</H2>
       <p>All traffic is served over HTTPS. Passwords are hashed, never stored in plain text. Access to the game database is restricted to the operator. No system is perfectly secure, so please use a unique password and add an email address so you can recover your account.</p>

@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -87,7 +87,7 @@ export function NewPlayerGuide({ w }) {
 export function Basics({ w }) {
   return (
     <Sec id="basics" title={tt("1 · Getting started")}>
-      <p><b className="text-[var(--text)]">{tt("Fishing Realms")}</b> {tt("is a persistent online world where every angler shares the same waters, market, chat and events. You start at Millbrook Pond with a cane pole, a few coins and a handful of bait. Everything you do, every cast, sale, quest and crew contest, is written down and visible to other players.")}</p>
+      <p><b className="text-[var(--text)]">{tt("FishyLand")}</b> {tt("is a persistent online world where every angler shares the same waters, market, chat and events. You start at Millbrook Pond with a cane pole, a few coins and a handful of bait. Everything you do, every cast, sale, quest and crew contest, is written down and visible to other players.")}</p>
       <H>{tt("The loop")}</H>
       <ul className="list-disc pl-5 space-y-0.5">
         <li><b>{tt("Account")}</b>{tt(": sign in with your angler name or the email you registered. Added an email? Use")} <i>{tt("Forgot password?")}</i> {tt("on the sign-in box to get a single-use reset link (valid 30 minutes). Without an email, an admin can reset it for you, email Support@TheFishingLands.com. Change your password or add/change your email any time from the small gear icon (⚙) in the top bar (your current password is required).")}</li>
@@ -470,7 +470,7 @@ export function VoteSec({ w }) {
   if (!v || v.sites.length === 0) return null;
   return (
     <Sec id="vote" title={tt("22 · Vote for the game")}>
-      <p>{tt("The")} <Link to="/game/vote" className="underline">{tt("Vote")}</Link> {tt("page lists game toplists where you can vote for Fishing Realms. Click a site, vote there, and the harbour pays you the moment the toplist confirms it.")}</p>
+      <p>{tt("The")} <Link to="/game/vote" className="underline">{tt("Vote")}</Link> {tt("page lists game toplists where you can vote for FishyLand. Click a site, vote there, and the harbour pays you the moment the toplist confirms it.")}</p>
       <T head={["Site", "Vote again after", "Reward"]} rows={v.sites.map((s) => [s.name, `${s.cooldown_h} hours`, `${s.gold} gold${s.pearls ? ` + ${s.pearls} Pearl${s.pearls > 1 ? "s" : ""}` : ""}`])} />
       <p>{tt("Rewards are paid once per site per cooldown, only after the toplist confirms the vote. A dot on the Vote tab means a reward is waiting to be earned.")}</p>
     </Sec>

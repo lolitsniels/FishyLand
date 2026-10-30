@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -154,7 +154,7 @@ export default function Support() {
         <img src="/art/boost/hero.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-[50%_35%] opacity-70" draggable="false" />
         <div className="absolute inset-0 bg-gradient-to-r from-[rgba(10,9,8,0.92)] via-[rgba(10,9,8,0.7)] to-[rgba(10,9,8,0.35)]" />
         <div className="relative px-3 sm:px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-1">
-          <h1 className="font-serif text-[18px] sm:text-[22px] text-[#f4ead2] leading-tight flex items-center gap-2 drop-shadow"><Heart size={18} className="text-[#e8647a]" fill="currentColor" /> {tt("Donate to Fishing Realms")}</h1>
+          <h1 className="font-serif text-[18px] sm:text-[22px] text-[#f4ead2] leading-tight flex items-center gap-2 drop-shadow"><Heart size={18} className="text-[#e8647a]" fill="currentColor" /> {tt("Donate to FishyLand")}</h1>
           <p className="text-[11.5px] text-[#d9cfb8] flex-1 min-w-[220px] drop-shadow">{tt("No pay-to-win. Treat yourself to an Angler Pass, light the Harbour Lantern for everyone online, or grab a ridiculous cosmetic. Supporters get a permanent")} <SupporterBadge size={11} className="mx-0.5" /> {tt("beside their name.")}</p>
         </div>
       </div>

@@ -21,7 +21,7 @@ import { QuickTackle } from "./QuickTackle";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
-  inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "/art/hud/tackle.webp"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
+  inventory: ["Inventory", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "/art/hud/tackle.webp"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
   quests: ["Quests", "quests"], contracts: ["Contracts", "daily"], market: ["Market", "market"], crews: ["Crew HQ", "crew"], tournaments: ["Tournaments", "rankings"],
   duel: ["Duel Pier", "guild"], leaderboards: ["Leaderboards", "rankings"], achievements: ["Achievements", "daily"], crafting: ["Bait Crafting", "craft"],
   messages: ["Messages", "pass"], almanac: ["Almanac", "fishdex"], wiki: ["Wiki", "skills"], "pearl-shop": ["Pearl Shop", "pass"], admin: ["Admin", "settings"],
@@ -104,6 +104,11 @@ export default function World() {
     if (mode === "duel" && page && page !== "inventory" && page !== "journal") { nav("/game", { replace: true }); return; }
     if (mode !== "harbour" && page && HARBOUR_ONLY.has(page) && !(mode === "crew" && page === "crews")) { toast("That's in the harbour. Sail back to visit it.", { id: "harbour-only" }); nav("/game", { replace: true }); }
   }, [mode, page, nav]);
+  useEffect(() => {
+    const op = (e) => nav(`/game/profile/${encodeURIComponent(e.detail)}`);
+    window.addEventListener("fr-profile", op);
+    return () => window.removeEventListener("fr-profile", op);
+  }, [nav]);
   useEffect(() => {
     const on = (e) => { goTo(e.detail); nav("/game", { replace: true }); };
     window.addEventListener("fr-mode", on);

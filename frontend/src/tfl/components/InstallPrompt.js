@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -47,7 +47,7 @@ export function InstallPrompt() {
         <div className="flex items-start gap-2 p-3">
           <img src="/icon-192.png" alt="" className="w-10 h-10 border border-[#2e2420] shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="font-display text-[13px] tracking-widest uppercase text-[var(--gold)]">{tt(mobile ? "Install Fishing Realms" : "Get it on your desktop")}</div>
+            <div className="font-display text-[13px] tracking-widest uppercase text-[var(--gold)]">{tt(mobile ? "Install FishyLand" : "Get it on your desktop")}</div>
             {ios ? (
               <div className="text-[11.5px] text-[var(--text-2)] mt-0.5 leading-snug">
                 {tt("Tap")} <Share size={11} className="inline -mt-0.5" /> {tt("Share below, then")} <b>{tt("Add to Home Screen")}</b> {tt("to keep the docks one tap away.")}
@@ -81,7 +81,7 @@ export function InstallSettings({ claimed }) {
         : <div className="text-[12px] text-[var(--text-2)] leading-snug" data-testid="settings-install-howto">
             {isIOS() ? <>{tt("In Safari tap")} <Share size={11} className="inline -mt-0.5" /> {tt("Share, then")} <b>{tt("Add to Home Screen")}</b>.</>
               : isMobileUA() ? <>{tt("Open your browser menu (⋮) and tap")} <b>{tt("Install app")}</b> {tt("or")} <b>{tt("Add to Home screen")}</b>.</>
-              : <>{tt("In Chrome or Edge, click the install icon at the right of the address bar, or open the menu (⋮) and choose")} <b>{tt("Install Fishing Realms")}</b>. {tt("Already installed? Open it from your desktop or Start menu.")}</>}
+              : <>{tt("In Chrome or Edge, click the install icon at the right of the address bar, or open the menu (⋮) and choose")} <b>{tt("Install FishyLand")}</b>. {tt("Already installed? Open it from your desktop or Start menu.")}</>}
           </div>}
       <div className={`text-[11.5px] mt-1.5 ${claimed ? "text-[var(--muted)]" : "text-[var(--gold)]"}`} data-testid="settings-install-reward">{claimed ? tt("App reward claimed.") : tt(INSTALL_REWARD_TEXT)}</div>
     </div>

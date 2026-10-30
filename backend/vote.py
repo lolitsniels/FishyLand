@@ -199,7 +199,7 @@ async def _pay_token(token, ip):
     await db.vote_tickets.update_one({"_id": t["_id"]}, {"$set": {"status": "done", "done_at": iso(now()), "reward": {"gold": gold, "pearls": pearls}}})
     total = u.get("stats", {}).get("votes", 0) + 1
     if total in (1, 10, 25, 50, 100) or total % 100 == 0:
-        await add_feed("vote", u["username"], f"{u['username']} voted for Fishing Realms on {s['name']}" + (f", {total} votes and counting." if total > 1 else "."), "common")
+        await add_feed("vote", u["username"], f"{u['username']} voted for FishyLand on {s['name']}" + (f", {total} votes and counting." if total > 1 else "."), "common")
     logger.info("Vote postback paid: %s on %s (%sg, %sP)", u["username"], s["key"], gold, pearls)
     await settle_vote_month()
     return "OK"

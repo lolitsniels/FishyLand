@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -23,7 +23,7 @@ export default function GuestQuests() {
   if (allDone) return null;
 
   return (
-    <Panel icon="quests" title={tt("Welcome to Fishing Realms")}
+    <Panel icon="quests" title={tt("Welcome to FishyLand")}
       right={<span className="text-[11px] text-[var(--muted)]">{rows.filter((q) => q.status === "done").length} / {rows.length} {tt("steps")}</span>}
       testId="guest-quests">
       <p className="text-[12px] text-[var(--text-2)] mb-2">

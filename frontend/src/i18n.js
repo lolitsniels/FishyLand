@@ -20,7 +20,7 @@ const en = {
   timeout: "The fish wriggled free in time…",
   noStamina: "Out of stamina",
   rotate: "Rotate your device to landscape",
-  rotateSub: "Fishing Realm is designed for landscape play.",
+  rotateSub: "FishyLand is designed for landscape play.",
   comingSoon: "Arriving soon",
 };
 

@@ -1,4 +1,4 @@
-# Fishing Realm Phase 1+2 regression: auth, fishing anti-cheat, inventory, shop, gear
+# FishyLand Phase 1+2 regression: auth, fishing anti-cheat, inventory, shop, gear
 import os
 import sys
 import time

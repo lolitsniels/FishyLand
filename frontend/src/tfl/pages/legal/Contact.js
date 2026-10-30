@@ -1,5 +1,5 @@
 /*
- * Fishing Realms, Copyright © 2026. All rights reserved.
+ * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -19,13 +19,13 @@ export default function Contact() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    name: "Contact Fishing Realms",
+    name: "Contact FishyLand",
     url: "https://thefishinglands.com/contact",
-    mainEntity: { "@type": "Organization", name: "Fishing Realms", email: CONTACT_EMAIL, url: "https://thefishinglands.com", contactPoint: { "@type": "ContactPoint", email: CONTACT_EMAIL, contactType: "customer support", availableLanguage: "English" } },
+    mainEntity: { "@type": "Organization", name: "FishyLand", email: CONTACT_EMAIL, url: "https://thefishinglands.com", contactPoint: { "@type": "ContactPoint", email: CONTACT_EMAIL, contactType: "customer support", availableLanguage: "English" } },
   };
   return (
     <LegalLayout slug="contact" title="Contact Us" type="ContactPage" jsonLd={jsonLd}
-      description={`Reach Fishing Realms team by email at ${CONTACT_EMAIL} or on Discord for support, account recovery, purchases, press and partnerships.`}>
+      description={`Reach FishyLand team by email at ${CONTACT_EMAIL} or on Discord for support, account recovery, purchases, press and partnerships.`}>
       <p>We are a small team and we read everything. The quickest way to reach us is email; for a chat with other anglers and the developers, join the Discord.</p>
 
       <div className="grid sm:grid-cols-2 gap-3 mt-4">

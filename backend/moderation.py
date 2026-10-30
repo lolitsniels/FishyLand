@@ -64,7 +64,7 @@ async def admin_set_mod(body: RoleModIn, admin=Depends(require_admin)):
     if is_admin_user(u): raise HTTPException(400, "That angler is already an admin")
     await db.users.update_one({"_id": u["_id"]}, {"$set": {"role": "mod"}} if body.mod else {"$unset": {"role": ""}})
     await log_action(admin, u["username"], "role", ["made MOD" if body.mod else "MOD rights removed"])
-    if body.mod: await send_system_message(str(u["_id"]), u["username"], "You are now a MOD of Fishing Realms. Your Mod Panel is in the menu. Thank you for keeping the docks friendly!")
+    if body.mod: await send_system_message(str(u["_id"]), u["username"], "You are now a MOD of FishyLand. Your Mod Panel is in the menu. Thank you for keeping the docks friendly!")
     return {"ok": True}
 
 

@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -8,9 +8,9 @@ import { Link } from "react-router-dom";
 import { GuideLayout, H2, H3, GameCard, Compare, Faq, faqLd } from "./GuideShared";
 
 const QA = [
-  ["What are games like Call of the Wild: The Angler?", "Fishing Planet and Russian Fishing 4 are free realistic simulators. Ultimate Fishing Simulator 2 is a solo option. For a free online fishing game with a persistent world, Fishing Realms runs in your browser."],
-  ["Is there a free alternative to Call of the Wild: The Angler?", "Yes. Fishing Planet and Russian Fishing 4 are free to play on PC. Fishing Realms is free in any browser, including on phones, with no download."],
-  ["Is there a fishing game like The Angler with a shared world?", "The Angler has co-op sessions, but your world isn't shared with everyone. Fishing Realms is an MMO: one world for all players, with live chat, a player market, crews and bosses."],
+  ["What are games like Call of the Wild: The Angler?", "Fishing Planet and Russian Fishing 4 are free realistic simulators. Ultimate Fishing Simulator 2 is a solo option. For a free online fishing game with a persistent world, FishyLand runs in your browser."],
+  ["Is there a free alternative to Call of the Wild: The Angler?", "Yes. Fishing Planet and Russian Fishing 4 are free to play on PC. FishyLand is free in any browser, including on phones, with no download."],
+  ["Is there a fishing game like The Angler with a shared world?", "The Angler has co-op sessions, but your world isn't shared with everyone. FishyLand is an MMO: one world for all players, with live chat, a player market, crews and bosses."],
 ];
 
 export default function CotwAnglerAlternatives() {
@@ -27,7 +27,7 @@ export default function CotwAnglerAlternatives() {
         It's a one-time purchase, and the DLC reserves add new places to explore. Once you've fished them all, though, many anglers want something with a longer goal, a live economy, or something they can play away from their PC or console.
       </p>
 
-      <H2>The Angler vs Fishing Realms</H2>
+      <H2>The Angler vs FishyLand</H2>
       <Compare testId="compare-cotw" them="Call of the Wild: The Angler" rows={[
         ["Price", "Paid game, paid DLC reserves", "Free, optional cosmetics and Angler Pass"],
         ["Install", "Large download, PC or console", "None, runs in your browser"],
@@ -53,7 +53,7 @@ export default function CotwAnglerAlternatives() {
 
       <H2>The six alternatives</H2>
       <div className="grid md:grid-cols-2 gap-3 not-prose">
-        <GameCard name="Fishing Realms" tag="Browser MMO · Free" verdict="Angler players who want a world that keeps going.">
+        <GameCard name="FishyLand" tag="Browser MMO · Free" verdict="Angler players who want a world that keeps going.">
           Full disclosure: this is our game. One persistent world with 12 waters, 340+ species, bosses that surface for everyone at once, crews with their own halls, and a player market.
           It's pixel art instead of photo-real, and it runs in a browser tab. <Link to="/" className="underline">Try it free</Link>.
         </GameCard>
@@ -78,7 +78,7 @@ export default function CotwAnglerAlternatives() {
       <H3>You want more open-world beauty</H3>
       <p>theHunter: Call of the Wild, or Fishing Planet for more water.</p>
       <H3>You want a fishing world with other players in it all the time</H3>
-      <p><Link to="/" className="text-[var(--gold)] underline">Fishing Realms</Link>. Bosses, tournaments and the market keep going whether you're online or not.</p>
+      <p><Link to="/" className="text-[var(--gold)] underline">FishyLand</Link>. Bosses, tournaments and the market keep going whether you're online or not.</p>
       <H3>You want a bigger challenge</H3>
       <p>Russian Fishing 4.</p>
 

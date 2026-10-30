@@ -18,7 +18,7 @@ def site_url() -> str:
     return os.environ["SITE_URL"].rstrip("/")
 
 
-def shell(title: str, body_html: str, cta: tuple | None = None, footer: str = "", asset_base: str | None = None, greeting: str = "Welcome to Fishing Realms!") -> str:
+def shell(title: str, body_html: str, cta: tuple | None = None, footer: str = "", asset_base: str | None = None, greeting: str = "Welcome to FishyLand!") -> str:
     """Every game email: pixel-water backdrop, game header, a panel box and the Harbourmaster with a speech bubble beside it."""
     art = f"{(asset_base or site_url()).rstrip('/')}/art/email"
     cta_html = (f'''<tr><td style="padding:18px 28px 6px;">
@@ -33,7 +33,7 @@ def shell(title: str, body_html: str, cta: tuple | None = None, footer: str = ""
 <tr><td align="center">
 <table width="780" cellpadding="0" cellspacing="0" style="max-width:780px;width:100%;">
 <tr><td colspan="2" style="background:#161412;border:1px solid #3b342f;border-bottom:3px solid #9a4a1f;padding:14px 22px;">
-<a href="{site_url()}" style="text-decoration:none;"><img src="{art}/logo.png" width="200" height="47" alt="Fishing Realms" style="display:block;border:0;image-rendering:pixelated;"></a></td></tr>
+<a href="{site_url()}" style="text-decoration:none;"><img src="{art}/logo.png" width="200" height="47" alt="FishyLand" style="display:block;border:0;image-rendering:pixelated;"></a></td></tr>
 <tr><td colspan="2" style="height:16px;line-height:16px;font-size:0;">&nbsp;</td></tr>
 <tr><td valign="top">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#161412;border:1px solid #3b342f;color:#e6dcc6;">
@@ -48,7 +48,7 @@ def shell(title: str, body_html: str, cta: tuple | None = None, footer: str = ""
 <tr><td style="padding-top:4px;"><img src="{art}/harbourmaster.png" width="280" height="380" alt="The Harbourmaster" style="display:block;border:0;image-rendering:pixelated;"></td></tr></table>
 </td></tr>
 <tr><td colspan="2" style="height:14px;line-height:14px;font-size:0;">&nbsp;</td></tr>
-<tr><td colspan="2" style="background:#100f0e;border:1px solid #3b342f;padding:10px 4px;font-size:12.5px;color:#8c8178;text-align:center;">Fishing Realms &middot; {links}</td></tr>
+<tr><td colspan="2" style="background:#100f0e;border:1px solid #3b342f;padding:10px 4px;font-size:12.5px;color:#8c8178;text-align:center;">FishyLand &middot; {links}</td></tr>
 </table></td></tr></table>"""
 
 
@@ -83,13 +83,13 @@ def welcome_html(username: str, referral_code: str, asset_base: str | None = Non
             f"New to the water? The <a href=\"{site_url()}/wiki\" style=\"{o}\">Fishing Lands Wiki</a> explains every water, fish, bait and system. "
             f"Questions, trades and dockside gossip live on our <a href=\"{DISCORD_URL}\" style=\"{o}\">Discord</a>.")
     return shell("Welcome aboard", body, ("Return to the water", f"{site_url()}/?login=1"),
-                 "You are receiving this once because you registered this address on Fishing Realms. Forgot your password later? Use \"Forgot password?\" on the sign-in box.", asset_base)
+                 "You are receiving this once because you registered this address on FishyLand. Forgot your password later? Use \"Forgot password?\" on the sign-in box.", asset_base)
 
 
 async def send_welcome(user: dict, referral_code: str):
     if not user.get("email"):
         return None
-    text = (f"Welcome to Fishing Realms, {user['username']}. Your recruit link: {site_url()}/?ref={referral_code}. "
+    text = (f"Welcome to FishyLand, {user['username']}. Your recruit link: {site_url()}/?ref={referral_code}. "
             f"Discord: {DISCORD_URL}. Sign in: {site_url()}/?login=1")
-    return await send_email(user["email"], f"Welcome to Fishing Realms, {user['username']}", welcome_html(user["username"], referral_code), text,
+    return await send_email(user["email"], f"Welcome to FishyLand, {user['username']}", welcome_html(user["username"], referral_code), text,
                             tag="welcome")

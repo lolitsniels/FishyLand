@@ -123,7 +123,7 @@ FRAMES = [
     {"id": "frame_frost", "name": "Frozen Abyss", "price": None, "shop": True, "animated": True, "earned": "Donate page cosmetic", "desc": "Ice spikes and a frost serpent."},
     {"id": "frame_maw", "name": "Abyssal Maw", "price": None, "shop": True, "animated": True, "earned": "Donate page cosmetic", "desc": "The breathing jaws of an abyssal anglerfish."},
     {"id": "frame_founder", "name": "Founder's Sun", "price": None, "shop": True, "animated": True, "earned": "Limited Golden Founder Pack (only 10 ever sold)", "desc": "Gilded sun rays, a crown and two golden koi."},
-    {"id": "frame_owner", "name": "Game Owner", "price": None, "owner": True, "earned": "Worn only by the creator of Fishing Realms", "desc": "A gilded crown-topped frame, worn only by the creator of Fishing Realms."},
+    {"id": "frame_owner", "name": "Game Owner", "price": None, "owner": True, "earned": "Worn only by the creator of FishyLand", "desc": "A gilded crown-topped frame, worn only by the creator of FishyLand."},
     {"id": "frame_galley", "name": "Galley Copper", "price": None, "earned": "Become an Old Friend of Cook Marisol Vane on the Contract Board", "desc": "Hammered copper with a warm hearth glow, straight from the galley."},
     {"id": "frame_app", "name": "App Angler", "price": None, "earned": "Play once from the installed app (phone or PC)", "desc": "A night-blue bezel with a soft screen glow, for anglers who keep the docks one tap away."},
     {"id": "frame_jackolantern", "name": "Jack-o'-Lantern", "price": None, "event": "halloween", "earned": "Traded for Soul Candles at the Marsh Witch (Halloween)", "desc": "A carved pumpkin rim that flickers with candlelight."},

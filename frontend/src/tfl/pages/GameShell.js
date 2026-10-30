@@ -1,5 +1,5 @@
 /*
- * Fishing Realms. Copyright © 2026. All rights reserved.
+ * FishyLand. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -204,7 +204,7 @@ export default function GameShell() {
       <div className="game-water" aria-hidden="true" />
       <header className="game-header" style={{ backgroundImage: "url(/art/header_ember.jpg)" }}>
         <div className="max-w-[1400px] 2xl:max-w-[1560px] mx-auto px-3 h-16 flex items-center gap-3 sm:gap-5">
-          <NavLink to="/game" className="shrink-0" data-testid="game-logo-link"><img src="/art/landing_logo.webp" alt="Fishing Realms" className="h-[34px] sm:h-[44px] w-auto drop-shadow-[0_3px_6px_rgba(0,0,0,.7)]" draggable="false" data-testid="game-logo" /></NavLink>
+          <NavLink to="/game" className="shrink-0" data-testid="game-logo-link"><img src="/art/landing_logo.webp" alt="FishyLand" className="h-[34px] sm:h-[44px] w-auto drop-shadow-[0_3px_6px_rgba(0,0,0,.7)]" draggable="false" data-testid="game-logo" /></NavLink>
           <div className="hidden lg:flex items-center gap-6 text-[12.5px] flex-1 min-w-0" data-testid="hud">
             <div className="flex items-center gap-2.5 whitespace-nowrap min-w-0">
               <NavLink to="/game/profile" title={tt("My Angler")} data-testid="hud-avatar-link"><Avatar id={user.avatar} size="sm" gold frame={user.frame} /></NavLink>
@@ -229,7 +229,7 @@ export default function GameShell() {
           </div>
           <div className="ml-auto flex items-center gap-2">
             {!PORTAL && <>
-            <NavLink to="/game/support" className="btn btn-sm !text-[#e8647a] hover:!text-[#ff8fa3]" title={tt("Donate to Fishing Realms")} aria-label={tt("Donate to Fishing Realms")} data-testid="support-button">
+            <NavLink to="/game/support" className="btn btn-sm !text-[#e8647a] hover:!text-[#ff8fa3]" title={tt("Donate to FishyLand")} aria-label={tt("Donate to FishyLand")} data-testid="support-button">
               <Heart size={13} /><span className="hidden sm:inline">{tt("Donate")}</span>
             </NavLink>
             <SocialButtons />
