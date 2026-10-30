@@ -1,10 +1,38 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { api, errMsg, fmt, wt } from "../tfl/lib/api";
 import { useGame as useTfl } from "../tfl/context/GameContext";
 
+const STARS = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, mythic: 5 };
+const cmText = (cm) => (cm >= 100 ? `${(cm / 100).toFixed(2)} m` : `${Math.round(cm)} cm`);
+
+function Tape({ cm }) {
+  const end = cm >= 100 ? `${(cm / 100).toFixed(1)}m` : Math.round(cm);
+  return (
+    <div className="relative w-[200px] h-[38px] tape-in" data-testid="catch-tape">
+      <img src="/art/hud/tape.webp" alt="" className="absolute inset-0 w-full h-full" />
+      <div className="absolute inset-y-0 left-2 right-6 flex items-center justify-between font-black text-[13px] text-[#2a1a04]">
+        {[1, 2, 3, 4, 5].map((n) => <span key={n}>{n}</span>)}<span>…</span><span className="px-1 bg-[#fff3b0]/80 rounded-sm border border-[#7a5a10]">{end}</span>
+      </div>
+    </div>
+  );
+}
+
+function Stars({ rarity }) {
+  const n = STARS[rarity] || 1;
+  return (
+    <div className="flex gap-0.5" data-testid="catch-stars" data-stars={n}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <img key={i} src={`/art/hud/star_${i < n ? "gold" : "grey"}.webp`} alt="" className={`w-7 h-7 star-pop ${rarity === "mythic" && i < n ? "drop-shadow-[0_0_6px_rgba(255,120,255,0.9)]" : ""}`} style={{ animationDelay: `${0.25 + i * 0.09}s` }} />
+      ))}
+    </div>
+  );
+}
+
 export default function CatchCard({ res, onClose }) {
   const { setUser } = useTfl();
+  const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const c = res.catch || {};
   const sell = async () => {
@@ -12,19 +40,42 @@ export default function CatchCard({ res, onClose }) {
     try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id] }); if (data.user) setUser(data.user); toast.success(`Sold for ${fmt(data.gold)} gold`); onClose(); }
     catch (e) { toast.error(errMsg(e)); setBusy(false); }
   };
+  const dex = () => { onClose(); nav("/game/journal"); };
   return (
     <div className="absolute inset-0 z-40 grid place-items-center bg-black/55" data-testid="catch-popup">
-      <div className={`fr-panel fr-modal pop w-[400px] max-w-[92vw] p-5 flex flex-col items-center text-center gap-2 rar-frame-${c.rarity}`}>
-        {res.first_discovery && <div className="text-[11px] font-cinzel tracking-widest text-cyan-200" data-testid="catch-new">NEW SPECIES!</div>}
-        <img src={res.img} alt="" className="w-56 h-36 object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.7)]" />
-        <div className={`font-deco text-2xl font-black rar-${c.rarity}`} data-testid="catch-name">{c.variant && c.variant !== "normal" ? `${c.variant} ` : ""}{c.name}</div>
-        <div className="text-xs uppercase tracking-widest font-cinzel text-amber-200/80" data-testid="catch-rarity">{c.rarity}</div>
-        <div className="flex gap-4 font-cinzel text-sm">
-          <span data-testid="catch-weight">{wt(c.weight)}</span><span className="text-amber-200" data-testid="catch-value">{fmt(c.value)} g</span><span className="text-fuchsia-200" data-testid="catch-xp">+{res.xp} XP</span>
+      <div className={`fr-panel fr-modal pop relative w-[480px] max-w-[94vw] p-4 flex flex-col gap-3 rar-frame-${c.rarity}`}>
+        <button type="button" onClick={onClose} className="absolute -top-3 -right-3 w-10 h-10 transition-transform hover:scale-110" data-testid="catch-close-btn">
+          <img src="/art/hud/close.webp" alt="Close" className="w-full h-full" />
+        </button>
+        <div className="text-center font-deco text-xl sm:text-2xl gold-text leading-tight" data-testid="catch-name">
+          {c.variant && c.variant !== "normal" ? `${c.variant} ` : ""}{c.name} <span className="uppercase">caught!</span>
         </div>
-        {res.level_up && <div className="gold-text font-deco text-lg" data-testid="catch-levelup">Level {res.level_up}!</div>}
-        <div className="flex gap-2 w-full mt-2">
+        {res.first_discovery && <div className="text-center -mt-2 text-[11px] font-cinzel tracking-widest text-cyan-200" data-testid="catch-new">NEW SPECIES FOR YOUR FISHDEX!</div>}
+        <div className="relative h-44 rounded-xl overflow-hidden border-2 border-[#3a2412] shadow-inner" data-testid="catch-scene">
+          <img src="/art/hud/catch_bg.webp" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={res.img} alt={c.name} className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 w-52 h-32 object-contain drop-shadow-[0_8px_10px_rgba(0,20,50,0.6)] fish-swim" />
+          <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/45 text-[10px] uppercase tracking-widest font-cinzel rar-${c.rarity}`} data-testid="catch-rarity">{c.rarity}</div>
+          {res.level_up && <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/50 gold-text font-deco text-sm" data-testid="catch-levelup">Level {res.level_up}!</div>}
+        </div>
+        <div className="flex items-end justify-between gap-3 px-1">
+          <div className="flex flex-col items-center gap-1">
+            <Tape cm={c.length_cm || 0} />
+            <div className="font-deco text-2xl text-[#ffe9a3] leading-none" data-testid="catch-length">{cmText(c.length_cm || 0)}</div>
+            <div className="text-xs text-amber-100/80 font-bold" data-testid="catch-weight">{wt(c.weight)}</div>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <Stars rarity={c.rarity} />
+            <div className="text-xs text-amber-100/80 font-bold">You've gained</div>
+            <div className="font-deco text-2xl text-[#ffe9a3] leading-none" data-testid="catch-xp">{res.xp} exp</div>
+            <div className="text-xs text-amber-200 font-bold" data-testid="catch-value">worth {fmt(c.value)} g</div>
+          </div>
+        </div>
+        <div className="flex gap-2 w-full items-center">
           <button type="button" className="fr-btn fr-btn-dark flex-1 py-2" disabled={busy} onClick={onClose} data-testid="catch-keep-btn">Keep</button>
+          <button type="button" onClick={dex} className="relative flex-[1.3] h-11 transition-transform hover:scale-105 active:scale-95" data-testid="catch-fishdex-btn">
+            <img src="/art/hud/btn_green.webp" alt="" className="absolute inset-0 w-full h-full" />
+            <span className="relative font-black text-white text-sm tracking-wide [text-shadow:0_2px_0_#0a4a0a]">VIEW IN FISHDEX</span>
+          </button>
           <button type="button" className="fr-btn flex-1 py-2" disabled={busy} onClick={sell} data-testid="catch-sell-btn">Sell {fmt(c.vendor ?? Math.round((c.value || 0) * 0.7))} g</button>
         </div>
       </div>

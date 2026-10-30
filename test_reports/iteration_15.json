@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 15. Frontend only: the 11 new tiled maps, travel with the loading veil and map cache, per-map music, and regression on the harbour, Millbrook, the duel pier and Crew Island. For 10 of the 11 maps, the mapcheck audit (?mapview=1&mapcheck=1&map=<key>) returns empty moved, dropped, onPath, wetBad and spots lists, with spawn=true. Willow is the exception: moved=['reeds->1305,1042']. Screenshots of every map, plus 1:1 crops of six of them, show nothing badly misplaced. No trees or buildings stand in water, no lamps stand on bridge or pier decks, no tree canopies are cut off, and buildings face their paths. Real flow as TestAngler: Travel Map > Willow shows the 'Setting sail…' veil (data-testid=map-loading), which then clears. The tiled map renders. The 'Back to Harbour' signpost returns to the harbour. Later trips to Greyfell, then Willow, then Greyfell again show no veil (cached or prewarmed). On Greyfell, click-to-walk reaches the Boathouse Jetty spot: cast-hint shows and the button reads FISH. Pressing Space runs the phases cast > wait > fight, and the bobber target (1681,1162) lands in the lake. Music: harbour.mp3, willow.mp3, greyfell.mp3, millbrook.mp3 and coral.mp3 (for crew_island) are each requested when entering their map. A hooked HTMLMediaElement shows the old track paused with src cleared and the new track playing at volume 0.32. There are no audio errors and no console errors. Regression: the harbour, Millbrook and Crew Island render and click-to-walk moves the player. The duel pier renders in mapview with a clean audit; it was not tested in a live duel.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "WILLOW_MAP (maps.js line 170)", "issue": "mapcheck audit is not empty: moved=['reeds->1305,1042']. The reeds at [1320,1048] get pushed by settle(). The main agent reported all lists empty, but this reproduces on every load.", "selector": "window.__mapAudit (map=willow)", "priority": "LOW"},
+      {"component": "MILLBROOK_MAP (regression map)", "issue": "Audit shows onPath=['bush@900,1300']. Visually the pink bush sits on the sand path junction west of the bridge. The audit also lists 7 reeds and lantern@594,1465 as moved.", "selector": "map=millbrook", "priority": "LOW"},
+      {"component": "HARBOUR_MAP / CREW_ISLAND_MAP", "issue": "Harbour: 3 rocks are moved by settle(). Crew Island: onPath=['guild_hall@1200,650'] (the clubhouse steps sit on the path; probably intentional). Neither is visibly wrong.", "selector": "map=harbour, map=crew_island", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "First visit loading", "issue": "The veil works, but a cold first load can be slow. Opening /game directly into Willow in a fresh browser showed the veil for 11.6s; Greyfell took 4.5s. Travelling from the harbour (prewarm running) took 3.2s. A cold CDN cache may explain part of it.", "affected_selectors": ["[data-testid=map-loading]"]},
+      {"flow": "Music start", "issue": "On the first interaction in the harbour, the harbour track was still at currentTime 0 and volume 0 after 3s. Each 1.4MB mp3 is only fetched when needed, so the first track starts late. Later tracks started within about 1.5s.", "affected_selectors": []}
+    ],
+    "design_issues": [
+      {"screen": "Coral Reef", "issues": ["The rowboat beside the south pier touches or overlaps the pier posts."]},
+      {"screen": "Harrow Point", "issues": ["The outrigger poles of the 'Bluefin Hunter' sport boat reach over the rocky shore. The hull is in the water."]},
+      {"screen": "Ghostlight Lake", "issues": ["Where the dirt path from the west meets the south end of the bridge, the cobble base tile cuts the path with a straight hard edge (blend seam)."]},
+      {"screen": "Willow / Blackwater", "issues": ["Lanterns beside the bridges stand on the bank, but their tall heads visually overlap the river. Acceptable at this perspective."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Move the Willow reeds at [1320,1048] to about [1305,1042] (or wherever settle() puts them) so the audit is fully empty.",
+    "Optional: fix the Millbrook bush@900,1300 that sits on the path (pre-existing map), and the moved reeds and lantern there.",
+    "Consider preloading the next map's music (or the harbour track) during prewarm, or using smaller or streamed mp3s, so music starts sooner.",
+    "Consider cutting cold first-load time: a fresh session's first water load took up to 11.6s.",
+    "Minor visuals: nudge the Coral rowboat away from the pier posts, and the Harrow sport boat away from the shore."
+  ],
+  "critical_code_review_comments": [
+    "Scene.js is 905 lines (over 700). Split the LoadingVeil, map cache/prewarm and camera code into separate modules.",
+    "Console warning: 'Canvas2D: Multiple readback operations using getImageData... willReadFrequently' from buildScene/auditMap. Pass getContext('2d', { willReadFrequently: true }) on the readback canvases.",
+    "sfx.js maps crew_island to the coral track, yet /audio/crew_island.mp3 exists and is never used (dead 1.4MB asset). Use it or delete it.",
+    "MAP_CACHE LRU (KEEP=4) destroys the textures of evicted maps. It is safe today because the current map is always among the 2 most recent, but the scene teardown assumes the cached tm is still alive. Guard against evicting the currently mounted key."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not requested)", "frontend": "95%"},
+  "seed_data_creation": "Temporarily added greyfell and saltmarsh to TestAngler.unlocked_waters in Mongo for the travel test. Restored afterwards: unlocked_waters=['millbrook','willow'], water='millbrook', gold unchanged at 5070. Energy dropped by about 2 from test casts.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Mapview audit: /game?mapview=1&mapcheck=1&map=<key> while logged in (owo_token in localStorage), then read window.__mapAudit. For 1:1 crops, set viewport 3200x2400 in mapview and screenshot with clip. Play mode: sessionStorage fr_mode='water' or 'crew' before /game. The camera scale is sc=min(1.1, min(sw, sh*1.4)/820)=1.1 at 1920x1080. Screen position = clamp(sw/2 - me.x*sc) + wx*sc. Keep clicks above y≈900, because the action bar (Quests button and others) catches clicks. Wait until window.__fx.moving is false before pressing Space. window.__fx exposes phase, me, atSpot and target. Greyfell spot fish-1 (1700,1400) is easy to reach via waypoints (1000,2010) and (1650,2010)."
+}

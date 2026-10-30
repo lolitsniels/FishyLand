@@ -1,5 +1,6 @@
 """Crab Cages: buy single-use cages, drop one at a water, come back up to 8 hours later and haul up what crawled in."""
 import random
+from fish_size import fish_length
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -106,7 +107,7 @@ async def _haul(user, w, doc):
         xp += int(round((RARITY_XP[f["rarity"]] + int(weight ** 0.5 * 3)) * CAGE_XP_MULT)) * boost
         legendary += f["rarity"] == "legendary"
         catches.append({"user_id": str(user["_id"]), "username": user["username"], "species_id": f["id"], "name": f["name"], "rarity": f["rarity"],
-                        "weight": weight, "length_cm": round((weight ** (1 / 3)) * 30, 1), "variant": "normal", "value": fish_value(f, weight, 1.0), "water": w,
+                        "weight": weight, "length_cm": fish_length(f, weight), "variant": "normal", "value": fish_value(f, weight, 1.0), "water": w,
                         "caught_at": iso(t), "listed": False, "mounted": False, "caught_by": str(user["_id"]), "caught_by_name": user["username"],
                         "crew_id": (user.get("crew") or {}).get("id"), "cage": cage["id"]})
     new_species = 0

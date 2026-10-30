@@ -140,7 +140,7 @@ export function buildMap(map, img) {
   // walk grid: land minus water, plus docks/bridges, minus object footprints and the map rim
   const gw = Math.ceil(W / CELL), gh = Math.ceil(H / CELL);
   const m = document.createElement("canvas"); m.width = gw; m.height = gh;
-  const g = m.getContext("2d");
+  const g = m.getContext("2d", { willReadFrequently: true });
   g.scale(1 / CELL, 1 / CELL);
   g.fillStyle = g.strokeStyle = "#fff"; g.fillRect(0, 0, W, H);
   g.fillStyle = g.strokeStyle = "#000"; g.lineCap = g.lineJoin = "round";
@@ -194,7 +194,7 @@ export function buildMap(map, img) {
 export function auditMap(map, tm) {
   const { W, H } = map, k = 8, gw = Math.ceil(W / k), gh = Math.ceil(H / k);
   const c = document.createElement("canvas"); c.width = gw; c.height = gh;
-  const g = c.getContext("2d"); g.scale(1 / k, 1 / k); g.fillStyle = g.strokeStyle = "#fff"; g.lineCap = g.lineJoin = "round";
+  const g = c.getContext("2d", { willReadFrequently: true }); g.scale(1 / k, 1 / k); g.fillStyle = g.strokeStyle = "#fff"; g.lineCap = g.lineJoin = "round";
   for (const s of (map.ground || []).filter((s) => s.line)) paint(g, s);
   for (const d of map.docks || []) { pathPoly(g, d.poly); g.fill(); }
   for (const b of map.bridges || []) { pathLine(g, [...b.a, ...b.b]); g.lineWidth = b.w; g.stroke(); }

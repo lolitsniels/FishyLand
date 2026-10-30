@@ -52,7 +52,7 @@ export function sfx(name) {
 }
 
 // One looping soundtrack per map (public/audio/<map>.mp3), cross-faded on travel.
-const TRACK = { duel_pier: "harrow", crew_island: "coral" };
+const TRACK = { duel_pier: "harrow" };
 const VOL = 0.32;
 let track = null, place = "harbour", unlocked = false;
 

@@ -4,6 +4,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 import os
+from fish_size import fish_length
 import re
 import asyncio
 import time
@@ -1487,7 +1488,7 @@ async def land(body: LandIn, user=Depends(get_current_user)):
         return {"success": False, "species": f["name"], "rarity": f["rarity"],
                 "message": fail_msg}
     weight = enc["weight"]
-    length = round((weight ** (1 / 3)) * 38 * (1.0 if f["behavior"] != "thrasher" else 1.1), 1)
+    length = fish_length(f, weight)
     journal = await db.journal.find_one({"user_id": str(user["_id"]), "species_id": f["id"]})
     m_old = mastery.level_for(f["rarity"], journal["count"] if journal else 0)
     mp = mastery.perks(m_old)
@@ -2712,7 +2713,7 @@ async def admin_grant(body: GrantIn, admin=Depends(require_admin)):
         weight = body.weight if body.weight else roll_weight(f)
         vmult = next((m for n, _, m in VARIANTS if n == body.variant), 1.0)
         catch = {"user_id": str(u["_id"]), "username": u["username"], "species_id": f["id"], "name": f["name"], "rarity": f["rarity"], "weight": weight,
-                 "length_cm": round(weight ** (1 / 3) * 38, 1), "variant": body.variant, "value": fish_value(f, weight, vmult), "water": f["water"],
+                 "length_cm": fish_length(f, weight), "variant": body.variant, "value": fish_value(f, weight, vmult), "water": f["water"],
                  "caught_at": iso(now()), "listed": False, "mounted": False, "caught_by": str(u["_id"]), "caught_by_name": u["username"], "admin_granted": True}
         await db.catches.insert_one(catch)
         await db.catch_log.insert_one(catch_ledger(catch))
@@ -3942,7 +3943,7 @@ async def retire_ponds():
             if not f or not keep: continue
             for w in (st.get("weights") or [])[:keep]:
                 fish.append({"user_id": p["owner_id"], "username": p["owner_name"], "species_id": f["id"], "name": f["name"], "rarity": f["rarity"], "weight": w,
-                             "length_cm": round((w ** (1 / 3)) * 38, 1), "variant": "normal", "value": fish_value(f, w, 1.0), "water": p.get("water") or f["water"], "caught_at": iso(now()),
+                             "length_cm": fish_length(f, w), "variant": "normal", "value": fish_value(f, w, 1.0), "water": p.get("water") or f["water"], "caught_at": iso(now()),
                              "listed": False, "mounted": False, "caught_by": p["owner_id"], "caught_by_name": p["owner_name"]})
         if fish: await db.catches.insert_many(fish)
         await db.users.update_one({"_id": oid(p["owner_id"])}, {"$inc": {"gold": gold}})
