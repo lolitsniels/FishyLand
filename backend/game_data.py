@@ -1,111 +1,591 @@
-RARITIES = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
-RARITY_WEIGHT = {"common": 50, "uncommon": 26, "rare": 13, "epic": 7, "legendary": 3, "mythic": 1}
-RARITY_XP = {"common": 12, "uncommon": 22, "rare": 45, "epic": 90, "legendary": 220, "mythic": 600}
-RARITY_TIME = {"common": 20, "uncommon": 24, "rare": 28, "epic": 34, "legendary": 40, "mythic": 45}
+RARITY = {"C": "common", "U": "uncommon", "R": "rare", "E": "epic", "L": "legendary", "M": "mythic"}
+RARITY_BASE_VALUE = {"common": 8, "uncommon": 26, "rare": 95, "epic": 380, "legendary": 2000, "mythic": 6000}
+RARITY_XP = {"common": 10, "uncommon": 24, "rare": 70, "epic": 210, "legendary": 650, "mythic": 1600}
+RARITY_WEIGHT = {"common": 600, "uncommon": 280, "rare": 90, "epic": 28, "legendary": 5, "mythic": 0.7}
+GROUNDBAIT_MULT = {"common": 2, "uncommon": 2}  # Groundbait: luck ignored, everyday fish doubled
+
+BEHAVIORS = {
+    "steady": {"strength": 0.8, "erratic": 0.5, "desc": "pulls with slow, even pressure"},
+    "sluggish": {"strength": 0.6, "erratic": 0.3, "desc": "sits heavy and barely moves"},
+    "runner": {"strength": 1.2, "erratic": 1.0, "desc": "makes long, fast runs"},
+    "thrasher": {"strength": 1.0, "erratic": 1.6, "desc": "thrashes wildly and unpredictably"},
+    "diver": {"strength": 1.35, "erratic": 0.6, "desc": "dives deep with brutal force"},
+    "jumper": {"strength": 1.1, "erratic": 1.4, "desc": "leaps and jerks the line"},
+}
 
 VARIANTS = [
-    {"id": "ancient", "name": "Ancient", "chance": 0.01, "mult": 5.0},
-    {"id": "golden", "name": "Golden", "chance": 0.02, "mult": 3.0},
-    {"id": "giant", "name": "Giant", "chance": 0.03, "mult": 2.0},
-    {"id": "shiny", "name": "Shiny", "chance": 0.04, "mult": 1.5},
+    ("normal", 0.0, 1.0),
+    ("scarred", 0.035, 1.35),
+    ("giant", 0.02, 2.2),
+    ("albino", 0.012, 3.0),
+    ("golden", 0.006, 5.0),
 ]
 
 WATERS = [
-    {"id": "crystal_lagoon", "name": "Crystal Lagoon", "unlock": 1, "rec_br": 0, "playable": True},
-    {"id": "lotus_pagoda", "name": "Lotus Pagoda Lake", "unlock": 10, "rec_br": 8000, "playable": False},
-    {"id": "thunder_falls", "name": "Thunder Falls", "unlock": 20, "rec_br": 15000, "playable": False},
-    {"id": "ice_castle", "name": "Ice-Bound Castle Moat", "unlock": 35, "rec_br": 30000, "playable": False},
-    {"id": "coral_sky", "name": "Coral Sky Reef", "unlock": 50, "rec_br": 50000, "playable": False},
-    {"id": "shadowfen", "name": "Shadowfen Marsh", "unlock": 65, "rec_br": 80000, "playable": False},
-    {"id": "dragon_caldera", "name": "Dragon's Caldera", "unlock": 80, "rec_br": 120000, "playable": False},
-    {"id": "abyssal_rift", "name": "Abyssal Rift", "unlock": 100, "rec_br": 180000, "playable": False},
-    {"id": "celestial_spring", "name": "Celestial Spring", "unlock": 120, "rec_br": 260000, "playable": False},
-    {"id": "ocean_throne", "name": "Ocean Throne", "unlock": 140, "rec_br": 400000, "playable": False},
+    {"key": "millbrook", "name": "Millbrook Pond", "type": "Freshwater pond", "level": 1, "fee": 0, "image": "/art/water_millbrook.jpg",
+     "desc": "A quiet village pond ringed with reeds. Every angler in The Fishing Lands started here.", "salt": False},
+    {"key": "willow", "name": "Willow River", "type": "Lowland river", "level": 3, "fee": 150, "image": "/art/water_willow.jpg",
+     "desc": "Slow bends and gravel runs beneath old willows. Trout and pike hunt the shallows.", "salt": False},
+    {"key": "greyfell", "name": "Greyfell Lake", "type": "Deep cold lake", "level": 7, "fee": 800, "image": "/art/water_greyfell.jpg",
+     "desc": "A glacial lake of black water and sudden depth. Old fish grow very large here.", "salt": False},
+    {"key": "saltmarsh", "name": "Saltmarsh Estuary", "type": "Brackish estuary", "level": 11, "fee": 2500, "image": "/art/water_saltmarsh.jpg",
+     "desc": "Where the river meets the tide. Mullet and drum roam the channels at dusk.", "salt": True},
+    {"key": "harrow", "name": "Harrow Point", "type": "Rocky sea coast", "level": 15, "fee": 6000, "image": "/art/water_harrow.jpg",
+     "desc": "Wind-beaten cliffs and kelp gullies. Serious sea fish patrol the breakers.", "salt": True},
+    {"key": "coral", "name": "Coral Shoals", "type": "Tropical reef", "level": 20, "fee": 14000, "image": "/art/water_coral.jpg",
+     "desc": "Turquoise flats and coral drop-offs teeming with color and teeth.", "salt": True},
+    {"key": "blackwater", "name": "Blackwater Mangroves", "type": "Tropical river", "level": 25, "fee": 30000, "image": "/art/water_blackwater.jpg",
+     "desc": "Tannin-dark channels beneath tangled roots. Giants lurk in the murk.", "salt": False},
+    {"key": "frozen", "name": "The Frozen Reach", "type": "Arctic ice fishing", "level": 31, "fee": 60000, "image": "/art/water_frozen.jpg",
+     "desc": "Holes cut through a metre of sea ice. Slow, ancient fish drift below.", "salt": True},
+    {"key": "sunken", "name": "The Sunken Deep", "type": "Open ocean abyss", "level": 38, "fee": 120000, "image": "/art/water_sunken.jpg",
+     "desc": "Charter boats drift over a trench two thousand metres deep. Strange things rise at night.", "salt": True},
+    {"key": "ghostlight", "name": "Ghostlight Cavern", "type": "Subterranean lake", "level": 45, "fee": 250000, "image": "/art/water_ghostlight.jpg",
+     "desc": "A flooded cave system lit by pale fungus. Fish here have never seen the sun.", "salt": False},
+    {"key": "temple", "name": "The Drowned Temple", "type": "Sunken temple lake", "level": 60, "fee": 500000, "image": "/art/water_temple.jpg",
+     "desc": "A jungle lake that swallowed an ancient temple whole. Stone stairs run down into jade water where the old koi pools still breed giants.", "salt": False},
+    {"key": "cinder", "name": "The Cinder Trench", "type": "Volcanic deep-sea trench", "level": 80, "fee": 1000000, "image": "/art/water_cinder.jpg",
+     "desc": "A rift in the sea floor where underwater volcanoes glow red in the dark. The warm vents feed fish of a size nobody believes.", "salt": True},
 ]
 
+# (name, rarity, min_kg, max_kg, behavior, value_mod, blurb, baitable)
+_FISH = {
+"millbrook": [
+    ("Bluegill", "C", 0.1, 0.9, "thrasher", 1.0, "A feisty panfish with a dark ear flap.", True),
+    ("Pumpkinseed", "C", 0.1, 0.6, "thrasher", 1.0, "Bright orange belly, loves shallow weeds.", True),
+    ("Golden Shiner", "C", 0.05, 0.3, "jumper", 0.8, "Flashy little baitfish schooling near the surface.", True),
+    ("Fathead Minnow", "C", 0.02, 0.1, "steady", 0.6, "Tiny, hardy and perfect as live bait.", True),
+    ("Brown Bullhead", "C", 0.3, 1.8, "sluggish", 1.0, "Whiskered bottom feeder active after dark.", False),
+    ("Yellow Perch", "C", 0.2, 1.2, "steady", 1.1, "Striped and delicious; travels in packs.", True),
+    ("Black Crappie", "C", 0.2, 1.5, "thrasher", 1.1, "Paper-mouthed and spotted, gathers around sunken brush.", False),
+    ("White Crappie", "C", 0.2, 1.4, "thrasher", 1.1, "Paler cousin with vertical bars.", False),
+    ("Common Carp", "C", 1.0, 12.0, "diver", 1.2, "Bronze bulldozer of the pond floor.", False),
+    ("Green Sunfish", "C", 0.1, 0.7, "thrasher", 0.9, "Big-mouthed sunfish with a turquoise sheen.", True),
+    ("Rock Bass", "C", 0.2, 1.0, "steady", 1.0, "Red-eyed ambusher hiding by stones.", False),
+    ("Creek Chub", "C", 0.1, 0.5, "jumper", 0.8, "Quick little chub common in feeder streams.", True),
+    ("Largemouth Bass", "U", 0.5, 7.0, "jumper", 1.3, "Explosive strikes and gill-rattling leaps.", False),
+    ("Channel Catfish", "U", 1.0, 15.0, "diver", 1.2, "Forked tail and a stubborn deep pull.", False),
+    ("Mirror Carp", "U", 2.0, 18.0, "diver", 1.5, "Scattered oversized scales like polished coins.", False),
+    ("Chain Pickerel", "U", 0.5, 3.5, "runner", 1.2, "Toothy chain-patterned pike relative.", False),
+    ("Bowfin", "U", 1.0, 6.0, "thrasher", 1.3, "Ancient, air-breathing, spins like a crocodile.", False),
+    ("Tench", "U", 0.8, 5.0, "steady", 1.4, "Olive-green with tiny red eyes, a doctor fish.", False),
+    ("Grass Carp", "U", 3.0, 30.0, "runner", 1.3, "Herbivorous giant that mows the weed beds.", False),
+    ("Warmouth", "U", 0.2, 0.9, "thrasher", 1.1, "Mottled sunfish with a bad temper.", False),
+    ("Feral Goldfish", "R", 0.3, 2.5, "steady", 1.6, "A released pet grown enormous and orange.", False),
+    ("Escaped Koi", "R", 1.5, 10.0, "diver", 2.2, "Someone's prize koi, now the pond's jewel.", False),
+    ("Leather Carp", "R", 4.0, 22.0, "diver", 1.8, "Almost scaleless, smooth as a saddle.", False),
+    ("Flathead Catfish", "R", 5.0, 40.0, "sluggish", 1.7, "A flat-headed predator that eats other catfish.", False),
+    ("Longnose Gar", "R", 1.0, 8.0, "thrasher", 1.6, "Armored, needle-jawed relic.", False),
+    ("Ghost Carp", "E", 5.0, 20.0, "diver", 2.5, "Pale metallic hybrid glimpsed only at dawn.", False),
+    ("Old Millbrook Bass", "E", 6.0, 10.0, "jumper", 3.0, "The bass anglers have chased for thirty years.", False),
+    ("Alligator Gar", "L", 30.0, 120.0, "diver", 2.5, "How did it get here? Nobody knows. It is enormous.", False),
+],
+"willow": [
+    ("Roach", "C", 0.1, 1.0, "steady", 0.9, "Silver with red fins, the river's staple.", True),
+    ("Dace", "C", 0.05, 0.4, "jumper", 0.8, "Slim and lightning-quick in fast riffles.", True),
+    ("Bleak", "C", 0.03, 0.15, "jumper", 0.7, "Surface-sipping sliver of silver.", True),
+    ("Gudgeon", "C", 0.03, 0.2, "steady", 0.7, "Whiskered gravel-dweller in shoals.", True),
+    ("European Chub", "C", 0.5, 4.0, "steady", 1.0, "Big-lipped and greedy, eats anything.", False),
+    ("Brown Trout", "C", 0.3, 4.0, "jumper", 1.3, "Spotted river hunter with golden flanks.", False),
+    ("Rainbow Trout", "C", 0.3, 5.0, "jumper", 1.2, "Pink-striped acrobat, jumps repeatedly.", False),
+    ("Common Bream", "C", 0.5, 5.0, "sluggish", 0.9, "Slab-sided, slimy and slow.", False),
+    ("Stone Loach", "C", 0.02, 0.1, "steady", 0.7, "Tiny, hides under stones by day.", True),
+    ("Brook Lamprey", "C", 0.02, 0.08, "steady", 0.8, "Eel-like and strange, but harmless.", False),
+    ("Minnow", "C", 0.01, 0.06, "jumper", 0.6, "The classic bait shoal fish.", True),
+    ("Ruffe", "C", 0.05, 0.3, "thrasher", 0.8, "Spiny little perch relative.", False),
+    ("Barbel", "U", 1.0, 9.0, "diver", 1.4, "Torpedo-shaped, fights like a train in current.", False),
+    ("Northern Pike", "U", 1.0, 15.0, "runner", 1.3, "Ambush predator with a mouth of needles.", False),
+    ("Grayling", "U", 0.3, 2.0, "jumper", 1.5, "Sail-finned lady of the stream.", False),
+    ("European Eel", "U", 0.3, 3.0, "thrasher", 1.3, "Slippery, twisting, born in the far sea.", False),
+    ("Zander", "U", 1.0, 12.0, "steady", 1.4, "Glass-eyed night hunter.", False),
+    ("Ide", "U", 0.5, 3.0, "runner", 1.2, "Golden chub relative of the slow reaches.", False),
+    ("Nase", "U", 0.3, 1.5, "steady", 1.1, "Hard-lipped scraper of algae.", False),
+    ("Burbot", "U", 0.5, 6.0, "sluggish", 1.3, "The only freshwater cod, active in winter.", False),
+    ("Atlantic Salmon", "R", 2.0, 20.0, "runner", 2.0, "The king of fish, returning from the ocean.", False),
+    ("Asp", "R", 1.0, 8.0, "runner", 1.7, "Predatory carp that smashes surface baitfish.", False),
+    ("Wels Catfish", "R", 10.0, 90.0, "diver", 1.8, "Europe's river monster.", False),
+    ("Sea Trout", "R", 1.0, 10.0, "jumper", 1.8, "Silver sea-run brown trout.", False),
+    ("Sterlet", "R", 1.0, 8.0, "steady", 2.0, "Small sturgeon with a shovel snout.", False),
+    ("Huchen", "E", 5.0, 40.0, "runner", 2.6, "The Danube salmon, a rare river titan.", False),
+    ("Golden Barbel", "E", 3.0, 9.0, "diver", 3.0, "Barbel with flanks of hammered gold.", False),
+    ("Willow Sturgeon", "L", 40.0, 250.0, "diver", 2.5, "Centuries old, a living shadow beneath the willows.", False),
+],
+"greyfell": [
+    ("Lake Whitefish", "C", 0.5, 4.0, "steady", 1.0, "Silvery deep-water schooling fish.", False),
+    ("Cisco", "C", 0.2, 1.2, "jumper", 0.9, "Lake herring, food for everything larger.", True),
+    ("Smallmouth Bass", "C", 0.5, 3.5, "jumper", 1.2, "Bronze, hard-fighting rock bass.", False),
+    ("White Sucker", "C", 0.5, 3.0, "sluggish", 0.8, "Down-turned mouth for vacuuming gravel.", False),
+    ("Rainbow Smelt", "C", 0.05, 0.25, "jumper", 0.8, "Smells of cucumber, runs in millions.", True),
+    ("Yellow Perch", "C", 0.2, 1.4, "steady", 1.1, "Deep-lake perch grow fat and dark.", True),
+    ("Rock Bass", "C", 0.2, 1.2, "steady", 1.0, "Red-eyed sentinel of the boulders.", False),
+    ("Lake Chub", "C", 0.1, 0.5, "steady", 0.8, "Cold-water chub of the shallows.", True),
+    ("Slimy Sculpin", "C", 0.02, 0.1, "steady", 0.7, "Ugly, bug-eyed bottom dweller.", True),
+    ("Spottail Shiner", "C", 0.03, 0.15, "jumper", 0.7, "Silver bait shiner with a tail spot.", True),
+    ("Pumpkinseed", "C", 0.1, 0.6, "thrasher", 0.9, "Bright sunfish of the warm bays.", True),
+    ("Longnose Sucker", "C", 0.5, 3.0, "sluggish", 0.8, "Deep-water sucker with a long snout.", False),
+    ("Walleye", "U", 0.8, 8.0, "steady", 1.4, "Marble-eyed and prized on any table.", False),
+    ("Lake Trout", "U", 2.0, 25.0, "diver", 1.5, "Grey giant of the cold depths.", False),
+    ("Arctic Char", "U", 0.5, 6.0, "jumper", 1.6, "Crimson-bellied beauty from glacial water.", False),
+    ("Northern Pike", "U", 1.0, 18.0, "runner", 1.3, "Bigger and meaner in the lake.", False),
+    ("Brook Trout", "U", 0.3, 3.0, "jumper", 1.4, "Vermilion spots in blue halos.", False),
+    ("Splake", "U", 1.0, 6.0, "runner", 1.4, "Brook trout and lake trout hybrid.", False),
+    ("Burbot", "U", 1.0, 8.0, "sluggish", 1.2, "Eel-tailed cod of the lake floor.", False),
+    ("Freshwater Drum", "U", 1.0, 12.0, "sluggish", 1.1, "Grunts audibly when landed.", False),
+    ("Muskellunge", "R", 5.0, 30.0, "runner", 2.0, "The fish of ten thousand casts.", False),
+    ("Lake Sturgeon", "R", 10.0, 100.0, "diver", 2.0, "Armored ancient of the deep basin.", False),
+    ("Ferox Trout", "R", 3.0, 15.0, "diver", 2.2, "Cannibal brown trout, hook-jawed and dark.", False),
+    ("Tiger Muskie", "R", 4.0, 20.0, "runner", 2.1, "Striped pike-muskie hybrid.", False),
+    ("Blue Walleye", "R", 1.0, 6.0, "steady", 2.4, "Thought extinct; a steel-blue phantom.", False),
+    ("Greyfell Giant Trout", "E", 15.0, 35.0, "diver", 2.8, "A lake trout older than most anglers.", False),
+    ("Silver Muskellunge", "E", 10.0, 28.0, "runner", 3.0, "A muskie with no bars, pure chrome.", False),
+    ("The Greyfell Leviathan", "L", 120.0, 400.0, "diver", 2.5, "A sturgeon of impossible size, seen once a decade.", False),
+],
+"saltmarsh": [
+    ("Striped Mullet", "C", 0.3, 2.5, "jumper", 0.9, "Leaps clear of the water in shoals.", True),
+    ("Atlantic Croaker", "C", 0.2, 1.5, "steady", 0.9, "Croaks like a frog on the deck.", True),
+    ("Pinfish", "C", 0.05, 0.4, "thrasher", 0.7, "Spiny, striped bait-stealer.", True),
+    ("Spot", "C", 0.1, 0.5, "steady", 0.8, "Small drum with a shoulder spot.", True),
+    ("Silver Perch", "C", 0.1, 0.6, "thrasher", 0.8, "Estuary panfish of the grass flats.", True),
+    ("Southern Flounder", "C", 0.5, 5.0, "sluggish", 1.2, "Flat ambusher buried in sand.", False),
+    ("Sheepshead", "C", 0.5, 6.0, "steady", 1.2, "Human-like teeth for crushing barnacles.", False),
+    ("Hardhead Catfish", "C", 0.3, 2.0, "sluggish", 0.7, "Venomous spines, ubiquitous nuisance.", False),
+    ("Ladyfish", "C", 0.5, 2.5, "jumper", 0.9, "Poor man's tarpon, jumps like mad.", False),
+    ("Blue Runner", "C", 0.3, 2.0, "runner", 0.9, "Hard-pulling jack of the channels.", True),
+    ("Spotted Seatrout", "C", 0.5, 4.0, "jumper", 1.2, "Speckled and sharp-toothed.", False),
+    ("Bay Anchovy", "C", 0.01, 0.05, "jumper", 0.6, "Glass-clear bait in vast clouds.", True),
+    ("Red Drum", "U", 1.0, 20.0, "runner", 1.5, "Bronze with a black tail spot, pulls like a truck.", False),
+    ("Black Drum", "U", 2.0, 40.0, "sluggish", 1.3, "Grunting heavyweight of the oyster beds.", False),
+    ("Striped Bass", "U", 1.0, 25.0, "runner", 1.5, "Striped and strong, king of the tide.", False),
+    ("Snook", "U", 1.0, 15.0, "jumper", 1.6, "Black lateral line and a violent strike.", False),
+    ("Weakfish", "U", 0.5, 6.0, "steady", 1.3, "Delicate mouth, iridescent purple sheen.", False),
+    ("Gafftopsail Catfish", "U", 0.5, 5.0, "diver", 1.1, "Sail-finned and slimy.", False),
+    ("Cownose Ray", "U", 5.0, 25.0, "diver", 1.2, "Flapping wings of the flats.", False),
+    ("Crevalle Jack", "U", 2.0, 20.0, "runner", 1.3, "Never gives up, ever.", False),
+    ("Tarpon", "R", 20.0, 100.0, "jumper", 2.0, "The silver king. Leaps two metres.", False),
+    ("Bull Shark", "R", 30.0, 200.0, "diver", 1.9, "Comes far up into fresh water to hunt.", False),
+    ("Cobia", "R", 5.0, 50.0, "runner", 1.9, "Shark-shaped and curious, follows rays.", False),
+    ("Tripletail", "R", 2.0, 15.0, "sluggish", 2.0, "Floats sideways under debris like a leaf.", False),
+    ("Atlantic Sturgeon", "R", 20.0, 150.0, "diver", 2.1, "Armored ocean wanderer returning to spawn.", False),
+    ("Sawfish", "E", 50.0, 300.0, "diver", 2.8, "A ray with a chainsaw. Critically rare.", False),
+    ("Marsh Ghost Snook", "E", 10.0, 24.0, "jumper", 3.0, "Pale snook seen only on new-moon tides.", False),
+    ("Old Saltmarsh Tarpon", "L", 100.0, 160.0, "jumper", 2.5, "Scarred by a hundred hooks, never landed.", False),
+],
+"harrow": [
+    ("Atlantic Mackerel", "C", 0.2, 1.5, "runner", 0.9, "Blue-green torpedoes in summer shoals.", True),
+    ("Pouting", "C", 0.1, 0.8, "steady", 0.7, "Copper-flanked little cod relative.", True),
+    ("Corkwing Wrasse", "C", 0.1, 0.5, "thrasher", 0.8, "Kaleidoscopic kelp dweller.", False),
+    ("Ballan Wrasse", "C", 0.5, 4.0, "diver", 1.1, "Thick-lipped rock dweller that dives for cover.", False),
+    ("Whiting", "C", 0.2, 1.5, "steady", 0.8, "Silver and toothy, arrives in winter.", True),
+    ("Coalfish", "C", 0.5, 5.0, "runner", 1.0, "Dark-backed pollock relative.", False),
+    ("Garfish", "C", 0.2, 1.0, "jumper", 0.9, "Needle-nosed with green bones.", True),
+    ("Shanny", "C", 0.02, 0.1, "thrasher", 0.6, "Rock-pool blenny with attitude.", False),
+    ("Lesser Weever", "C", 0.05, 0.2, "steady", 0.7, "Venomous spines. Handle with care.", False),
+    ("Dab", "C", 0.1, 0.8, "sluggish", 0.8, "Rough-skinned little flatfish.", False),
+    ("Sand Eel", "C", 0.01, 0.05, "jumper", 0.6, "Everything in the sea eats these.", True),
+    ("Grey Gurnard", "C", 0.2, 1.0, "steady", 0.9, "Croaking, winged bottom fish.", False),
+    ("Pollock", "U", 1.0, 10.0, "diver", 1.3, "Crash-dives into the kelp.", False),
+    ("Atlantic Cod", "U", 1.0, 20.0, "steady", 1.4, "The fish that built nations.", False),
+    ("European Sea Bass", "U", 1.0, 8.0, "runner", 1.6, "Silver surf hunter, highly prized.", False),
+    ("Conger Eel", "U", 5.0, 50.0, "thrasher", 1.4, "Wreck-dwelling muscle, fights backwards.", False),
+    ("Thornback Ray", "U", 2.0, 12.0, "sluggish", 1.3, "Spiny-backed skate of sandy gullies.", False),
+    ("Plaice", "U", 0.5, 4.0, "sluggish", 1.3, "Orange-spotted flatfish.", False),
+    ("Red Gurnard", "U", 0.3, 1.5, "steady", 1.2, "Scarlet, armored and vocal.", False),
+    ("Ling", "U", 3.0, 25.0, "diver", 1.3, "Long, mottled cod of the deep reefs.", False),
+    ("Atlantic Halibut", "R", 10.0, 150.0, "diver", 2.0, "A flatfish the size of a door.", False),
+    ("John Dory", "R", 0.5, 4.0, "steady", 2.2, "Thumbprint of Saint Peter on its flank.", False),
+    ("Monkfish", "R", 3.0, 30.0, "sluggish", 1.8, "All mouth and lure, hideous and delicious.", False),
+    ("Atlantic Wolffish", "R", 3.0, 20.0, "thrasher", 1.9, "Crushes crabs with canine teeth.", False),
+    ("Porbeagle Shark", "R", 30.0, 200.0, "runner", 1.9, "Cold-water mako cousin.", False),
+    ("Bluefin Tuna", "E", 50.0, 400.0, "runner", 2.8, "Warm-blooded ocean missile worth a fortune.", False),
+    ("Harrow Blue Cod", "E", 15.0, 35.0, "steady", 3.0, "A cod with an eerie cobalt back.", False),
+    ("The Harrow Point Halibut", "L", 200.0, 320.0, "diver", 2.5, "Lighthouse keepers tell of it. Few believe them.", False),
+],
+"coral": [
+    ("Yellowtail Snapper", "C", 0.3, 3.0, "runner", 1.0, "Yellow-striped reef staple.", True),
+    ("Stoplight Parrotfish", "C", 0.5, 3.0, "steady", 0.9, "Crunches coral, poops sand.", False),
+    ("Sergeant Major", "C", 0.05, 0.3, "thrasher", 0.7, "Striped damselfish in swarms.", True),
+    ("Bluehead Wrasse", "C", 0.05, 0.2, "jumper", 0.8, "Electric blue head, tiny.", False),
+    ("Queen Triggerfish", "C", 0.5, 4.0, "thrasher", 1.1, "Psychedelic and bites hard.", False),
+    ("Grunt", "C", 0.2, 1.5, "steady", 0.8, "Grunts by grinding its teeth.", True),
+    ("Squirrelfish", "C", 0.1, 0.6, "thrasher", 0.8, "Big-eyed red night fish.", False),
+    ("Needlefish", "C", 0.2, 1.5, "jumper", 0.8, "Skips across the surface.", True),
+    ("Bar Jack", "C", 0.5, 3.0, "runner", 1.0, "Electric blue stripe, fast and mean.", True),
+    ("Lane Snapper", "C", 0.3, 2.0, "steady", 1.0, "Pink with yellow lines.", False),
+    ("Porkfish", "C", 0.2, 1.0, "steady", 0.9, "Yellow with two black bars.", False),
+    ("Lionfish", "C", 0.2, 1.2, "sluggish", 1.1, "Venomous invader, oddly tasty.", False),
+    ("Mutton Snapper", "U", 1.0, 12.0, "runner", 1.4, "Shy, powerful and highly prized.", False),
+    ("Nassau Grouper", "U", 2.0, 25.0, "diver", 1.5, "Dives for its hole the instant it's hooked.", False),
+    ("Great Barracuda", "U", 3.0, 40.0, "runner", 1.3, "Chrome predator with a sinister grin.", False),
+    ("Hogfish", "U", 1.0, 10.0, "steady", 1.6, "Pig-snouted, best-eating fish on the reef.", False),
+    ("Permit", "U", 2.0, 20.0, "runner", 1.7, "Flats fish that ignores everything.", False),
+    ("Mahi-Mahi", "U", 3.0, 30.0, "jumper", 1.5, "Blazing gold and blue, leaps repeatedly.", False),
+    ("Spotted Eagle Ray", "U", 20.0, 100.0, "diver", 1.4, "Spotted wings gliding over sand.", False),
+    ("Green Moray", "U", 5.0, 30.0, "thrasher", 1.2, "Ties itself in knots, bites everything.", False),
+    ("Giant Trevally", "R", 10.0, 70.0, "runner", 2.0, "The reef's gangster. Utterly brutal.", False),
+    ("Wahoo", "R", 10.0, 60.0, "runner", 2.0, "Fastest fish in the shoals.", False),
+    ("Napoleon Wrasse", "R", 10.0, 150.0, "diver", 2.3, "Blue-green giant with a bumped head.", False),
+    ("Goliath Grouper", "R", 50.0, 400.0, "diver", 2.0, "A boulder with fins and a grudge.", False),
+    ("Roosterfish", "R", 5.0, 50.0, "runner", 2.1, "Seven-spined crest raised in anger.", False),
+    ("Sailfish", "E", 30.0, 90.0, "jumper", 2.8, "Sail unfurled, greyhounding across the swell.", False),
+    ("Golden Dorado of the Shoals", "E", 15.0, 30.0, "jumper", 3.0, "A mahi glowing pure gold at dusk.", False),
+    ("Black Marlin", "L", 200.0, 700.0, "runner", 2.5, "The heaviest, hardest-fighting billfish alive.", False),
+],
+"blackwater": [
+    ("Red-bellied Piranha", "C", 0.3, 2.0, "thrasher", 1.0, "Razor teeth, mostly bluster.", False),
+    ("Oscar", "C", 0.3, 1.5, "steady", 1.0, "Tiger-marked, personality of a dog.", False),
+    ("Silver Dollar", "C", 0.05, 0.3, "jumper", 0.8, "Coin-shaped shoal fish.", True),
+    ("Headstander", "C", 0.1, 0.5, "steady", 0.8, "Swims nose-down among roots.", True),
+    ("Banded Leporinus", "C", 0.3, 2.0, "runner", 0.9, "Striped, quick and nervous.", False),
+    ("Bristlenose Catfish", "C", 0.05, 0.3, "sluggish", 0.8, "Armored algae-scraper.", False),
+    ("Cardinal Tetra", "C", 0.005, 0.02, "jumper", 0.7, "Neon red and blue, a living jewel.", True),
+    ("Pike Cichlid", "C", 0.2, 1.5, "runner", 1.0, "Torpedo cichlid ambushing tetras.", False),
+    ("Tambaqui", "C", 2.0, 30.0, "diver", 1.1, "Fruit-eating giant with molars.", False),
+    ("Hoplias Wolf Fish", "C", 0.5, 4.0, "thrasher", 1.0, "Fanged ambusher of the shallows.", False),
+    ("Armored Catfish", "C", 0.2, 1.5, "sluggish", 0.8, "Bony plates and a stubborn hold.", False),
+    ("Bicuda", "C", 0.5, 3.0, "runner", 0.9, "Freshwater barracuda.", True),
+    ("Peacock Bass", "U", 1.0, 12.0, "jumper", 1.6, "Explosive topwater strike, gorgeous colours.", False),
+    ("Redtail Catfish", "U", 5.0, 60.0, "diver", 1.4, "Red tail, black back, immense pulling power.", False),
+    ("Pacu", "U", 2.0, 25.0, "diver", 1.2, "Piranha's vegetarian cousin, human-like teeth.", False),
+    ("Silver Arowana", "U", 1.0, 6.0, "jumper", 1.6, "Leaps for insects, a living ribbon.", False),
+    ("Payara", "U", 2.0, 15.0, "thrasher", 1.5, "Vampire fish with two fangs.", False),
+    ("Tiger Shovelnose", "U", 3.0, 30.0, "diver", 1.4, "Striped catfish with a flat spade snout.", False),
+    ("Electric Eel", "U", 3.0, 20.0, "thrasher", 1.5, "Not an eel. Six hundred volts.", False),
+    ("Black Piranha", "U", 1.0, 4.0, "thrasher", 1.4, "Largest and most fearsome piranha.", False),
+    ("Arapaima", "R", 30.0, 200.0, "diver", 2.0, "Air-breathing river monster, red-scaled.", False),
+    ("Piraiba", "R", 40.0, 200.0, "diver", 2.0, "Goliath catfish that eats fishermen, allegedly.", False),
+    ("Golden Dorado", "R", 5.0, 30.0, "jumper", 2.2, "River tiger, gold and savage.", False),
+    ("Freshwater Stingray", "R", 5.0, 40.0, "sluggish", 1.9, "Ornate disc hidden in the sand.", False),
+    ("Jau Catfish", "R", 20.0, 100.0, "sluggish", 1.8, "Bulldog-headed, night-black.", False),
+    ("Black Arowana", "E", 3.0, 8.0, "jumper", 3.0, "Jet-black dragonfish of legend.", False),
+    ("Blackwater Arapaima", "E", 100.0, 220.0, "diver", 2.6, "Old, scarred, tannin-stained titan.", False),
+    ("Mother of the Mangroves", "L", 250.0, 500.0, "diver", 2.5, "A piraiba so vast the roots part for her.", False),
+],
+"frozen": [
+    ("Polar Cod", "C", 0.1, 0.8, "steady", 0.9, "Lives in the ice cracks themselves.", True),
+    ("Capelin", "C", 0.02, 0.1, "jumper", 0.8, "Keystone bait fish of the arctic.", True),
+    ("Arctic Sculpin", "C", 0.1, 0.5, "steady", 0.7, "Spiny and grumpy under the ice.", False),
+    ("Eelpout", "C", 0.2, 1.5, "sluggish", 0.8, "Slimy eel-shaped cold specialist.", False),
+    ("Arctic Flounder", "C", 0.2, 1.0, "sluggish", 0.9, "Small flatfish of the ice shelf.", False),
+    ("Saffron Cod", "C", 0.3, 1.5, "steady", 0.9, "Yellow-tinged shallow cod.", True),
+    ("Lumpsucker", "C", 0.3, 2.0, "sluggish", 1.0, "A grumpy ball with a suction disc.", False),
+    ("Fourhorn Sculpin", "C", 0.2, 0.8, "steady", 0.8, "Four bony horns on its head.", False),
+    ("Arctic Cisco", "C", 0.3, 1.5, "runner", 1.0, "Silver whitefish of arctic rivers.", True),
+    ("Snailfish", "C", 0.1, 0.5, "sluggish", 0.8, "Gelatinous and pink.", False),
+    ("Sand Lance", "C", 0.01, 0.05, "jumper", 0.7, "Buries itself in the seabed.", True),
+    ("Greenland Cod", "C", 0.5, 4.0, "steady", 1.0, "Dark cod of the fjords.", False),
+    ("Arctic Char", "U", 1.0, 10.0, "jumper", 1.6, "Northernmost freshwater fish, scarlet in autumn.", False),
+    ("Greenland Halibut", "U", 3.0, 25.0, "diver", 1.5, "Deep, slow and delicious.", False),
+    ("Atlantic Wolffish", "U", 5.0, 20.0, "thrasher", 1.4, "Fangs that crush clams.", False),
+    ("Sheefish", "U", 3.0, 25.0, "runner", 1.6, "Tarpon of the north, silver and huge.", False),
+    ("Broad Whitefish", "U", 1.0, 8.0, "steady", 1.3, "Fat whitefish of the arctic delta.", False),
+    ("Arctic Skate", "U", 3.0, 15.0, "sluggish", 1.3, "Pale ray of the icy shelf.", False),
+    ("Spotted Wolffish", "U", 5.0, 25.0, "thrasher", 1.5, "Leopard-spotted and grim.", False),
+    ("Northern Wolffish", "U", 5.0, 20.0, "thrasher", 1.4, "Blue-black and jelly-fleshed.", False),
+    ("Greenland Shark", "R", 200.0, 1000.0, "sluggish", 1.8, "Four hundred years old, half blind, immense.", False),
+    ("Beluga Sturgeon", "R", 50.0, 400.0, "diver", 2.3, "Source of the world's most expensive caviar.", False),
+    ("Inconnu", "R", 10.0, 30.0, "runner", 2.0, "The unknown fish, named by baffled explorers.", False),
+    ("Arctic Lamprey", "R", 0.2, 1.0, "thrasher", 1.8, "Toothed disc mouth, an ancient horror.", False),
+    ("Taimen", "R", 15.0, 80.0, "runner", 2.2, "Largest salmonid on earth.", False),
+    ("Ice Ghost Char", "E", 6.0, 14.0, "jumper", 3.0, "A char the colour of glacier ice.", False),
+    ("Ancient Greenland Shark", "E", 800.0, 1400.0, "sluggish", 2.6, "Older than the printing press.", False),
+    ("The White Reach Sturgeon", "L", 400.0, 900.0, "diver", 2.5, "Ice fishers swear the hole itself groaned.", False),
+],
+"sunken": [
+    ("Lanternfish", "C", 0.01, 0.1, "jumper", 0.9, "Most abundant vertebrate on earth, glowing.", True),
+    ("Hatchetfish", "C", 0.01, 0.05, "steady", 0.9, "Silver-mirrored and haunted-looking.", True),
+    ("Bristlemouth", "C", 0.01, 0.05, "steady", 0.8, "Trillions of them, glowing faintly.", True),
+    ("Skipjack Tuna", "C", 1.0, 15.0, "runner", 1.1, "Striped surface speedster.", True),
+    ("Escolar", "C", 3.0, 40.0, "diver", 1.1, "Oily, deep, purple-black.", False),
+    ("Oilfish", "C", 5.0, 50.0, "sluggish", 1.0, "Massive and greasy.", False),
+    ("Blue Shark", "C", 20.0, 150.0, "runner", 1.0, "Slender indigo wanderer.", False),
+    ("Rattail Grenadier", "C", 0.5, 3.0, "sluggish", 0.9, "Abyssal scavenger with a whip tail.", False),
+    ("Viperfish", "C", 0.1, 0.5, "thrasher", 1.1, "Fangs too big for its mouth.", False),
+    ("Fangtooth", "C", 0.1, 0.4, "thrasher", 1.1, "Nightmare teeth on a tiny body.", False),
+    ("Snipe Eel", "C", 0.1, 0.6, "thrasher", 0.9, "Absurdly long jaws that don't close.", False),
+    ("Slender Snipe Eel", "C", 0.1, 0.4, "thrasher", 0.9, "Even thinner than the snipe eel.", False),
+    ("Yellowfin Tuna", "U", 20.0, 180.0, "runner", 1.5, "Sickle-finned ocean athlete.", False),
+    ("Swordfish", "U", 50.0, 400.0, "diver", 1.7, "Broadbill night hunter of the deep.", False),
+    ("Opah", "U", 20.0, 90.0, "diver", 1.6, "Warm-blooded moonfish, red and silver.", False),
+    ("Lancetfish", "U", 3.0, 9.0, "thrasher", 1.3, "Sail-finned cannibal with a glass-like body.", False),
+    ("Barreleye", "U", 0.1, 0.3, "steady", 1.6, "Transparent head, telescoping eyes.", False),
+    ("Anglerfish", "U", 1.0, 10.0, "sluggish", 1.5, "The lure is a light. The mouth is a cavern.", False),
+    ("Gulper Eel", "U", 1.0, 5.0, "thrasher", 1.4, "Mostly mouth, hanging in the black.", False),
+    ("Bigeye Thresher", "U", 50.0, 300.0, "runner", 1.4, "Scythe tail longer than its body.", False),
+    ("Blue Marlin", "R", 100.0, 800.0, "runner", 2.0, "The ocean's most famous fighter.", False),
+    ("Goblin Shark", "R", 50.0, 200.0, "sluggish", 2.2, "Pink alien with a slingshot jaw.", False),
+    ("Megamouth Shark", "R", 300.0, 1200.0, "sluggish", 2.2, "Seen fewer than a hundred times in history.", False),
+    ("Giant Oarfish", "R", 50.0, 270.0, "thrasher", 2.3, "The sea serpent of every legend.", False),
+    ("Bluntnose Sixgill", "R", 200.0, 600.0, "diver", 2.0, "Primitive shark rising from the abyss.", False),
+    ("Coelacanth", "E", 30.0, 90.0, "sluggish", 3.0, "A living fossil, thought dead for 65 million years.", False),
+    ("Sunken Deep Marlin", "E", 500.0, 900.0, "runner", 2.8, "A marlin darker than the trench itself.", False),
+    ("The Drowned Serpent", "L", 300.0, 500.0, "thrasher", 2.5, "An oarfish of unthinkable length, silver as moonlight.", False),
+],
+"ghostlight": [
+    ("Cave Loach", "C", 0.02, 0.15, "steady", 1.0, "Pale, eyeless and whiskered.", True),
+    ("Blind Cavefish", "C", 0.02, 0.1, "jumper", 1.0, "Pink and sightless, hunts by vibration.", True),
+    ("Cave Barb", "C", 0.05, 0.4, "runner", 1.0, "Translucent barb from the cathedral pool.", True),
+    ("Pale Sculpin", "C", 0.05, 0.3, "steady", 1.0, "Bleached bottom-dweller.", False),
+    ("Grotto Shiner", "C", 0.03, 0.2, "jumper", 1.0, "Silver flickers in the fungus light.", True),
+    ("Cave Bullhead", "C", 0.3, 2.0, "sluggish", 1.1, "Whiskers longer than its body.", False),
+    ("Blindcat", "C", 0.1, 0.8, "sluggish", 1.1, "A catfish that has never seen light.", False),
+    ("Siphon Eel", "C", 0.2, 1.5, "thrasher", 1.1, "Lives in the drainage siphons.", False),
+    ("Dripstone Darter", "C", 0.02, 0.1, "jumper", 1.0, "Darts between limestone spires.", True),
+    ("Ghost Tetra", "C", 0.01, 0.03, "jumper", 1.0, "Body glass-clear, organs visible.", True),
+    ("Cave Goby", "C", 0.02, 0.1, "steady", 1.0, "Clings to flowstone with a suction disc.", False),
+    ("White Cave Crayfish Eater", "C", 0.3, 1.5, "thrasher", 1.2, "A sunfish gone ghostly white.", False),
+    ("Lantern Eel", "U", 0.5, 4.0, "thrasher", 1.5, "Faint blue glow along its spine.", False),
+    ("Cavern Pike", "U", 1.0, 10.0, "runner", 1.5, "Bone-white ambusher of the black pools.", False),
+    ("Blind Cave Carp", "U", 2.0, 15.0, "diver", 1.4, "Enormous, pale and ancient.", False),
+    ("Pallid Sturgeon", "U", 5.0, 40.0, "diver", 1.6, "Almost extinct above; thriving below.", False),
+    ("Fungus Glowfish", "U", 0.1, 0.5, "steady", 1.7, "Luminous spots that pulse slowly.", False),
+    ("Echo Char", "U", 1.0, 6.0, "jumper", 1.6, "A char that found the cave a thousand years ago.", False),
+    ("Marble Cavefish", "U", 0.2, 1.0, "steady", 1.5, "Veined like marble, cold to touch.", False),
+    ("Stalactite Catfish", "U", 3.0, 30.0, "sluggish", 1.4, "Hangs motionless beneath the ceiling drips.", False),
+    ("Crystal Gar", "R", 3.0, 20.0, "thrasher", 2.2, "Scales like quartz, teeth like glass.", False),
+    ("Abyss Walker Catfish", "R", 20.0, 100.0, "diver", 2.0, "Walks the cave floor on its fins.", False),
+    ("Moonpool Salmon", "R", 5.0, 25.0, "runner", 2.3, "Runs to a sea nobody has found.", False),
+    ("Hollow Eel", "R", 10.0, 60.0, "thrasher", 2.1, "You can see the light through it.", False),
+    ("Sightless Muskellunge", "R", 8.0, 30.0, "runner", 2.2, "Hunts by sound alone, never misses.", False),
+    ("Ghostlight Wraithfish", "E", 5.0, 15.0, "jumper", 3.2, "Glows cold white and vanishes when netted.", False),
+    ("Cathedral Sturgeon", "E", 60.0, 150.0, "diver", 2.8, "Sleeps beneath the tallest stone pillar.", False),
+    ("The Pale Ancient", "L", 200.0, 400.0, "sluggish", 2.5, "The oldest living thing in The Fishing Lands.", False),
+    ("Lightless Leviathan", "L", 150.0, 350.0, "diver", 2.6, "A catfish the divers refuse to speak about.", False),
+],
+}
 
-def _f(id, name, rarity, wmin, wmax, value, strength, erratic, behavior, bait, lore):
-    return {"id": id, "name": name, "rarity": rarity, "water": "crystal_lagoon", "weight": [wmin, wmax],
-            "value": value, "strength": strength, "erratic": erratic, "behavior": behavior,
-            "bait": bait, "lore": lore, "img": f"/art/fish/{id}.png", "icon": f"/art/fish/icons/{id}.webp"}
-
-
-SPECIES = [
-    _f("glimmer_minnow", "Glimmer Minnow", "common", 0.1, 0.6, 8, 0.2, 0.25, "steady", "worm", "Schools of them turn the shallows to liquid silver."),
-    _f("azure_perch", "Azure Perch", "common", 0.4, 2.2, 14, 0.28, 0.3, "steady", "worm", "Its stripes are said to be painted by the Angel of the Tides."),
-    _f("lagoon_carp", "Lagoon Carp", "uncommon", 2, 9, 32, 0.38, 0.32, "thrasher", "worm", "Fat, lazy and stubborn as a temple guard."),
-    _f("coral_snapper", "Coral Snapper", "uncommon", 1.5, 7, 40, 0.42, 0.45, "runner", "glow_shrimp", "Grows tiny coral gardens along its spine."),
-    _f("moonfin_trout", "Moonfin Trout", "rare", 3, 12, 95, 0.52, 0.5, "jumper", "glow_shrimp", "Only rises when the moons kiss the falls."),
-    _f("prism_koi", "Prism Koi", "rare", 4, 16, 120, 0.55, 0.55, "steady", "glow_shrimp", "Splits sunlight into a hundred tiny rainbows."),
-    _f("stormscale_pike", "Stormscale Pike", "epic", 10, 40, 320, 0.7, 0.68, "diver", "star_lure", "Its bite carries the thunder of distant storms."),
-    _f("crystal_angelfish", "Crystal Angelfish", "epic", 6, 28, 360, 0.68, 0.72, "jumper", "star_lure", "A halo of light follows it wherever it swims."),
-    _f("golden_sunray", "Golden Sunray", "legendary", 40, 180, 1500, 0.85, 0.8, "runner", "star_lure", "It glides beneath the lagoon like a fallen sun."),
-    _f("starwhale", "Mythic Starwhale", "mythic", 300, 900, 8000, 1.0, 0.9, "diver", "star_lure", "A whole night sky lives inside its body."),
+FISH = []
+_id = 1
+for _wk, _rows in _FISH.items():
+    for (_n, _r, _mn, _mx, _b, _vm, _blurb, _bait) in _rows:
+        FISH.append({"id": _id, "name": _n, "water": _wk, "rarity": RARITY[_r], "min_kg": _mn, "max_kg": _mx,
+                     "behavior": _b, "value_mod": _vm, "blurb": _blurb, "baitable": _bait})
+        _id += 1
+# Later additions keep their own ids (appended after the originals so existing journals/catches stay valid).
+_FISH_EXTRA = [
+    # (name, water, rarity, min_kg, max_kg, behaviour, value_mod, blurb, baitable)
+    ("Reed King Wels", "millbrook", "L", 45.0, 140.0, "sluggish", 2.2, "A wels catfish that has eaten every duck the village ever lost.", False),
+    ("Riverlord Taimen", "willow", "L", 30.0, 105.0, "runner", 2.4, "The great salmonid of the upper river. Takes a whole pool to turn.", False),
+    ("Greyfell Lake Sturgeon", "greyfell", "L", 80.0, 300.0, "diver", 2.3, "Older than the boathouse. Rises once a decade.", False),
+    ("Goliath Grouper", "saltmarsh", "L", 90.0, 320.0, "diver", 2.4, "Sits in the channel mouth like a sunken barrel and swallows the tide.", False),
+    ("Harrow Swordfish", "harrow", "L", 100.0, 450.0, "jumper", 2.6, "Runs the kelp gullies at dusk with a blade the length of a man.", False),
+    ("Giant Trevally", "coral", "L", 25.0, 80.0, "runner", 2.6, "The reef bully. Hits like a dropped anvil and never stops.", False),
+    ("Blackwater Goonch", "blackwater", "L", 60.0, 180.0, "diver", 2.5, "A devil catfish of the dark roots. The villagers do not swim here.", False),
+    ("Old Reach Wolffish", "frozen", "L", 15.0, 40.0, "thrasher", 2.9, "Teeth like a smith's tongs. Bites the ice-hole rim on the way up.", False),
+    ("Giant Oarfish", "sunken", "L", 90.0, 270.0, "steady", 2.7, "The sailors' sea serpent, ribbon-bodied and eleven metres long.", False),
+    ("The Mill Giant", "millbrook", "M", 120.0, 300.0, "sluggish", 3.0, "A Siamese giant barb, the largest carp-like fish on earth, with scales the size of saucers. A sailor brought it home as a fingerling eighty years ago and tipped it in the millpond.", False),
+    ("The Last Paddlefish", "willow", "M", 150.0, 450.0, "steady", 3.0, "A Chinese paddlefish, seven metres of grey-blue body behind a sword of a snout. Declared extinct from every river in the world. Every river but this one.", False),
+    ("The Greyfell Perch", "greyfell", "M", 90.0, 230.0, "runner", 3.0, "A Nile perch of impossible size, silver-grey with a black eye ringed in gold. It took the lake in a single generation and now nothing else grows old here.", False),
+    ("The Channel Hammer", "saltmarsh", "M", 200.0, 450.0, "runner", 3.0, "A great hammerhead that patrols the estuary mouth on the flood tide. Its dorsal fin stands a metre clear of the water and the wading birds go silent.", False),
+    ("The Grey Pilgrim", "harrow", "M", 900.0, 2400.0, "steady", 3.0, "A basking shark that appears off the Point once a generation, mouth wide, drifting through the plankton like a slow grey cathedral.", False),
+    ("The Sunfire Manta", "coral", "M", 700.0, 1800.0, "jumper", 3.0, "A giant oceanic manta with a seven-metre span, its back lit gold by the drop-off light. It breaches at dusk and the whole reef hears it land.", False),
+    ("The Fanged Warden", "blackwater", "M", 30.0, 70.0, "thrasher", 3.0, "A goliath tigerfish, thirty-two teeth like a dog's and eyes that catch the lamp. The villagers do not swim here, and this is why.", False),
+    ("The Ice Sleeper", "frozen", "M", 400.0, 1000.0, "diver", 3.0, "A Pacific sleeper shark, seven metres of slate-grey muscle that rises under the ice-hole without a sound. It has never been in a hurry.", False),
+    ("The Hadal Wanderer", "sunken", "M", 4000.0, 12000.0, "steady", 3.0, "A whale shark, the largest fish that has ever lived, spotted like a night sky. It passes through the Deep once a year and the sea goes dark beneath the boat.", False),
+    ("The Stone Lamprey", "ghostlight", "M", 60.0, 180.0, "diver", 3.0, "A pale, eyeless lamprey four metres long, older than the fungus light. It fastens to the rock and waits, and it has been waiting a very long time.", False),
 ]
-SPECIES_BY_ID = {s["id"]: s for s in SPECIES}
-
-BEHAVIOR_TRICKS = {
-    "steady": ["rally"], "runner": ["run", "rally"], "thrasher": ["shake", "dive"],
-    "diver": ["dive", "dive", "shake"], "jumper": ["shake", "run"],
+# Former pond strains (304-311) now live at The Drowned Temple; 320+ are the late-game waters' own species.
+_FISH_FIXED = [
+    # (id, name, water, rarity, min_kg, max_kg, behaviour, value_mod, blurb, baitable)
+    (304, "Crucian Carp", "temple", "C", 0.3, 2.5, "sluggish", 1.3, "A deep-bodied golden carp that thrives where nothing else will. The temple monks kept it in the lower pools.", True),
+    (305, "Tench", "temple", "C", 0.8, 5.0, "steady", 1.3, "Olive-green and slime-skinned, the 'doctor fish' of old ponds. Feeds at dawn along the sunken stair roots.", True),
+    (306, "Mirror Carp", "temple", "U", 3.0, 25.0, "sluggish", 1.5, "A carp with a scatter of oversized mirror scales along its flank, each one different. Monks bred it for the table.", False),
+    (307, "Golden Orfe", "temple", "U", 0.5, 4.0, "runner", 1.6, "A slim orange-gold ide that cruises the surface in shoals and bolts at a shadow.", True),
+    (308, "Grass Carp", "temple", "R", 5.0, 35.0, "runner", 1.8, "A torpedo of a fish that eats the weed the lake would otherwise drown in. Runs like a train when hooked.", False),
+    (309, "Ghost Koi", "temple", "R", 2.0, 15.0, "steady", 2.2, "A metallic koi with a pale skull-marked head that seems to float above the mud. Prized by collectors.", False),
+    (310, "Sterlet", "temple", "E", 3.0, 16.0, "diver", 2.6, "A small sturgeon with a pointed snout and rows of bony stars, ancient and slow to grow.", False),
+    (311, "The Old Koi", "temple", "L", 15.0, 40.0, "sluggish", 3.2, "A vast red-and-white koi said to be older than the temple's last abbot. It surfaces once a season and every angler talks about it.", False),
+    (320, "Giant Gourami", "temple", "C", 1.0, 8.0, "sluggish", 1.4, "A broad, flat-faced gourami that sips air at the surface between the lotus pads.", True),
+    (321, "Silver Barb", "temple", "C", 0.2, 1.2, "runner", 1.3, "Quick silver shoals that flash around the drowned pillars like thrown coins.", True),
+    (322, "Siamese Mud Carp", "temple", "C", 0.3, 2.0, "steady", 1.3, "A humble grey carp that grazes the algae off the temple's carved faces.", True),
+    (323, "Clown Featherback", "temple", "U", 1.0, 6.0, "jumper", 1.7, "A knife-shaped fish with a row of black eye-spots, gliding backwards along the stone ledges.", False),
+    (324, "Bighead Carp", "temple", "U", 5.0, 40.0, "sluggish", 1.6, "An enormous-headed filter feeder that hangs in the green water like a sunken lantern.", False),
+    (325, "Golden Mahseer", "temple", "R", 5.0, 45.0, "runner", 2.4, "The tiger of the river, armoured in gold coin scales. Its first run has broken more rods than any rock.", False),
+    (326, "Giant Snakehead", "temple", "R", 3.0, 20.0, "thrasher", 2.3, "A red-striped ambusher that guards the temple doorways and strikes at anything that moves.", False),
+    (327, "Asian Arowana", "temple", "E", 2.0, 8.0, "jumper", 3.3, "The dragon fish of the old emperors, scales edged in red gold. Leaps clear of the water for falling insects.", False),
+    (328, "Black Carp", "temple", "E", 20.0, 70.0, "diver", 2.9, "A coal-dark carp that crushes snails with teeth in its throat. It lives at the foot of the deepest stair.", False),
+    (329, "Mekong Giant Catfish", "temple", "L", 150.0, 350.0, "diver", 2.7, "A toothless grey giant as long as a boat, said to carry the souls of drowned monks. It takes an hour to raise.", False),
+    (330, "Temple Bell Carp", "temple", "L", 90.0, 240.0, "sluggish", 2.8, "A carp so vast the monks once hung a bronze bell from its fin. On still nights you can still hear it ring under the water.", False),
+    (331, "The Jade Sovereign", "temple", "M", 60.0, 160.0, "jumper", 3.1, "A colossal arowana with scales of living jade, older than the temple itself. When it leaps, the whole lake goes quiet and the stone faces seem to watch.", False),
+    (332, "The Naga of the Steps", "temple", "M", 120.0, 320.0, "thrasher", 3.1, "A serpent-long giant snakehead with seven red bands, coiled around the sunken stairway. The old carvings on the walls are of this fish.", False),
+    (340, "Sablefish", "cinder", "C", 1.0, 12.0, "steady", 1.6, "A soot-black cod of the warm vents, oily and rich enough to fry in its own fat.", True),
+    (341, "Blackbelly Rosefish", "cinder", "C", 0.3, 2.0, "steady", 1.5, "A red, spiny scorpionfish that rests on the ash slopes with its mouth open.", True),
+    (342, "Ashfin Cusk-eel", "cinder", "C", 0.5, 4.0, "thrasher", 1.5, "A grey, eel-like fish that burrows in warm volcanic sand and wriggles out at the scent of bait.", True),
+    (343, "Pumice Lizardfish", "cinder", "C", 0.2, 1.5, "jumper", 1.5, "A long-jawed ambusher that lies buried in pumice gravel with only its eyes showing.", True),
+    (344, "Orange Roughy", "cinder", "U", 1.0, 7.0, "steady", 1.8, "A deep-red fish that can live for two hundred years in the cold beside the hot vents.", False),
+    (345, "Basalt Rockfish", "cinder", "U", 1.0, 9.0, "diver", 1.8, "Mottled grey and black like cooled lava. It dives straight back into its crack when hooked.", False),
+    (346, "Ember Lanternshark", "cinder", "U", 1.5, 6.0, "runner", 1.9, "A small shark with a glowing orange belly that hides its silhouette against the vent light.", False),
+    (347, "Vent Hagfish", "cinder", "U", 0.5, 3.0, "thrasher", 1.7, "A slimy, eyeless scavenger that ties itself in knots to escape. Your landing net will never be clean again.", False),
+    (348, "Frilled Shark", "cinder", "R", 4.0, 16.0, "thrasher", 2.4, "A living fossil with an eel's body and three hundred trident-shaped teeth. Its gills ruffle like a collar.", False),
+    (349, "Pacific Halibut", "cinder", "R", 20.0, 200.0, "diver", 2.2, "A flatfish the size of a barn door that lies flat on the trench floor and rises like a lid.", False),
+    (350, "Magma Tilefish", "cinder", "R", 3.0, 25.0, "runner", 2.4, "Banded gold and red, it digs burrows in the warm ash and bolts for them at the first pull.", False),
+    (351, "Smalltooth Sand Tiger", "cinder", "R", 80.0, 300.0, "diver", 2.3, "A heavy, spotted deep-water shark with a mouth full of crooked needle teeth.", False),
+    (352, "Obsidian Chimaera", "cinder", "E", 3.0, 15.0, "jumper", 3.2, "A ghost shark with skin like black glass and huge green eyes. It flaps through the dark like a bird.", False),
+    (353, "Ocean Sunfish", "cinder", "E", 250.0, 1000.0, "sluggish", 2.9, "A giant round fish that looks like a head with no body. It rises to bask in the warm vent water.", False),
+    (354, "Cinderjaw Moray", "cinder", "E", 8.0, 30.0, "thrasher", 3.2, "A huge moray with scorched-orange jaws that lives inside a still-warm lava tube.", False),
+    (355, "Great White Shark", "cinder", "L", 600.0, 2000.0, "diver", 2.7, "The ocean's most feared hunter, drawn to the trench by the warm water. It circles the boat before it bites.", False),
+    (356, "Tiger Shark", "cinder", "L", 300.0, 700.0, "runner", 2.7, "A striped garbage-gut of the deep that will eat anything, including your other fish.", False),
+    (357, "Warsaw Grouper", "cinder", "L", 150.0, 300.0, "diver", 2.6, "A dark, ancient grouper that lives in the cooled lava caves and swallows sharks whole.", False),
+    (358, "The Last Megalodon", "cinder", "M", 12000.0, 30000.0, "diver", 3.2, "A shark the size of a whale that should have died out millions of years ago. The vents kept it warm. Its teeth are as big as your hand.", False),
+    (359, "The Caldera Wyrm", "cinder", "M", 800.0, 2200.0, "thrasher", 3.1, "A twelve-metre frilled giant with a glowing red throat, born in the heart of the undersea volcano. Sailors say the water boils where it surfaces.", False),
+]
+for (_i, _n, _wk, _r, _mn, _mx, _b, _vm, _blurb, _bait) in _FISH_FIXED:
+    FISH.append({"id": _i, "name": _n, "water": _wk, "rarity": RARITY[_r], "min_kg": _mn, "max_kg": _mx,
+                 "behavior": _b, "value_mod": _vm, "blurb": _blurb, "baitable": _bait})
+_id = 285  # 282-284 belong to the secret fish (secrets_data.py)
+for (_n, _wk, _r, _mn, _mx, _b, _vm, _blurb, _bait) in _FISH_EXTRA:
+    FISH.append({"id": _id, "name": _n, "water": _wk, "rarity": RARITY[_r], "min_kg": _mn, "max_kg": _mx,
+                 "behavior": _b, "value_mod": _vm, "blurb": _blurb, "baitable": _bait})
+    _id += 1
+from halloween_data import HALLOW_FISH, HALLOW_WATER  # noqa: E402
+FISH.extend(HALLOW_FISH)
+FISH_BY_ID = {f["id"]: f for f in FISH}
+# Species that share a name across waters (Burbot at Willow and Greyfell, ...) are the same fish for orders and contracts.
+SAME_SPECIES = {f["id"]: {g["id"] for g in FISH if g["name"] == f["name"]} for f in FISH}
+FISH_BY_WATER = {w["key"]: [f for f in FISH if f["water"] == w["key"]] for w in WATERS}
+FISH_BY_WATER[HALLOW_WATER] = list(HALLOW_FISH)
+# Bait-only species: these fish (by name) only bite on the listed baits; any other bait gives a token chance (BAIT_ONLY_OTHER).
+BAIT_ONLY = {
+    "Common Carp": ["bait_bread", "bait_cricket"], "Northern Pike": ["bait_minnow", "bait_lure"], "Escaped Koi": ["bait_bread", "bait_cricket"],
+    "Brown Trout": ["bait_cricket", "bait_lure", "bait_worm"], "Zander": ["bait_minnow", "bait_lure"], "Redfish": ["bait_bloodworm", "bait_shrimp"],
+    "Tarpon": ["bait_live", "bait_sardine", "bait_cut"], "Mahi-Mahi": ["bait_sardine", "bait_squid", "bait_lure"], "Sailfish": ["bait_sardine", "bait_live"],
+    "Coelacanth": ["bait_lantern", "bait_glow", "craft_glowpaste"], "Ghostlight Wraithfish": ["bait_lantern", "bait_glow", "craft_glowpaste"],
+    "Greenland Shark": ["bait_cut", "bait_sardine", "bait_roe"], "Wolffish": ["bait_cut", "bait_squid"], "Giant Trevally": ["bait_live", "bait_moonfly", "bait_lure"],
 }
+BAIT_ONLY_OTHER = 0.04  # weight multiplier for a bait-only species when the angler uses anything else
+for _f in FISH:
+    if _f["name"] in BAIT_ONLY: _f["bait_only"] = BAIT_ONLY[_f["name"]]
+RARE_SET_WEAR_SKIP = 0.5  # rare rod + reel + line: half of all wear is skipped
 
-GEAR = {
-    "rod": [
-        {"tier": 1, "name": "Willow Rod", "stat": 1.0, "price": 0, "level": 1, "br": 300, "dur": 120},
-        {"tier": 2, "name": "Coral Spine Rod", "stat": 1.15, "price": 2500, "level": 5, "br": 900, "dur": 160},
-        {"tier": 3, "name": "Moonsilver Rod", "stat": 1.3, "price": 12000, "level": 12, "br": 2200, "dur": 200},
-        {"tier": 4, "name": "Seraph Wing Rod", "stat": 1.5, "price": 60000, "level": 25, "br": 5200, "dur": 260},
-        {"tier": 5, "name": "Celestial Trident Rod", "stat": 1.75, "price": 250000, "level": 40, "br": 11000, "dur": 320},
-    ],
-    "reel": [
-        {"tier": 1, "name": "Brass Reel", "stat": 1.0, "price": 0, "level": 1, "br": 250, "dur": 120},
-        {"tier": 2, "name": "Tidecaller Reel", "stat": 1.15, "price": 2000, "level": 5, "br": 750, "dur": 160},
-        {"tier": 3, "name": "Pearl Reel", "stat": 1.3, "price": 10000, "level": 12, "br": 1900, "dur": 200},
-        {"tier": 4, "name": "Stormheart Reel", "stat": 1.5, "price": 50000, "level": 25, "br": 4500, "dur": 260},
-        {"tier": 5, "name": "Leviathan Reel", "stat": 1.75, "price": 200000, "level": 40, "br": 9500, "dur": 320},
-    ],
-    "line": [
-        {"tier": 1, "name": "Hemp Line", "stat": 1.0, "price": 0, "level": 1, "br": 200, "dur": 100},
-        {"tier": 2, "name": "Silk Line", "stat": 1.15, "price": 1500, "level": 5, "br": 600, "dur": 140},
-        {"tier": 3, "name": "Mithril Line", "stat": 1.3, "price": 7500, "level": 12, "br": 1500, "dur": 180},
-        {"tier": 4, "name": "Phoenix Line", "stat": 1.5, "price": 36000, "level": 25, "br": 3600, "dur": 230},
-        {"tier": 5, "name": "Starweave Line", "stat": 1.75, "price": 150000, "level": 40, "br": 7800, "dur": 280},
-    ],
-}
-GEAR_SLOTS = ["rod", "reel", "line"]
+# Secret catches live in FISH (journal, art, species pages) but never in the water pools: pick_species can't roll them.
+from secrets_data import SECRET_FISH  # noqa: E402
+FISH.extend(SECRET_FISH)
+FISH_BY_ID.update({f["id"]: f for f in SECRET_FISH})
+# Crab Cage species: journal/market/inventory like any fish, but only caught by cages, never on a rod.
+from cages_data import CAGE_FISH  # noqa: E402
+FISH.extend(CAGE_FISH)
+FISH_BY_ID.update({f["id"]: f for f in CAGE_FISH})
+SAME_SPECIES.update({f["id"]: {f["id"]} for f in CAGE_FISH})
+# Completion pool of a water = its rod fish + its 5 cage critters (variants stay rod-only: cage critters have none).
+WATER_POOL = {k: v + [f for f in CAGE_FISH if f["water"] == k] for k, v in FISH_BY_WATER.items()}
 
-ENHANCE_MAX = 15
-ENHANCE_CHANCE = [1.0, 0.95, 0.9, 0.85, 0.8, 0.7, 0.6, 0.5, 0.42, 0.35, 0.28, 0.22, 0.17, 0.13, 0.1]
-
-ITEMS = {
-    "worm": {"name": "Basic Worm", "kind": "bait", "price": 0, "luck": 0.0, "desc": "Unlimited. Gets the job done."},
-    "glow_shrimp": {"name": "Glow Shrimp", "kind": "bait", "price": 50, "luck": 0.35, "desc": "+35% rare bite chance."},
-    "star_lure": {"name": "Starlight Lure", "kind": "bait", "price": 400, "luck": 1.0, "desc": "+100% rare bite chance."},
-    "stamina_potion": {"name": "Stamina Potion", "kind": "potion", "price": 300, "desc": "+30 Stamina (can exceed max)."},
-    "enhance_stone": {"name": "Enhance Stone", "kind": "material", "price": 150, "desc": "Used to enhance gear."},
-    "protection_scroll": {"name": "Protection Scroll", "kind": "material", "price": 2000, "desc": "Prevents enhance level loss on failure."},
-}
-
-BASE_STAMINA = 100
-STAMINA_REGEN_SEC = 180
-WINGS_BR = 2400
-PET_BR = 1500
-FISHDEX_BR = 80
-LEVEL_BR = 150
-MAX_LEVEL = 200
-
-
-def xp_needed(level: int) -> int:
-    return int(80 * level ** 1.6)
-
-
-def gear_def(slot: str, tier: int) -> dict:
-    return GEAR[slot][tier - 1]
-
-
-def public_data() -> dict:
-    return {
-        "waters": WATERS, "species": SPECIES, "gear": GEAR, "items": ITEMS, "variants": VARIANTS,
-        "enhance_chance": ENHANCE_CHANCE, "enhance_max": ENHANCE_MAX,
-        "xp_table": [xp_needed(i) for i in range(1, MAX_LEVEL + 1)],
-    }
+RODS = [
+    {"id": "rod_cane", "name": "Cane Pole", "tier": 1, "price": 0, "power": 1.0, "control": 1.0, "desc": "A bamboo pole and a prayer."},
+    {"id": "rod_fibre", "name": "Fibreglass Rod", "tier": 2, "price": 250, "power": 1.15, "control": 1.06, "desc": "Forgiving and tough."},
+    {"id": "rod_graphite", "name": "Graphite Spinning Rod", "tier": 3, "price": 900, "power": 1.3, "control": 1.15, "desc": "Light, sensitive, quick."},
+    {"id": "rod_surf", "name": "Heavy Surf Rod", "tier": 4, "price": 2800, "power": 1.5, "control": 1.22, "desc": "Built for the breakers."},
+    {"id": "rod_match", "name": "Carbon Match Rod", "tier": 5, "price": 7500, "power": 1.7, "control": 1.35, "desc": "Tournament-grade carbon."},
+    {"id": "rod_troll", "name": "Offshore Trolling Rod", "tier": 6, "price": 20000, "power": 2.0, "control": 1.45, "desc": "Roller guides, gimbal butt."},
+    {"id": "rod_deep", "name": "Deepwater Composite", "tier": 7, "price": 55000, "power": 2.3, "control": 1.6, "desc": "Bends double and never breaks."},
+    {"id": "rod_heirloom", "name": "Master's Heirloom Rod", "tier": 8, "price": 160000, "power": 2.8, "control": 1.8, "desc": "Passed down four generations of legends."},
+    {"id": "rod_titan", "name": "Titan Stand-Up Rod", "tier": 9, "price": 420000, "power": 3.2, "control": 2.0, "desc": "Bent-butt, unbreakable. Built for fish that should not exist."},
+    # Rare gear: level-locked, some priced in gold + Pearls. Something to work towards.
+    {"id": "rod_willow", "name": "Riverkeeper's Willow Rod", "tier": 4, "price": 4500, "level": 8, "rare": True, "power": 1.6, "control": 1.3, "desc": "Cut from the oldest willow on the river. Bends like water."},
+    {"id": "rod_storm", "name": "Stormbreaker Rod", "tier": 6, "price": 32000, "level": 18, "rare": True, "power": 2.15, "control": 1.5, "desc": "Forged for the anglers who fish through gales."},
+    {"id": "rod_gaff", "name": "Leviathan Gaff Rod", "tier": 7, "price": 90000, "pearls": 15, "level": 25, "rare": True, "power": 2.55, "control": 1.7, "desc": "Bone-white and heavy. Made for things that pull back."},
+    {"id": "rod_hexwood", "name": "Hexwood Rod", "tier": 9, "price": 260000, "level": 30, "rare": True, "event": "halloween", "power": 3.2, "control": 2.1, "hex_hook": 0.08, "no_wear": True, "perk": "Hex Hook: 8% of the fish you land bring a twin of the same species, in every water, all year. Never wears out.", "desc": "Carved from a lightning-struck witch elm. Hex Hook: 8% of the fish you land bring a twin of the same species with them, in every water, all year. Never wears out. Only from the Marsh Witch at Halloween, or from another angler on the Market."},
+    {"id": "rod_shoalcaller", "name": "Shoalcaller Rod", "tier": 5, "price": 12000, "pearls": 5, "level": 15, "rare": True, "bound": True, "power": 1.8, "control": 1.4, "bite_bonus": 6,
+     "milestones": [["catches", 2000], ["cheers", 25], ["friends_together", 3]], "perk": "Shoal Call: +6% bite chance on every cast.",
+     "desc": "Strung with shells that hum under the water. Shoals turn towards it."},
+    {"id": "rod_fellowship", "name": "Fellowship Ash Rod", "tier": 6, "price": 35000, "pearls": 10, "level": 20, "rare": True, "bound": True, "power": 2.1, "control": 1.55, "xp_bonus": 0.15,
+     "milestones": [["catches", 5000], ["recruits", 3], ["friends_together", 5]], "perk": "Fellowship: +15% XP from every fish you land.",
+     "desc": "Five ribbons, one for each friend who stood on the bank beside you."},
+    {"id": "rod_duelist", "name": "Duelist's Rapier Rod", "tier": 7, "price": 90000, "pearls": 20, "level": 28, "rare": True, "bound": True, "power": 2.5, "control": 1.8, "free_cast": 0.10,
+     "milestones": [["catches", 7500], ["duel_wins", 100], ["tournament_wins", 1]], "perk": "Quickdraw: 10% of your casts cost no energy.",
+     "desc": "A swept hilt for a grip. Fast, cruel and only handed to proven duellists."},
+    {"id": "rod_giantsbane", "name": "Giantsbane Rod", "tier": 8, "price": 200000, "pearls": 35, "level": 35, "rare": True, "bound": True, "power": 2.95, "control": 1.9, "weight_bonus": 0.15,
+     "milestones": [["catches", 10000], ["boss_kills", 50], ["legendary", 25]], "perk": "Giant Catch: every fish you land weighs 15% more, so it is worth more and can break records.",
+     "desc": "Iron and leviathan bone, studded with the teeth of things it brought in."},
+    {"id": "rod_eternal", "name": "Eternal Tide Rod", "tier": 10, "price": 750000, "pearls": 100, "level": 50, "rare": True, "bound": True, "legendary": True, "power": 3.5, "control": 2.25,
+     "hex_hook": 0.06, "xp_bonus": 0.10, "no_wear": True,
+     "milestones": [["catches", 25000], ["cheers", 500], ["mythic", 10], ["boss_kills", 150], ["friends_together", 5]],
+     "perk": "Eternal Tide: 6% of landed fish bring a twin, +10% XP from every catch, never wears out.",
+     "desc": "Coral that never stopped growing, wound with a tide that never went out. The rod of a lifetime."},
+    {"id": "rod_drowned", "name": "Drowned King's Rod", "tier": 9, "price": 260000, "pearls": 40, "level": 35, "rare": True, "power": 3.1, "control": 2.0, "desc": "Raised from the Sunken Deep, still dripping. Nothing pulls harder."},
+    # Crate-only rods: never in the shop, only from crates or another angler on the Market. "price" is their reference value.
+    {"id": "rod_coral", "name": "Reefsong Coral Rod", "tier": 5, "price": 30000, "level": 10, "rare": True, "crate": True, "crate_rarity": "epic", "power": 1.75, "control": 1.4, "bite_bonus": 5, "luck_bonus": 2,
+     "perk": "Reef Song: +5% bite chance and +2 luck on every cast.", "desc": "Living coral grown around a whalebone core. Reef fish swear it sings."},
+    {"id": "rod_moonreed", "name": "Moonreed Rod", "tier": 6, "price": 80000, "level": 15, "rare": True, "crate": True, "crate_rarity": "epic", "power": 2.1, "control": 1.6, "xp_bonus": 0.12, "free_cast": 0.05,
+     "perk": "Moonlit: +12% XP from every fish and 5% of casts cost no energy.", "desc": "A single reed cut under a full moon, silvered with its light."},
+    {"id": "rod_tempest", "name": "Tempest Fang Rod", "tier": 8, "price": 250000, "level": 22, "rare": True, "crate": True, "crate_rarity": "legendary", "power": 2.9, "control": 1.95, "free_cast": 0.10, "weight_bonus": 0.08, "no_wear": True,
+     "perk": "Stormcharged: 10% of casts cost no energy, fish weigh 8% more, never wears out.", "desc": "A shark's fang set in storm-forged steel. Lightning still crawls along it."},
+    {"id": "rod_jade", "name": "Emerald Wyrm Rod", "tier": 9, "price": 600000, "level": 28, "rare": True, "crate": True, "crate_rarity": "legendary", "power": 3.3, "control": 2.1, "luck_bonus": 4, "weight_bonus": 0.12, "xp_bonus": 0.10, "no_wear": True,
+     "perk": "Wyrmscale: +4 luck, fish weigh 12% more, +10% XP, never wears out.", "desc": "Carved from jade that glows like a sea-dragon's eye. Fish feel it before they see it."},
+    {"id": "rod_starfall", "name": "Starfall Rod", "tier": 10, "price": 1500000, "level": 35, "rare": True, "crate": True, "crate_rarity": "mythic", "power": 3.6, "control": 2.3, "hex_hook": 0.10, "xp_bonus": 0.15, "free_cast": 0.06, "no_wear": True,
+     "perk": "Falling Star: 10% of landed fish bring a twin, +15% XP, 6% free casts, never wears out.", "desc": "The night sky poured into a rod. A comet still trails the line."},
+    {"id": "rod_abyssal", "name": "Abyssal Crown Rod", "tier": 11, "price": 4000000, "level": 40, "rare": True, "crate": True, "crate_rarity": "mythic", "power": 4.0, "control": 2.5, "hex_hook": 0.15, "weight_bonus": 0.20, "xp_bonus": 0.20, "luck_bonus": 6, "bite_bonus": 6, "free_cast": 0.08, "no_wear": True,
+     "perk": "Crown of the Deep: 15% twin catches, fish weigh 20% more, +20% XP, +6 luck, +6% bite, 8% free casts, never wears out.", "desc": "The crown of a drowned sea-king, fused to obsidian. The rarest rod in the Lands."},
+]
+REELS = [
+    {"id": "reel_spool", "name": "Basic Spool", "tier": 1, "price": 0, "recovery": 1.0, "desc": "A wooden spool."},
+    {"id": "reel_spin", "name": "Spinning Reel", "tier": 2, "price": 400, "recovery": 1.15, "desc": "Smooth enough."},
+    {"id": "reel_bait", "name": "Baitcaster", "tier": 3, "price": 1600, "recovery": 1.3, "desc": "Precise and fast."},
+    {"id": "reel_drag", "name": "Sealed Drag Reel", "tier": 4, "price": 6000, "recovery": 1.5, "desc": "Saltwater-sealed carbon drag."},
+    {"id": "reel_biggame", "name": "Big Game Reel", "tier": 5, "price": 24000, "recovery": 1.75, "desc": "Two-speed lever drag."},
+    {"id": "reel_tourn", "name": "Precision Tournament Reel", "tier": 6, "price": 90000, "recovery": 2.0, "desc": "Machined from a single billet."},
+    {"id": "reel_deepdrag", "name": "Deepwater Lever Drag", "tier": 7, "price": 55000, "recovery": 2.2, "desc": "Carbon washers the size of saucers."},
+    {"id": "reel_heirloom", "name": "Master's Heirloom Reel", "tier": 8, "price": 160000, "recovery": 2.45, "desc": "Brass and steel, kept oiled for eighty years."},
+    {"id": "reel_titan", "name": "Titan Electric Winch", "tier": 9, "price": 420000, "recovery": 2.75, "desc": "Geared like a ship's capstan. Hauls the deep up to the light."},
+    {"id": "reel_brass", "name": "Brass Fly Reel", "tier": 3, "price": 2800, "level": 7, "rare": True, "recovery": 1.4, "desc": "Old brass, new bearings. Sings when a fish runs."},
+    {"id": "reel_winch", "name": "Harpooner's Winch", "tier": 5, "price": 45000, "pearls": 8, "level": 20, "rare": True, "recovery": 1.88, "desc": "Salvaged whaling gear, geared for brutes."},
+    {"id": "reel_abyss", "name": "Abyssal Lever Drag", "tier": 7, "price": 150000, "pearls": 30, "level": 32, "rare": True, "recovery": 2.25, "desc": "Sealed against a pressure no angler has felt."},
+    {"id": "reel_drowned", "name": "Drowned King's Winch", "tier": 9, "price": 260000, "pearls": 40, "level": 35, "rare": True, "recovery": 2.9, "desc": "Raised beside the rod, barnacled and turning still. It never tires."},
+]
+LINES = [
+    {"id": "line_cotton", "name": "Cotton Line", "tier": 1, "price": 0, "tolerance": 1.0, "desc": "Snaps if you look at it wrong."},
+    {"id": "line_mono", "name": "Monofilament", "tier": 2, "price": 300, "tolerance": 1.1, "desc": "Stretchy and reliable."},
+    {"id": "line_fluoro", "name": "Fluorocarbon", "tier": 3, "price": 1300, "tolerance": 1.22, "desc": "Invisible underwater."},
+    {"id": "line_braid", "name": "Braided Line", "tier": 4, "price": 4500, "tolerance": 1.38, "desc": "Thin, strong, zero stretch."},
+    {"id": "line_wire", "name": "Wire Leader Rig", "tier": 5, "price": 18000, "tolerance": 1.55, "desc": "Teeth-proof."},
+    {"id": "line_kevlar", "name": "Kevlar Braid", "tier": 6, "price": 65000, "tolerance": 1.8, "desc": "Could tow a boat."},
+    {"id": "line_hollow", "name": "Hollow-Core Braid", "tier": 7, "price": 55000, "tolerance": 2.0, "desc": "Spliced, not knotted. No weak point anywhere."},
+    {"id": "line_heirloom", "name": "Master's Heirloom Line", "tier": 8, "price": 160000, "tolerance": 2.25, "desc": "Silk-steel weave, spun by hand for one family."},
+    {"id": "line_titan", "name": "Titan Cable Braid", "tier": 9, "price": 420000, "tolerance": 2.55, "desc": "Rated for things measured in tonnes."},
+    {"id": "line_silk", "name": "Waxed Silk Line", "tier": 3, "price": 2600, "level": 6, "rare": True, "tolerance": 1.3, "desc": "Hand-waxed by the dockside widows. Forgiving."},
+    {"id": "line_dyneema", "name": "Deep-Sea Dyneema", "tier": 5, "price": 30000, "pearls": 6, "level": 17, "rare": True, "tolerance": 1.68, "desc": "Thinner than a hair, stronger than the wire."},
+    {"id": "line_sinew", "name": "Leviathan Sinew", "tier": 7, "price": 120000, "pearls": 25, "level": 30, "rare": True, "tolerance": 2.05, "desc": "Cured tendon of something enormous. It does not snap."},
+    {"id": "line_drowned", "name": "Drowned King's Line", "tier": 9, "price": 260000, "pearls": 40, "level": 35, "rare": True, "tolerance": 2.7, "desc": "Woven from the anchor rope of a ship that never surfaced."},
+]
+BAITS = [
+    {"id": "bait_bread", "name": "Bread Crust", "price": 3, "size": 0, "luck": 0, "bite": 4, "desc": "Cheap and cheerful for pond fish.", "waters": ["millbrook", "willow", "greyfell", "temple"]},
+    {"id": "bait_worm", "name": "Earthworms", "price": 7, "size": 0, "luck": 1, "bite": 6, "desc": "The universal freshwater bait.", "waters": ["millbrook", "willow", "greyfell", "blackwater", "ghostlight", "temple"]},
+    {"id": "bait_maggot", "name": "Maggots", "price": 8, "size": 0, "luck": 1, "bite": 8, "desc": "Wriggly and irresistible to small fish.", "waters": ["millbrook", "willow", "greyfell", "temple"]},
+    {"id": "bait_minnow", "name": "Live Minnows", "price": 18, "size": 1, "luck": 4, "bite": 4, "desc": "For predators. Pike, bass, zander.", "waters": ["millbrook", "willow", "greyfell", "blackwater", "ghostlight", "temple"]},
+    {"id": "bait_shrimp", "name": "Peeled Shrimp", "price": 20, "size": 1, "luck": 4, "bite": 6, "desc": "Estuary and reef favourite.", "waters": ["saltmarsh", "harrow", "coral"]},
+    {"id": "bait_squid", "name": "Squid Strips", "price": 35, "size": 2, "luck": 7, "bite": 5, "desc": "Tough, smelly, sea-fish magnet.", "waters": ["saltmarsh", "harrow", "coral", "frozen", "sunken", "cinder"]},
+    {"id": "bait_lure", "name": "Spinner Lure", "price": 27, "size": 2, "luck": 6, "bite": 2, "desc": "Flash and vibration for hunters.", "waters": None},
+    {"id": "bait_cut", "name": "Cut Bait", "price": 37, "size": 2, "luck": 8, "bite": 4, "desc": "Chunks of oily fish for big mouths.", "waters": ["saltmarsh", "harrow", "coral", "frozen", "sunken", "blackwater", "cinder"]},
+    {"id": "bait_live", "name": "Live Bait", "price": None, "size": 2, "luck": 9, "bite": 5, "desc": "Small fish you caught yourself. Predators love it.", "waters": None},
+    {"id": "bait_chum", "name": "Premium Chum", "price": 68, "size": 3, "luck": 14, "bite": 8, "desc": "Draws in the rare and the ravenous.", "waters": None},
+    {"id": "bait_glow", "name": "Glow Jig", "price": 91, "size": 4, "luck": 20, "bite": 3, "desc": "Bioluminescent jig for the deep and dark.", "waters": ["sunken", "ghostlight", "frozen", "cinder"]},
+    {"id": "bait_cricket", "name": "Crickets", "price": 15, "size": 1, "luck": 2, "bite": 9, "level": 3, "desc": "Loud, lively and impossible for pond fish to ignore.", "waters": ["millbrook", "willow", "greyfell", "temple"]},
+    {"id": "bait_ground", "name": "Groundbait", "price": 10, "size": 0, "luck": 0, "bite": 10, "ground": True, "desc": "Mashed bread, bran and crushed shell. Draws the everyday fish in numbers and keeps the trophies away. Your luck is ignored while it's on the hook.", "waters": None},
+    {"id": "bait_bloodworm", "name": "Bloodworms", "price": 24, "size": 1, "luck": 5, "bite": 7, "level": 6, "desc": "Dug from the mud at low tide. Brackish fish go wild.", "waters": ["saltmarsh", "harrow", "blackwater", "temple"]},
+    {"id": "bait_sardine", "name": "Frozen Sardine", "price": 43, "size": 2, "luck": 9, "bite": 6, "level": 12, "desc": "Whole oily sardine for the big open-water hunters.", "waters": ["harrow", "coral", "frozen", "sunken", "cinder"]},
+    {"id": "bait_moonfly", "name": "Moonfly Lure", "price": 675, "size": 3, "pack": 10, "pearls": 1, "luck": 15, "bite": 5, "level": 15, "rare": True, "desc": "Tied with pale feathers that catch the moon. Works anywhere.", "waters": None},
+    {"id": "bait_lantern", "name": "Abyss Lantern", "price": 1040, "size": 4, "pack": 10, "pearls": 2, "luck": 26, "bite": 4, "level": 24, "rare": True, "desc": "A caged, living lanternfish. Calls the deep things up.", "waters": ["sunken", "ghostlight", "frozen", "cinder"]},
+    {"id": "bait_roe", "name": "Siren's Roe", "price": 1310, "size": 5, "pack": 10, "pearls": 4, "luck": 30, "bite": 8, "level": 30, "rare": True, "desc": "Salt-cured roe from a fish nobody admits to catching.", "waters": ["coral", "harrow", "saltmarsh", "sunken", "cinder"]},
+    {"id": "bait_duel", "name": "Duellist's Chum", "price": None, "size": 3, "luck": 12, "bite": 7, "duel": True, "desc": "Blood, oil and pier sweepings, mixed by the duellists themselves. Works at any water. Earned on the weekly Duel Ladder, never sold for gold.", "waters": None},
+    {"id": "craft_salted", "name": "Salted Cutbait", "price": None, "size": 2, "luck": 10, "bite": 8, "desc": "Crafted. Salt-cured strips of your own catch.", "waters": None, "crafted": True},
+    {"id": "craft_chum", "name": "Oiled Chum Ball", "price": None, "size": 3, "luck": 17, "bite": 7, "desc": "Crafted. Ground fish bound with oil and spice.", "waters": None, "crafted": True},
+    {"id": "craft_glowpaste", "name": "Glow Paste", "price": None, "size": 4, "luck": 28, "bite": 5, "desc": "Crafted. Luminous paste that lures things from the dark.", "waters": ["sunken", "ghostlight", "frozen", "greyfell", "cinder"], "crafted": True},
+    {"id": "craft_secret", "name": "Angler's Secret", "price": None, "size": 5, "luck": 34, "bite": 9, "desc": "Crafted. Nobody sells this. Nobody explains it.", "waters": None, "crafted": True},
+]
+INGREDIENTS = [
+    {"id": "ing_salt", "name": "Sea Salt", "price": 15, "daily_cap": 20, "desc": "Cures and preserves."},
+    {"id": "ing_oil", "name": "Fish Oil", "price": 45, "daily_cap": 16, "desc": "Rendered from the vendor's scraps."},
+    {"id": "ing_spice", "name": "Harbour Spice", "price": 120, "daily_cap": 12, "desc": "A secret blend from the dockside stalls."},
+    {"id": "ing_glow", "name": "Glow Powder", "price": 350, "daily_cap": 8, "desc": "Crushed lanternfish photophores."},
+]
+ING_BY_ID = {i["id"]: i for i in INGREDIENTS}
+# fish: number of baitable fish consumed; ingredients: {id: qty}; yield: bait count
+RECIPES = [
+    {"id": "craft_salted", "fish": 2, "ingredients": {"ing_salt": 1}, "yield": 6},
+    {"id": "craft_chum", "fish": 3, "ingredients": {"ing_oil": 1, "ing_spice": 1}, "yield": 5},
+    {"id": "craft_glowpaste", "fish": 2, "ingredients": {"ing_glow": 1, "ing_oil": 1}, "yield": 4},
+    {"id": "craft_secret", "fish": 5, "ingredients": {"ing_oil": 1, "ing_spice": 1, "ing_glow": 1}, "yield": 3},
+]
+# Pearls only buy cosmetics: gameplay gear and bait cost gold alone.
+for _g in RODS + REELS + LINES + BAITS:
+    _g.pop("pearls", None)
+GEAR_BY_ID = {g["id"]: g for g in RODS + REELS + LINES}
+BAIT_BY_ID = {b["id"]: b for b in BAITS}

@@ -254,3 +254,10 @@ body {
 /* Square phones (e.g. Unihertz Titan): tighter action bar */
 [data-layout="square"] [data-testid="action-bar"] .fr-ring { width: 40px !important; height: 40px !important; }
 [data-layout="square"] [data-testid="action-bar"] .ring-img { width: 44px !important; height: 44px !important; }
+
+.lp2-bg { background-size: cover; background-position: center; animation: lp2-drift 40s ease-in-out infinite alternate; }
+@keyframes lp2-drift { from { transform: scale(1.05) translateX(0); } to { transform: scale(1.12) translateX(-2%); } }
+.lp2-input { background: rgba(10, 6, 3, 0.75); border: 1px solid #8a6417; border-radius: 6px; padding: 0.55rem 0.75rem; color: #fdf1cf; font-size: 0.95rem; outline: none; transition: border-color .2s, box-shadow .2s; }
+.lp2-input:focus { border-color: #f3c24d; box-shadow: 0 0 0 3px rgba(243, 194, 77, 0.18); }
+.fr-panel.absolute { position: absolute; }
+.fr-panel.fixed { position: fixed; }

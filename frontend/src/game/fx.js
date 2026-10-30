@@ -1,6 +1,18 @@
 // Shared mutable state read every frame by the Pixi scene and the tension bar.
 export const fx = {
   phase: "idle",
+  mode: "harbour",
+  me: { x: 400, y: 560 },
+  dest: null,
+  keys: new Set(),
+  near: null,
+  atSpot: null,
+  fishSpot: null,
+  flip: false,
+  moving: false,
+  others: [],
+  autoOpen: null,
+  hue: 0,
   pos: 0.5,
   fill: 0,
   zone: 0,

@@ -2,8 +2,9 @@ import { X } from "lucide-react";
 import { useEffect } from "react";
 import { useGame } from "../../store";
 
-export default function Modal({ title, children, width = 720, testid }) {
-  const close = useGame((s) => s.closeModal);
+export default function Modal({ title, children, width = 720, testid, onClose }) {
+  const storeClose = useGame((s) => s.closeModal);
+  const close = onClose || storeClose;
   useEffect(() => {
     const k = (e) => e.key === "Escape" && close();
     window.addEventListener("keydown", k);
