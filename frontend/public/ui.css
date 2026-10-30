@@ -219,9 +219,10 @@ html body { --bg: #071427 !important; --bg-2: rgba(10, 28, 54, .78) !important; 
 .fl-online i { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; }
 .fl-main { max-width: 1120px; margin: 0 auto; padding: 0 16px 30px; display: flex; flex-direction: column; align-items: center; }
 .fl-side { grid-area: side; display: flex; flex-direction: column; align-items: stretch; }
-.fl-mascot-row { display: flex; align-items: flex-end; gap: 6px; padding-left: 10px; margin-bottom: -28px; position: relative; z-index: 2; }
+.fl-side .fl-card { position: relative; z-index: 2; }
+.fl-mascot-row { display: flex; align-items: flex-end; gap: 6px; padding-left: 26px; margin-bottom: -58px; position: relative; z-index: 1; }
 .fl-mascot { height: 210px; width: auto; transform: scaleX(-1); filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6)); }
-.fl-bubble { max-width: 230px; margin-bottom: 120px; padding: 10px 14px; border-radius: 14px; background: #fff6dc; color: #2a1a08; font-weight: 700; font-size: 14px; box-shadow: 0 6px 14px rgba(0, 0, 0, .5); position: relative; }
+.fl-bubble { max-width: 230px; margin-bottom: 150px; padding: 10px 14px; border-radius: 14px; background: #fff6dc; color: #2a1a08; font-weight: 700; font-size: 14px; box-shadow: 0 6px 14px rgba(0, 0, 0, .5); position: relative; }
 .fl-bubble::before { content: ""; position: absolute; left: -10px; bottom: 16px; border: 10px solid transparent; border-right-color: #fff6dc; border-left: 0; }
 .fl-logo { grid-area: logo; justify-self: center; align-self: end; width: min(460px, 86vw); height: auto; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .6)); }
 .fl-grid { width: 100%; display: grid; gap: 18px; margin-top: 10px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "logo" "side" "shots"; }
@@ -236,4 +237,4 @@ html body .panel.fl-card, html body .panel.fl-login { padding: 16px 18px !import
 .fl-shot figcaption { padding: 6px 10px; font-weight: 700; font-size: 12.5px; color: #fff3cf; background: rgba(6, 16, 32, .9); }
 .fl-foot { display: flex; gap: 16px; justify-content: center; padding: 16px; font-size: 12.5px; color: #a9c1e0; }
 .fl-foot a:hover { color: #ffd27a; }
-@media (max-width: 640px) { .fl-mascot { height: 150px; } .fl-bubble { margin-bottom: 70px; font-size: 12.5px; max-width: 200px; } .fl-shots { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .fl-mascot { height: 170px; } .fl-mascot-row { margin-bottom: -44px; } .fl-bubble { margin-bottom: 100px; font-size: 12.5px; max-width: 200px; } .fl-shots { grid-template-columns: 1fr; } }
