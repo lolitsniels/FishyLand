@@ -596,12 +596,20 @@ function buildScene(app, tex, key, bgTex, mt) {
     const now = performance.now();
     list.forEach((p) => {
       let v = peers.get(p.id);
-      if (!v) { v = makePeer(p); peers.set(p.id, v); actors.addChild(v.c); }
+      if (!v) { v = makePeer(p); v.c.x = p.x; v.c.y = p.y; v.wp = []; peers.set(p.id, v); actors.addChild(v.c); }
+      if (p.x !== v.tx || p.y !== v.ty) {
+        // walk peers along the walk grid (never straight across water); far jumps or off-grid positions snap
+        const far = Math.hypot(p.x - v.c.x, p.y - v.c.y) > 1400 || (tm && !canWalk(v.c.x, v.c.y)) || (tm && !canWalk(p.x, p.y));
+        if (far) { v.c.x = p.x; v.c.y = p.y; v.wp = []; }
+        else v.wp = (tm && tm.nav.path({ x: v.c.x, y: v.c.y }, { x: p.x, y: p.y })) || [{ x: p.x, y: p.y }];
+      }
       v.tx = p.x; v.ty = p.y; v.seen = now; v.phase = p.phase; v.f.setLook(p.look); v.f.setRod(p.rod);
     });
     peers.forEach((v, id) => {
       if (now - v.seen > 4000) { v.c.destroy({ children: true }); peers.delete(id); return; }
-      const dx = v.tx - v.c.x, dy = v.ty - v.c.y, d = Math.hypot(dx, dy);
+      while (v.wp.length > 1 && Math.hypot(v.wp[0].x - v.c.x, v.wp[0].y - v.c.y) < 4) v.wp.shift();
+      const goal = v.wp[0] || { x: v.tx, y: v.ty };
+      const dx = goal.x - v.c.x, dy = goal.y - v.c.y, d = Math.hypot(dx, dy);
       const walking = d > 2;
       if (walking) { const st = Math.min(d, 230 * dt); v.c.x += (dx / d) * st; v.c.y += (dy / d) * st; if (Math.abs(dx) > 1) v.flip = dx < 0; }
       const pd = depth(v.c.y);
@@ -613,6 +621,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       v.f.setAngle(rodAngle(mode, v.phase, walking, time + v.c.x));
       v.c.zIndex = v.c.y;
     });
+    if (QS.has("debugpeers")) window.__peerPos = [...peers.values()].map((v) => ({ x: v.c.x, y: v.c.y, onLand: canWalk(v.c.x, v.c.y) }));
 
     // actors
     hero.setLook(fx.look); hero.setRod(fx.rod || "rod_cane");
