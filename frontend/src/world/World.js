@@ -162,7 +162,7 @@ export default function World() {
   const nearSpot = sceneFor(placeOf(mode, user)).spots.find((x) => x.id === near && !x.fish);
   const wet = mode === "water" || mode === "duel";
   const canFish = wet && !!atSpot;
-  const title = PAGES[page]?.[0] || page;
+  const title = mode === "crew" && page === "crews" ? "Crew Clubhouse" : PAGES[page]?.[0] || page;
   const idle = ph === "idle" && !result && !fightEnc;
   const fishLabel = !wet ? "SAIL" : ph === "fight" ? "REEL" : !idle ? "WAIT" : canFish ? "FISH" : "FIND SPOT";
   const onFish = () => { if (!wet) nav("/game/waters"); else if (fx.phase === "idle" && fx.atSpot) cast(); };

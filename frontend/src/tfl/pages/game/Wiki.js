@@ -18,7 +18,7 @@ const TOC = [
   ["guide", "New player guide"], ["basics", "Getting started"], ["fishing", "Casting & the fight"], ["conditions", "Time, weather & tides"], ["waters", "Waters"], ["fish", "Fish & rarity"], ["mastery", "Fish mastery"],
   ["tackle", "Tackle"], ["crates", "Crates"], ["enhance", "Salvage & enhancement"], ["bait", "Bait & crafting"], ["economy", "Economy & market"], ["levels", "Levels & titles"], ["quests", "Quests & streaks"],
   ["harbour", "Harbour: daily spin & dockside"], ["contracts", "Contract Board & favour"], ["events", "Expeditions & alerts"], ["bosses", "Legendary bosses"], ["secrets", "Secret catches"], ["crews", "Crews & crew hall"], ["duel", "Fishing duels & Duel Ladder"],
-  ["social", "Friends & chat"], ["contests", "Tournaments & crew challenges"], ["achievements", "Achievements"], ["pearls", "Pearls & portraits"], ["recruit", "Recruit an Angler"], ["vote", "Vote for the game"],
+  ["social", "Friends & chat"], ["contests", "Tournaments"], ["achievements", "Achievements"], ["pearls", "Pearls & portraits"], ["recruit", "Recruit an Angler"], ["vote", "Vote for the game"],
 ];
 
 export default function Wiki() {

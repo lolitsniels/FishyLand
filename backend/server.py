@@ -2607,16 +2607,8 @@ async def ensure_contests():
     t = now()
     for c in await db.contests.find({"status": "open", "end": {"$lte": iso(t)}}).to_list(50):
         await close_contest(c)
-    # Solo daily/weekly contests were replaced by buy-in tournaments (tournaments.py); only the weekly crew challenge remains here.
-    for kind in ("weekly",):
-        start, end = period_bounds(kind, t)
-        cats = [crew_contest_category(start)]
-        # Contests from before the rotation existed close early so the board only shows this period's draw.
-        for c in await db.contests.find({"status": "open", "category": {"$nin": cats}}).to_list(20):
-            await close_contest({**c, "end": min(c["end"], iso(t))})
-        for cat in cats:
-            if not await db.contests.find_one({"kind": kind, "category": cat, "start": iso(start)}):
-                await db.contests.insert_one({"kind": kind, "category": cat, "start": iso(start), "end": iso(end), "status": "open", "winners": []})
+    # The weekly crew challenge was retired: nothing new opens and any leftover contest is closed without prizes.
+    await db.contests.update_many({"status": "open"}, {"$set": {"status": "cancelled", "closed_at": iso(t)}})
 
 
 def contest_meta(c):

@@ -7,82 +7,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { api, errMsg, fmt, kg, wt, weightUnit, ago } from "../../lib/api";
+import { api, errMsg, fmt, wt, ago } from "../../lib/api";
 import { useGame } from "../../context/GameContext";
-import { Panel, Empty, Gold } from "../../components/ui-bits";
+import { Panel, Empty } from "../../components/ui-bits";
 import CrewOrder from "../../components/CrewOrder";
 import CrewHall from "../../components/CrewHall";
 import { CrewBoss } from "../../components/CrewBoss";
 import { TABS, CrewTabs, CrewName, CrewHome, WithdrawBox, EmblemColour } from "../../components/CrewTabs";
-import { contestVal, PrizeRow } from "./contestBits";
 import { t as tt } from "../../i18n";
-
-const left = (end) => {
-  const s = Math.max(0, (new Date(end) - Date.now()) / 1000);
-  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
-  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
-};
-
-function CrewChallenges({ myCrewId, focusCrewId }) {
-  const nav = useNavigate();
-  const [c, setC] = useState(null);
-  const [showPast, setShowPast] = useState(false);
-  useEffect(() => {
-    const load = () => api.get("/contests").then((r) => {
-      const cur = r.data.current.find((x) => x.category.startsWith("crew"));
-      const past = r.data.past.filter((x) => x.category.startsWith("crew")).slice(0, 5);
-      const next = (r.data.upcoming || []).find((x) => x.category.startsWith("crew"));
-      setC({ current: cur, past, next });
-    }).catch(() => {});
-    load();
-    const t = setInterval(load, 30000);
-    return () => clearInterval(t);
-  }, []);
-  if (!c) return null;
-  const cur = c.current;
-  return (
-    <>
-      {cur && (
-        <Panel icon="tournaments" title={`Weekly crew challenge · ${cur.label}`} right={
-          <span className="flex items-center gap-2">
-            <span className="num">{tt("ends in")} {left(cur.end)}</span>
-            {c.past.length > 0 && <button className="btn btn-sm" onClick={() => setShowPast((v) => !v)} data-testid="toggle-past-champions">{showPast ? tt("Hide past") : tt("Past champions")}</button>}
-          </span>
-        } bodyClass="!p-0" testId="crew-challenge">
-          <div className="px-3 py-1.5 text-[11.5px] text-[var(--text-2)] italic border-b border-[var(--border)]">{cur.desc} {tt("Gold is split among members; every member gets the Pearls.")}{c.next && <span className="not-italic text-[var(--muted)]"> {tt("Next week:")} <span className="tag">{c.next.label}</span></span>}</div>
-          <PrizeRow c={cur} shared="split" />
-          {cur.standings.length === 0 ? <Empty>{tt("No crews have landed anything yet this week.")}</Empty> : (
-            <table className="table"><tbody>
-              {cur.standings.map((s, i) => (
-                <tr key={s.crew_id} className={(myCrewId === s.crew_id || focusCrewId === s.crew_id) ? "bg-[#1f1714]" : ""} data-testid={`challenge-row-${s.crew_id}`}>
-                  <td className="num text-[var(--muted)] w-8">{i + 1}</td>
-                  <td><button className="hover:text-[var(--gold)] font-medium" onClick={() => nav(`/game/crews/${s.crew_id}`)}>{s.tag ? `[${s.tag}] ${s.name}` : s.username}</button></td>
-                  <td className="num r text-[#ffcfa8]">{contestVal(cur.unit, s.value)}</td>
-                </tr>
-              ))}
-            </tbody></table>
-          )}
-        </Panel>
-      )}
-      {showPast && c.past.length > 0 && (
-        <Panel icon="rankings" title={tt("Past crew champions")} bodyClass="!p-0" testId="crew-past-champions">
-          <table className="table">
-            <thead><tr><th>{tt("Closed")}</th><th>{tt("Challenge")}</th><th>{tt("1st")}</th><th>{tt("2nd")}</th><th>{tt("3rd")}</th></tr></thead>
-            <tbody>
-              {c.past.map((row) => (
-                <tr key={row.id}>
-                  <td className="text-xs text-[var(--muted)]">{new Date(row.end).toLocaleDateString()}</td>
-                  <td className="text-xs">{row.label}</td>
-                  {[0, 1, 2].map((i) => { const w = row.winners[i]; return <td key={i}>{w ? <><span className={i === 0 ? "text-[var(--gold)]" : ""}>{w.tag ? `[${w.tag}] ${w.name}` : w.username}</span> <span className="num text-[11px] text-[var(--muted)]">{contestVal(row.unit, w.value)} · {fmt(w.prize)}{tt("g split")}</span></> : <span className="text-[var(--muted)]">-</span>}</td>; })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
-      )}
-    </>
-  );
-}
+import { fx } from "../../../game/fx";
 
 function CreateCrew({ cost, minLevel, onCreated }) {
   const { user } = useGame();
@@ -201,6 +134,8 @@ function BroadcastBox({ crew, onSent }) {
 const RoleTag = ({ role }) => role === "leader" ? <span className="tag ml-1.5 text-[var(--gold)] border-[var(--gold-dim)]" data-testid="role-leader">{tt("leader")}</span>
   : role === "officer" ? <span className="tag ml-1.5 text-[#8fd0f0] border-[#3a6b85]" data-testid="role-officer">{tt("officer")}</span> : null;
 
+const SailBtn = () => <button type="button" className="btn btn-gold w-full" onClick={() => window.dispatchEvent(new CustomEvent("fr-mode", { detail: "crew" }))} data-testid="go-crew-island">{tt("Sail to your crew island")}</button>;
+
 export default function Crews() {
   const { id } = useParams();
   const { user, setUser } = useGame();
@@ -217,10 +152,21 @@ export default function Crews() {
   const refreshAll = () => { load(); loadCrew(); loadInbox(); window.dispatchEvent(new CustomEvent("crew-inbox-changed")); };
   const act = async (path, msg) => { try { const r = await api.post(path); if (r.data.username) setUser(r.data); toast.success(msg); refreshAll(); } catch (e) { toast.error(errMsg(e)); } };
   const apply = async (c) => { try { const r = await api.post(`/crews/${c.id}/apply`); toast.success(r.data.joined ? `You joined ${c.name}` : `Request sent to ${c.name}`); if (r.data.joined) { const me = await api.get("/auth/me"); setUser(me.data); } refreshAll(); } catch (e) { toast.error(errMsg(e)); } };
-  if (!d) return null;
   const mine = user.crew;
+  const onIsland = fx.mode === "crew";
+  useEffect(() => { if (onIsland && mine && !id) nav(`/game/crews/${mine.id}`, { replace: true }); }, [onIsland, mine, id]); // eslint-disable-line
+  if (!d) return null;
 
   if (id && crew) {
+    if (!onIsland) {
+      // harbour Crew HQ: public crew card only; running the crew happens in the island clubhouse
+      return (
+        <div className="space-y-3 fade-in" data-testid="crew-detail-page">
+          {mine?.id === crew.id && <SailBtn />}
+          <CrewHome crew={crew} member={false} mine={mine} onJoin={() => act(`/crews/${crew.id}/join`, `You joined ${crew.name}`)} onRequest={() => apply(crew)} />
+        </div>
+      );
+    }
     const isLeader = crew.leader === user.username;
     const isOfficer = (crew.officers || []).includes(user.username);
     const canManage = isLeader || isOfficer;
@@ -231,12 +177,11 @@ export default function Crews() {
     const pick = (t) => { setTab(t); localStorage.setItem(`owo_crew_tab_${crew.id}`, t); };
     return (
       <div className="space-y-3 fade-in" data-testid="crew-detail-page">
-      {user.crew && <button type="button" className="btn btn-gold w-full" onClick={() => window.dispatchEvent(new CustomEvent("fr-mode", { detail: "crew" }))} data-testid="go-crew-island">{tt("Sail to your crew island")}</button>}
         <div className="panel px-3 py-2 flex items-center justify-between gap-3 flex-wrap">
           <div className="font-display text-[16px] text-[#f4ead2] truncate"><CrewName crew={crew} /></div>
           <CrewTabs tab={cur} setTab={pick} member={member} canManage={canManage} />
         </div>
-        {cur === "home" && <CrewHome crew={crew} member={member} mine={mine} onJoin={() => act(`/crews/${crew.id}/join`, `You joined ${crew.name}`)} onRequest={() => apply(crew)} onLeave={() => act(`/crews/${crew.id}/leave`, `You left ${crew.name}`)} />}
+        {cur === "home" && <CrewHome island crew={crew} member={member} mine={mine} onJoin={() => act(`/crews/${crew.id}/join`, `You joined ${crew.name}`)} onRequest={() => apply(crew)} onLeave={() => act(`/crews/${crew.id}/leave`, `You left ${crew.name}`)} />}
         {cur === "members" && (
           <Panel icon="angler" title={tt("Members · this week's contribution")} bodyClass="!p-0" testId="crew-members">
             <table className="table">
@@ -254,7 +199,6 @@ export default function Crews() {
             </table>
           </Panel>
         )}
-        {cur === "contest" && <CrewChallenges myCrewId={mine?.id} focusCrewId={crew.id} />}
         {cur === "contract" && <CrewOrder crewId={crew.id} />}
         {cur === "leviathan" && <CrewBoss />}
         {cur === "hall" && <CrewHall crew={crew} canManage={canManage} member={member} onChanged={loadCrew} extra={isLeader && <WithdrawBox crew={crew} onChanged={loadCrew} />} />}
@@ -278,21 +222,20 @@ export default function Crews() {
 
   return (
     <div className="space-y-3 fade-in" data-testid="crews-page">
-      {user.crew && <button type="button" className="btn btn-gold w-full" onClick={() => window.dispatchEvent(new CustomEvent("fr-mode", { detail: "crew" }))} data-testid="go-crew-island">{tt("Sail to your crew island")}</button>}
-      <Panel icon="crews" title={tt("Crews")} right={<span className="num">{tt("weekly contest ends in")} {Math.max(0, Math.floor((new Date(d.week_end) - Date.now()) / 3600000))}h</span>}>
+      {user.crew && <SailBtn />}
+      <Panel icon="crews" title={tt("Crews")}>
         <p className="text-[12.5px] text-[var(--text-2)] m-clamp">{tt("Crews of up to")} {d.max} {tt("anglers share a private crew chat and their own crew island with a round pond the crew can stock later. Anyone can join a crew at any level; founding one needs level")} {d.min_level}.</p>
-        {mine ? <div className="mt-2 text-[13px]">{tt("You sail with")} <button className="text-[var(--gold)] underline" onClick={() => nav(`/game/crews/${mine.id}`)} data-testid="my-crew-link">[{mine.tag}] {mine.name}</button></div>
+        {mine ? <div className="mt-2 text-[13px]">{tt("You sail with")} <button className="text-[var(--gold)] underline" onClick={() => nav(`/game/crews/${mine.id}`)} data-testid="my-crew-link">[{mine.tag}] {mine.name}</button>. {tt("Members, settings and crew tools are in the clubhouse on your crew island.")}</div>
           : <div className="mt-3"><CreateCrew cost={d.cost} minLevel={d.min_level} onCreated={async (cid) => { const r = await api.get("/auth/me"); setUser(r.data); load(); nav(`/game/crews/${cid}`); }} /></div>}
       </Panel>
       <CrewInbox inbox={inbox} onChange={refreshAll} />
-      <Panel icon="rankings" title={tt("Crew standings · this week")} bodyClass="!p-0" testId="crew-standings">
+      <Panel icon="crews" title={tt("All crews")} bodyClass="!p-0" testId="crew-standings">
         {d.crews.length === 0 ? <Empty>{tt("No crews yet. Found the first one.")}</Empty> : (
           <table className="table">
-            <thead><tr><th></th><th>{tt("Crew")}</th><th>{tt("Leader")}</th><th className="r">{tt("Members")}</th><th className="r">{tt("Wins")}</th><th className="r">{tt("Weekly")} {weightUnit()}</th><th></th></tr></thead>
-            <tbody>{d.crews.map((c, i) => <tr key={c.id} className={mine?.id === c.id ? "bg-[#1f1714]" : ""} data-testid={`crew-row-${c.id}`}>
-              <td className="num text-[var(--muted)] w-8">{i + 1}</td>
+            <thead><tr><th>{tt("Crew")}</th><th>{tt("Leader")}</th><th className="r">{tt("Members")}</th><th className="r">{tt("Joining")}</th><th></th></tr></thead>
+            <tbody>{d.crews.map((c) => <tr key={c.id} className={mine?.id === c.id ? "bg-[#1f1714]" : ""} data-testid={`crew-row-${c.id}`}>
               <td><button className="hover:text-[var(--gold)] font-medium" onClick={() => nav(`/game/crews/${c.id}`)}><CrewName crew={c} /></button><div className="text-[11px] text-[var(--muted)] italic truncate max-w-xs">{c.desc}</div></td>
-              <td>{c.leader}</td><td className="num r">{c.member_count}/{c.max_members}</td><td className="num r">{c.wins}</td><td className="num r text-[#ffcfa8]">{kg(c.weekly_kg)}</td>
+              <td>{c.leader}</td><td className="num r">{c.member_count}/{c.max_members}</td><td className="r text-[12px]">{c.open ? tt("Open") : tt("Invite only")}</td>
               <td className="r">
                 {!mine && c.open && c.member_count < c.max_members && <button className="btn btn-sm btn-gold" onClick={() => act(`/crews/${c.id}/join`, `You joined ${c.name}`)} data-testid={`join-${c.id}`}>{tt("Join")}</button>}
                 {!mine && !c.open && c.member_count < c.max_members && <button className="btn btn-sm" onClick={() => apply(c)} data-testid={`request-${c.id}`}>{tt("Request")}</button>}

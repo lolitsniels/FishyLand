@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Anchor, Users, Trophy, ClipboardList, Landmark, Settings2, Skull } from "lucide-react";
-import { api, errMsg, fmt, wt, ago } from "../lib/api";
+import { api, errMsg, fmt, ago } from "../lib/api";
 import { useGame } from "../context/GameContext";
 import { Panel, Empty, Gold } from "./ui-bits";
 import { t as tt } from "../i18n";
@@ -51,7 +51,7 @@ export function CrewActivity({ crewId }) {
   );
 }
 
-export function CrewHome({ crew, member, mine, onJoin, onRequest, onLeave }) {
+export function CrewHome({ crew, member, mine, onJoin, onRequest, onLeave, island = false }) {
   const nav = useNavigate();
   const banner = crew.hall_tier > 0 ? `/art/hall/hall_${crew.hall_tier}.jpg` : "/art/header_band.jpg";
   return (
@@ -66,7 +66,7 @@ export function CrewHome({ crew, member, mine, onJoin, onRequest, onLeave }) {
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" data-testid="crew-home-stats">
-        {[["Leader", crew.leader], ["Contest wins", crew.wins], ["This week", wt(crew.weekly_kg)], ["Founded", ago(crew.created_at)]].map(([k, v]) => (
+        {[["Leader", crew.leader], ["Members", `${crew.member_count} / ${crew.max_members}`], ["Joining", crew.open ? "Open" : "Invite only"], ["Founded", ago(crew.created_at)]].map(([k, v]) => (
           <div key={k} className="panel px-3 py-2"><div className="label">{k}</div><div className="text-[13px] text-[#f4ead2] truncate">{v}</div></div>
         ))}
       </div>
@@ -75,10 +75,10 @@ export function CrewHome({ crew, member, mine, onJoin, onRequest, onLeave }) {
       <div className="flex gap-2 flex-wrap">
         {!mine && crew.open && <button className="btn btn-gold btn-sm" onClick={onJoin} data-testid="join-crew-button">{tt("Join crew")}</button>}
         {!mine && !crew.open && <button className="btn btn-gold btn-sm" onClick={onRequest} data-testid="request-join-button">{tt("Request to join")}</button>}
-        {member && <button className="btn btn-danger btn-sm" onClick={onLeave} data-testid="leave-crew-button">{tt("Leave crew")}</button>}
-        <button className="btn btn-sm" onClick={() => nav("/game/crews")}>{tt("All crews")}</button>
+        {member && island && <button className="btn btn-danger btn-sm" onClick={onLeave} data-testid="leave-crew-button">{tt("Leave crew")}</button>}
+        {!island && <button className="btn btn-sm" onClick={() => nav("/game/crews")}>{tt("All crews")}</button>}
       </div>
-      {member && <CrewActivity crewId={crew.id} />}
+      {member && island && <CrewActivity crewId={crew.id} />}
     </div>
   );
 }

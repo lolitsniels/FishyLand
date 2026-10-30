@@ -168,7 +168,6 @@ Three new crates have washed up on the docks: **Bronze**, **Silver** and **Gold*
 Crates are **earned only by playing**, never sold for Pearls or money, and you can trade them on the Market. Every crate shows each prize's exact % chance and value before you open it.
 
 **How to get them**
-- **Weekly crew challenge:** every member of the 1st place crew gets a Silver Crate, 2nd and 3rd place crews get Bronze.
 - **Weekly lucky draw:** three random anglers with 20+ catches that week win a crate, whatever their rank.
 - **Tournaments:** a random angler who scored (not the winner) wins a crate.
 - **Bosses and Leviathans:** a small chance to drop one.

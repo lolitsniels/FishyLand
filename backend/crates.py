@@ -35,8 +35,7 @@ def wiki_data():
             "leviathan_drop": {cid: round(p * 100, 3) for cid, p in LEVIATHAN_DROP}}
 
 
-HOW_TO_GET = ["Weekly crew challenge: every member of the 1st place crew gets a Silver Crate, 2nd and 3rd place crews get Bronze.",
-              "Weekly lucky draw: three random anglers who landed 20+ fish that week win a crate, whatever their rank.",
+HOW_TO_GET = ["Weekly lucky draw: three random anglers who landed 20+ fish that week win a crate, whatever their rank.",
               "Tournaments: one random angler who scored (not the winner) wins a Bronze Crate, plus a Silver draw in tournaments with 8+ anglers.",
               "Bosses: slaying a boss or pulling on a crew Leviathan has a small chance to drop one.",
               "Fishing: any fish you land has a tiny chance to come up with a crate tangled in the line.",

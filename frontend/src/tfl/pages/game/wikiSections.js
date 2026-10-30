@@ -221,7 +221,7 @@ export function PearlsSec({ w }) {
       <H>{tt("Earning Pearls")}</H>
       <T head={["Source", "Pearls"]} rows={[
         ["Story chapter completed", `${p.story[0]} (${p.story[1]} if it grants a title)`], ["Weekly quest completed", p.weekly], [`Daily quest streak bonus (every 7 days)`, p.streak],
-        ["Daily Spin, Better Wheel (day 7, 12% slice)", p.spin_pearls], ["Legendary boss slain", p.boss], ["Daily contest podium 1st / 2nd / 3rd", (p.contest.daily || p.contest).join(" / ")], ["Weekly contest podium 1st / 2nd / 3rd", (p.contest.weekly || p.contest).join(" / ")], ["Crew challenge podium (each member)", (p.contest.crew || p.contest).join(" / ")], ["Achievement that grants a title", p.title_achievement],
+        ["Daily Spin, Better Wheel (day 7, 12% slice)", p.spin_pearls], ["Legendary boss slain", p.boss], ["Daily contest podium 1st / 2nd / 3rd", (p.contest.daily || p.contest).join(" / ")], ["Weekly contest podium 1st / 2nd / 3rd", (p.contest.weekly || p.contest).join(" / ")], ["Achievement that grants a title", p.title_achievement],
       ]} />
       <H>{tt("Spending Pearls")}</H>
       <p>{tt("Buy premium portraits and name changes in the")} <Link to="/game/pearl-shop" className="underline">{tt("Pearl Shop")}</Link>{tt("; swap between portraits you own from")} <Link to="/game/profile" className="underline">{tt("My Angler")}</Link>{tt(". Six village faces are free (you pick one when you register; guests get a random one). Premium portraits are bought once and kept forever. A name change costs")} <b>{p.rename_cost}</b> {tt("Pearls and carries all your history with it.")}</p>
@@ -437,21 +437,14 @@ export function Social({ w }) {
 }
 
 export function Contests({ w }) {
-  const c = w.contests;
   const t = w.tournaments;
-  const p = c.prizes;
-  const pearls = c.pearls || {};
-  const crewPool = c.crew_pool || ["crew"];
   return (
-    <Sec id="contests" title={tt("18 · Tournaments & crew challenges")}>
+    <Sec id="contests" title={tt("18 · Tournaments")}>
       {t && <>
         <p><Link to="/game/tournaments" className="underline">{tt("Tournaments")}</Link> {tt("are scheduled contests you buy into, one every 3 hours, alternating gold and Pearls, never back to back. Gold tournaments start at")} {t.gold_hours.map((h) => `${String(h).padStart(2, "0")}:00`).join(", ")} {tt("UTC and Pearl tournaments at")} {t.pearl_hours.map((h) => `${String(h).padStart(2, "0")}:00`).join(", ")} {tt("UTC. Buy-in opens")} {t.signup_h} {tt("hour before the start and closes when it begins; each runs")} {t.durations.join(" or ")} {tt("hours. Gold buy-ins are")} {t.fees.gold.join(" / ")} {tt("gold, Pearl buy-ins")} {t.fees.pearls.join(" / ")} {tt("Pearls, the amount, the length and the category are drawn per tournament and shown in advance. A tournament needs at least")} {t.min_entrants} {tt("anglers or it is called off and every fee is refunded. You can hold one ticket at a time, guests cannot buy in, and only fish you hook yourself during the window count.")}</p>
         <p>{tt("The fee is a fee, not a prize pool. Every angler is paid for their")} <b>{tt("own score")}</b>{tt(": a rate per unit (fish, kilo, species, variant or point) that scales with the buy-in, the table shows the rate at the top buy-in (1000 gold / 5 Pearls); a 500-gold tournament pays half as much per unit, and so on. Payouts are capped at")} {t.cap_mult_gold}{tt("× the buy-in in gold tournaments and at")} {t.cap_pearls} {tt("Pearls in Pearl tournaments. The top three also take a podium bonus in the other currency (")}{t.podium.gold[1].join("/")} {tt("Pearls in gold tournaments,")} {t.podium.pearls[1].join("/")} {tt("gold in Pearl tournaments) and the winner keeps the title")} <b>"{t.title}"</b>.</p>
         <T head={["Tournament", "What counts", "Gold per unit", "Pearls per unit"]} rows={Object.entries(t.categories).map(([k, v]) => [<span className="inline-flex items-center gap-2"><img src={`/art/tournaments/${k}.webp`} alt="" width={22} height={22} />{v.label}</span>, v.desc, `${v.rate.gold} / ${unitOne(v.unit)}`, `${v.rate.pearls} / ${unitOne(v.unit)}`])} />
       </>}
-      <p>{tt("Crews get their own weekly challenge on the")} <Link to="/game/crews" className="underline">{tt("Crews page")}</Link>{tt(", drawn from")} {crewPool.map((k) => c.labels[k]).join(", ")}{tt(". It resets on Monday 00:00 UTC; the top three crews split gold between their members and every member takes Pearls.")}</p>
-      {c.rarity_points && <p className="text-[12px]">{tt("Rarity points:")} {Object.entries(c.rarity_points).map(([r, n]) => `${r} ${n}`).join(", ")}.</p>}
-      <T head={["Crew challenge", "1st", "2nd", "3rd"]} rows={[["weekly crew (gold split)", ...p.crew.map((g, i) => `${fmt(g)}g${pearls.crew?.[i] ? ` + ${pearls.crew[i]} Pearls each` : ""}`)]]} />
     </Sec>
   );
 }
