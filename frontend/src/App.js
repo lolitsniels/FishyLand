@@ -16,7 +16,7 @@ import Waters from "./tfl/pages/game/Waters";
 import Journal from "./tfl/pages/game/Journal";
 import Inventory from "./tfl/pages/game/Inventory";
 import Shop from "./tfl/pages/game/Shop";
-import PearlShop from "./tfl/pages/game/PearlShop";
+import PearlShop from "./world/PearlShopSoon";
 import Profile from "./tfl/pages/game/Profile";
 import Quests from "./tfl/pages/game/Quests";
 import Contracts from "./tfl/pages/game/Contracts";

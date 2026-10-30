@@ -369,7 +369,7 @@ def public_user(u):
     level, into = level_from_xp(u["xp"])
     return {
         "id": str(u["_id"]), "username": u["username"], "gold": u["gold"], "xp": u["xp"], "level": level, "tutorial": u.get("tutorial"), "seen_flags": u.get("seen_flags") or [], "app_reward": bool(u.get("app_reward_at")), "humancheck_due": bool((u.get("humancheck") or {}).get("pending")),
-        "pearls": u.get("pearls", 0), "candles": u.get("candles", 0), "avatar": u.get("avatar") or STARTER_AVATARS[0], "owned_avatars": u.get("owned_avatars", []),
+        "pearls": u.get("pearls", 0), "candles": u.get("candles", 0), "avatar": look_of(u.get("avatar")), "owned_avatars": u.get("owned_avatars", []),
         "name_colour": u.get("name_colour"), "name_colour_hex": colour_hex(u), "frame": u.get("frame"), "wall": u.get("wall"), "rod_skin": u.get("rod_skin"), "owned_rod_skins": u.get("owned_rod_skins") or [],
         "durability": durability_map(u),
         "xp_into_level": into, "xp_next": xp_for_level(level), "energy": u["energy"], "max_energy": max_energy(u), "energy_cap": energy_cap(u), "premium": premium_active(u), "premium_until": u.get("premium_until"),
@@ -451,11 +451,20 @@ def title_for(level, stats, active_title=None, admin=False):
     return "Greenhorn"
 
 
+LOOK_RE = re.compile(r"^look:[mf]_[0-3]_[0-4]$")
+DEFAULT_LOOK = "look:m_1_1"
+
+
+def look_of(a):
+    """The 2.5D character (gender_skin_hair) is the avatar; legacy avatar ids map to the default male angler."""
+    return a if isinstance(a, str) and LOOK_RE.match(a) else DEFAULT_LOOK
+
+
 def new_user_doc(username, pw_hash, email=None, is_guest=False, avatar=None):
     doc = {"username": username, "username_lc": username.lower(), "password_hash": pw_hash,
            "is_guest": bool(is_guest), "pending_setup": bool(is_guest),
            "gold": 120, "xp": 0, "pearls": 0,
-           "avatar": avatar if avatar in STARTER_AVATARS else random.choice(STARTER_AVATARS), "owned_avatars": [],
+           "avatar": look_of(avatar), "owned_avatars": [],
            "durability": {"rod_cane": MAX_DURABILITY, "reel_spool": MAX_DURABILITY, "line_cotton": MAX_DURABILITY},
            "energy": MAX_ENERGY, "energy_at": iso(now()), "water": "millbrook", "unlocked_waters": ["millbrook"],
            "gear": {"rod": "rod_cane", "reel": "reel_spool", "line": "line_cotton"},
@@ -659,7 +668,7 @@ async def complete_signup(body: CompleteSignupIn, response: Response, user=Depen
         upd["acq_source"] = (body.source or "").strip().lower()[:120] or "direct / typed"
         if body.source_page: upd["acq_page"] = body.source_page.strip().lower()[:300]
     if body.guide and not user.get("acq_guide"): upd["acq_guide"] = body.guide
-    if body.avatar in STARTER_AVATARS or body.avatar in (user.get("owned_avatars") or []):
+    if body.avatar and LOOK_RE.match(body.avatar):
         upd["avatar"] = body.avatar
     unset = {}
     if email:

@@ -5,6 +5,8 @@ import { Users, Fish, Waves, Gem, Anchor, LogIn } from "lucide-react";
 import { api, errMsg, fmt } from "../tfl/lib/api";
 import { useGame } from "../tfl/context/GameContext";
 import { createGuest } from "../tfl/lib/guest";
+import { CharacterPicker } from "../world/CharacterPicker";
+import { DEFAULT_LOOK } from "../game/look";
 
 const Motes = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -42,15 +44,15 @@ function LoginBox({ onDone }) {
 }
 
 function SignupBox({ go }) {
-  const { login, data } = useGame();
+  const { login } = useGame();
   const [f, setF] = useState({ username: "", password: "", email: "" });
+  const [look, setLook] = useState(DEFAULT_LOOK);
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
   const register = async (e) => {
     e.preventDefault(); setBusy("signup"); setErr("");
-    const starters = (data?.avatars || []).filter((a) => a.price === 0);
-    const body = { username: f.username.trim(), password: f.password, ...(f.email.trim() ? { email: f.email.trim() } : {}), ...(starters.length ? { avatar: starters[Math.floor(Math.random() * starters.length)].id } : {}) };
+    const body = { username: f.username.trim(), password: f.password, avatar: look, ...(f.email.trim() ? { email: f.email.trim() } : {}) };
     const guestToken = localStorage.getItem("owo_guest_token");
     try {
       const r = guestToken
@@ -66,6 +68,7 @@ function SignupBox({ go }) {
   };
   return (
     <form onSubmit={register} className="flex flex-col gap-3" data-testid="lp-signup-form">
+      <CharacterPicker value={look} onChange={setLook} testid="lp-char" />
       <Field label="Angler name" placeholder="3 to 16 letters, numbers or _" value={f.username} onChange={set("username")} autoComplete="username" data-testid="lp-signup-username" />
       <Field label="Password" type="password" value={f.password} onChange={set("password")} autoComplete="new-password" data-testid="lp-signup-password" />
       <Field label="Email" hint="optional, for password resets" type="email" placeholder="you@example.com" value={f.email} onChange={set("email")} autoComplete="email" data-testid="lp-signup-email" />

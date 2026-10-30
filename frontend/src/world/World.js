@@ -13,6 +13,7 @@ import { Ring, Bar } from "../components/fr";
 import { useFight } from "./useFight";
 import { startMusic } from "../game/sfx";
 import CatchCard from "./CatchCard";
+import { lookFace } from "../game/look";
 
 export const PAGES = {
   inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "bait"], waters: ["Travel Map", "rod"], profile: ["My Angler", "skills"],
@@ -35,7 +36,7 @@ function TopBar({ u, place, here }) {
   return (
     <div className="fr-panel flex items-center gap-3 px-3 py-2 pointer-events-auto" data-testid="player-panel">
       <div className="w-14 h-14 rounded-full overflow-hidden border-[3px] border-amber-300 bg-gradient-to-b from-cyan-700 to-slate-900 shrink-0">
-        <img src="art/angler.png" alt="" className="w-[150%] max-w-none -ml-[12%]" />
+        <img src={lookFace(u.avatar)} alt="" className="w-full h-full object-cover" data-testid="player-portrait" />
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2"><span className="font-cinzel font-bold text-amber-50 outline-text" data-testid="player-name">{u.username}</span><span className="fr-chip px-2 text-[11px] font-cinzel font-black text-amber-200" data-testid="player-level">Lv.{u.level}</span></div>
@@ -96,7 +97,7 @@ export default function World() {
     if (prevWater.current && prevWater.current !== user.water) { goTo("water"); nav("/game", { replace: true }); }
     prevWater.current = user.water;
   }, [user?.water, nav]);
-  useEffect(() => { fx.username = user?.username || ""; fx.title = user?.active_title || ""; }, [user]);
+  useEffect(() => { fx.username = user?.username || ""; fx.title = user?.active_title || ""; fx.look = user?.avatar; fx.rod = user?.gear?.rod || "rod_cane"; }, [user]);
   useEffect(() => {
     fx.openSpot = (id) => {
       if (id === "boat") nav("/game/waters");

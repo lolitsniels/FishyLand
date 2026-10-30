@@ -5,6 +5,7 @@
  * is strictly prohibited without prior written permission from the owner.
  */
 import { PearlIcon } from "./ui-bits";
+import { lookFace } from "../../game/look";
 
 const SIZES = { xs: "w-5 h-5", chat: "w-6 h-6", sm: "w-8 h-8", md: "w-14 h-14", lg: "w-24 h-24", xl: "w-32 h-32" };
 const PAD = { xs: "p-px", chat: "p-px", sm: "p-[2px]", md: "p-1", lg: "p-[5px]", xl: "p-[6px]" };
@@ -23,7 +24,7 @@ export const Avatar = ({ id, name = "", size = "sm", className = "", gold = fals
   const anim = ANIM_AV[id];
   const img = (
     <span className={`relative inline-block shrink-0 overflow-hidden border ${frame ? "border-[rgba(0,0,0,.6)]" : gold ? "border-[var(--gold)]" : "border-[var(--border)]"} bg-[#0b0a09] ${SIZES[size]} ${frame ? "" : className}`} data-testid={frame ? undefined : testId}>
-      <img src={`/art/avatars/${id || "av_lad"}.jpg`} alt={name} loading="lazy" className={`w-full h-full object-cover block ${anim ? `av-anim av-anim-${anim}` : ""}`} />
+      <img src={lookFace(id)} alt={name} loading="lazy" className="w-full h-full object-cover object-top block bg-gradient-to-b from-[#1a6a7a] to-[#0a1a22]" />
       {anim && <span className={`av-fx av-fx-${anim}`} aria-hidden="true" />}
       {anim === "leviathan" && <span className="av-sparkle" aria-hidden="true" />}
     </span>

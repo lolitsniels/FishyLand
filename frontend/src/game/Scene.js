@@ -5,6 +5,8 @@ import { fx } from "./fx";
 import { useGame } from "../store";
 import { gameReady } from "../portal";
 import { sceneFor, inPoly } from "./scenes";
+import { lookSprite, parseLook, HAND } from "./look";
+import ROD_META from "./rodMeta.json";
 
 let BG_W = 1264;
 const BG_H = 848;
@@ -60,20 +62,65 @@ const streakTex = () => canvasTex(64, 256, (g) => {
   }
 });
 
-// Another online angler: sprite + wings + nameplate, eased toward the last reported position.
-function makePeer(tex, p) {
+const ROD_LEN = 150;
+// Rod angle (radians, 0 = pointing forward, negative = up) for a given activity.
+const rodAngle = (mode, phase, moving, time, extra = 0) => {
+  if (mode === "harbour") return -1.3 + (moving ? Math.sin(time * 11) * 0.05 : Math.sin(time * 1.3) * 0.02);
+  if (phase === "fight" || phase === "resolving") return -0.45 - extra;
+  if (phase === "wait" || phase === "bite") return -0.62 + (phase === "bite" ? Math.sin(time * 30) * 0.04 : 0);
+  return -0.95 + Math.sin(time * 1.3) * 0.02;
+};
+
+// A player character (look sprite + held rod sprite); feet at (0, 0), facing right.
+function makeFigure() {
   const c = new Container();
-  const shadow = new Graphics().ellipse(0, -4, 70 * K, 16 * K).fill({ color: 0x0b1e33, alpha: 0.35 });
-  const wings = new Sprite(tex.wings); wings.anchor.set(0.5, 0.55); wings.scale.set(0.32 * K); wings.x = -14 * K; wings.y = -ANGLER_H * 0.68; wings.alpha = 0.9;
-  const a = new Sprite(tex.angler); a.anchor.set(0.5, 1); a.scale.set(ANGLER_H / tex.angler.height); a.tint = 0xf2ecff;
-  const fig = new Container(); fig.addChild(shadow, wings, a);
+  const shadow = new Graphics().ellipse(0, -4, 60 * K, 14 * K).fill({ color: 0x0b1e33, alpha: 0.35 });
+  const a = new Sprite(Texture.EMPTY); a.anchor.set(0.5, 1);
+  const rod = new Sprite(Texture.EMPTY);
+  c.addChild(shadow, a, rod);
+  const st = { look: null, rodId: null, hand: [12, -110], nat: -Math.PI / 4 };
+  const placeRod = () => rod.position.set(st.hand[0], st.hand[1] + a.y);
+  return {
+    c, a, rod,
+    setLook(look) {
+      if (look === st.look) return;
+      st.look = look;
+      Assets.load(lookSprite(look)).then((t) => {
+        if (a.destroyed || st.look !== look) return;
+        a.texture = t; a.scale.set(ANGLER_H / t.height);
+        const h = HAND[parseLook(look).g];
+        st.hand = [(h[0] - 0.5) * t.width * a.scale.x, -(1 - h[1]) * ANGLER_H];
+        placeRod();
+      });
+    },
+    setRod(id) {
+      if (id === st.rodId) return;
+      st.rodId = id;
+      const m = ROD_META[id] || ROD_META.rod_cane;
+      st.nat = Math.atan2(m[3] - m[1], m[2] - m[0]);
+      Assets.load(`art/gear/${ROD_META[id] ? id : "rod_cane"}.webp`).then((t) => {
+        if (rod.destroyed || st.rodId !== id) return;
+        rod.texture = t; rod.anchor.set(m[0] / t.width, m[1] / t.height);
+        rod.scale.set(ROD_LEN / Math.hypot(m[2] - m[0], m[3] - m[1]));
+      });
+    },
+    setAngle(d) { placeRod(); rod.rotation = d - st.nat; },
+    tip(d) { return { x: st.hand[0] + Math.cos(d) * ROD_LEN, y: st.hand[1] + a.y + Math.sin(d) * ROD_LEN }; },
+  };
+}
+
+// Another online angler: their character + rod + nameplate, eased toward the last reported position.
+function makePeer(p) {
+  const c = new Container();
+  const f = makeFigure();
+  f.setLook(p.look); f.setRod(p.rod);
   const name = new Text({ text: `${p.username}  Lv.${p.level}`, style: { ...NAME_STYLE, fontSize: 13, fill: 0xcff6ff } });
   name.anchor.set(0.5, 1); name.y = -ANGLER_H - 6;
   const status = new Text({ text: "", style: { fontFamily: "Cinzel", fontSize: 11, fill: 0xffd35a, stroke: { color: 0x1a0d03, width: 3 } } });
   status.anchor.set(0.5, 1); status.y = -ANGLER_H - 24;
-  c.addChild(fig, name, status);
+  c.addChild(f.c, name, status);
   c.x = p.x; c.y = p.y;
-  return { c, fig, name, status, tx: p.x, ty: p.y, seen: 0 };
+  return { c, fig: f.c, f, name, status, tx: p.x, ty: p.y, seen: 0 };
 }
 
 // Ambient particles per location: snow, embers, fireflies, petals, gulls…
@@ -218,27 +265,13 @@ function buildScene(app, tex, key, bgTex) {
   world.hitArea = new Rectangle(0, 0, BG_W, BG_H);
   world.on("pointertap", (e) => { const p = world.toLocal(e.global); if (inPoly(p.x, p.y, cfg.walk)) { fx.dest = { x: p.x, y: p.y }; fx.autoOpen = null; } });
   actors.addChild(body);
-  const shadow = new Graphics().ellipse(FEET.x, FEET.y - 4, 70 * K, 16 * K).fill({ color: 0x0b1e33, alpha: 0.35 });
-  body.addChild(shadow);
-  const wingGroup = new Container();
-  wingGroup.x = FEET.x - 14 * K; wingGroup.y = FEET.y - ANGLER_H * 0.68;
-  const wingGlow = new Sprite(tex.wings);
-  const wings = new Sprite(tex.wings);
-  for (const w of [wingGlow, wings]) { w.anchor.set(0.5, 0.55); w.scale.set(0.32 * K); wingGroup.addChild(w); }
-  wingGlow.blendMode = "add"; wingGlow.alpha = 0.35; wingGlow.scale.set(0.345 * K);
-  body.addChild(wingGroup);
-  const angler = new Sprite(tex.angler);
-  angler.anchor.set(0.5, 1);
-  angler.scale.set(ANGLER_H / tex.angler.height);
-  angler.x = FEET.x; angler.y = FEET.y;
-  body.addChild(angler);
-  const pet = new Sprite(tex.pet);
-  pet.anchor.set(0.5); pet.scale.set((105 * K) / tex.pet.width); pet.x = FEET.x - 95 * K; pet.y = FEET.y - 40 * K;
-  body.addChild(pet);
-  const rod = new Graphics();
+  const hero = makeFigure();
+  hero.c.position.set(FEET.x, FEET.y);
+  body.addChild(hero.c);
+  const angler = hero.a;
   const line = new Graphics();
-  rod.zIndex = line.zIndex = 15000;
-  actors.addChild(rod, line);
+  line.zIndex = 15000;
+  actors.addChild(line);
   const nameplate = new Text({ text: "", style: NAME_STYLE });
   nameplate.anchor.set(0.5, 1); nameplate.x = FEET.x; nameplate.y = FEET.y - ANGLER_H - 8;
   const titleplate = new Text({ text: "", style: { fontFamily: "Cinzel", fontSize: 11, fill: 0x7ff3ff, stroke: { color: 0x02121c, width: 3 } } });
@@ -415,8 +448,8 @@ function buildScene(app, tex, key, bgTex) {
     const now = performance.now();
     list.forEach((p) => {
       let v = peers.get(p.id);
-      if (!v) { v = makePeer(tex, p); peers.set(p.id, v); actors.addChild(v.c); }
-      v.tx = p.x; v.ty = p.y; v.seen = now; v.phase = p.phase;
+      if (!v) { v = makePeer(p); peers.set(p.id, v); actors.addChild(v.c); }
+      v.tx = p.x; v.ty = p.y; v.seen = now; v.phase = p.phase; v.f.setLook(p.look); v.f.setRod(p.rod);
     });
     peers.forEach((v, id) => {
       if (now - v.seen > 4000) { v.c.destroy({ children: true }); peers.delete(id); return; }
@@ -428,16 +461,12 @@ function buildScene(app, tex, key, bgTex) {
       v.fig.y = walking ? -Math.abs(Math.sin(time * 11 + v.c.x)) * 5 : 0;
       v.name.scale.set(pd); v.name.y = -ANGLER_H * pd - 6; v.status.y = -ANGLER_H * pd - 22;
       v.status.text = v.phase === "fight" ? "Reeling in!" : ["cast", "wait", "bite"].includes(v.phase) ? "Fishing…" : v.phase === "landed" ? "Caught one!" : "";
+      v.f.setAngle(rodAngle(mode, v.phase, walking, time + v.c.x));
       v.c.zIndex = v.c.y;
     });
 
     // actors
-    const flap = Math.sin(time * 2.6);
-    wings.scale.set(0.32 * K * (1 + flap * 0.05), 0.32 * K * (1 - flap * 0.03));
-    wingGlow.alpha = 0.25 + 0.15 * Math.sin(time * 3.1);
-    wingGroup.y = FEET.y - ANGLER_H * 0.68 + flap * 2;
-    pet.y = FEET.y - 45 * K + Math.sin(time * 2) * 5;
-    pet.scale.x = Math.abs(pet.scale.x) * (Math.sin(time * 0.5) > 0.9 ? -1 : 1);
+    hero.setLook(fx.look); hero.setRod(fx.rod || "rod_cane");
     nameplate.text = fx.username; titleplate.text = fx.title ? `« ${fx.title} »` : "";
 
     if (fx.phase !== lastPhase) {
@@ -455,25 +484,17 @@ function buildScene(app, tex, key, bgTex) {
     const fighting = ph === "fight" || ph === "resolving";
     const tension = fighting ? fx.pos : 0.3;
     celebrate = Math.max(0, celebrate - dt);
-    angler.y = FEET.y - (celebrate > 0 ? Math.abs(Math.sin(celebrate * 6)) * 14 : 0);
+    angler.y = -(celebrate > 0 ? Math.abs(Math.sin(celebrate * 6)) * 14 : 0);
     angler.rotation = fighting ? (fx.pos - 0.5) * 0.06 : ph === "cast" ? Math.sin(Math.min(1, (time - castFrom) * 2.5) * Math.PI) * -0.05 : 0;
 
-    // rod: butt -> tip, bending toward bobber with tension
+    // held rod; the line runs from its tip
     const facing = fx.flip ? -1 : 1;
-    rod.visible = line.visible = mode === "water";
-    const butt = { x: me.x + 18 * K * ds * facing, y: body.y + (-ANGLER_H * 0.64 + (angler.y - FEET.y)) * ds };
-    const baseTip = { x: butt.x + 75 * facing, y: butt.y - 150 };
-    const bend = fighting ? 0.18 + tension * 0.35 : ph === "wait" || ph === "bite" ? 0.1 : 0;
-    tip.x = baseTip.x + (fx.target.x - baseTip.x) * bend * 0.5;
-    tip.y = baseTip.y + (fx.target.y - baseTip.y) * bend * 0.6;
-    const mid = { x: (butt.x + tip.x) / 2 + (10 + bend * 40) * facing, y: (butt.y + tip.y) / 2 - 10 - bend * 30 };
-    rod.clear();
-    if (rod.visible) {
-      rod.moveTo(butt.x, butt.y).quadraticCurveTo(mid.x, mid.y, tip.x, tip.y).stroke({ width: 9, color: 0x4ff2ff, alpha: 0.25, cap: "round" });
-      rod.moveTo(butt.x, butt.y).quadraticCurveTo(mid.x, mid.y, tip.x, tip.y).stroke({ width: 4, color: 0xf6c94b, cap: "round" });
-      rod.moveTo(butt.x, butt.y).lineTo(butt.x + 12 * facing, butt.y - 24).stroke({ width: 6, color: 0x6b3d12, cap: "round" });
-      rod.circle(tip.x, tip.y, 4).fill({ color: 0xbffcff, alpha: 0.9 });
-    }
+    line.visible = mode === "water";
+    let ang = rodAngle(mode, ph, moving, time, tension * 0.35);
+    if (ph === "cast") { const k = Math.min(1, (time - castFrom) * 2.2); ang = -2.1 + k * 1.45; }
+    hero.setAngle(ang);
+    const tl = hero.tip(ang);
+    tip.x = body.x + tl.x * ds * facing; tip.y = body.y + tl.y * ds;
 
     // bobber & line
     let bob = null;
@@ -618,9 +639,9 @@ export default function Scene({ place = "harbour" }) {
       window.visualViewport?.addEventListener("resize", fit);
       window.addEventListener("orientationchange", fit);
       offFit = () => { ro.disconnect(); window.visualViewport?.removeEventListener("resize", fit); window.removeEventListener("orientationchange", fit); };
-      const [angler, wings, pet, ambient] = await Promise.all(["art/angler.png", "art/wings.png", "art/pet.png", "art/fish/glimmer_minnow.png"].map((u) => Assets.load(u)));
+      const ambient = await Assets.load("art/fish/glimmer_minnow.png");
       if (!alive) return;
-      r.app = app; r.tex = { angler, wings, pet, ambient };
+      r.app = app; r.tex = { ambient };
       mount(r);
       gameReady();
       unsub = useGame.subscribe((s, prev) => { if (s.paused !== prev.paused) s.paused ? app.ticker.stop() : app.ticker.start(); });

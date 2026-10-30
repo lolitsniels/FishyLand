@@ -21,6 +21,8 @@ import { Pearls, AdminBadge, ModBadge, SupporterBadge, PremiumBadge } from "../.
 import { ProfileTackle } from "../../components/RodSkin";
 import Guestbook from "../../components/Guestbook";
 import { t as tt } from "../../i18n";
+import { lookFace } from "../../../game/look";
+import { LookEditor } from "../../../world/LookEditor";
 
 function FriendButton({ username }) {
   const [st, setSt] = useState(null);
@@ -63,7 +65,8 @@ export default function Profile() {
         <div className="p-4 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div className="flex items-end gap-3 min-w-0 flex-1">
             <div className="relative shrink-0">
-              <div className="g-portrait" data-testid="profile-avatar"><img src="/art/angler.png" alt={p.username} /></div>
+              <div className="g-portrait g-face" data-testid="profile-avatar"><img src={lookFace(p.avatar)} alt={p.username} /></div>
+              {mine && <LookEditor />}
               <span className="absolute -top-1 -left-1 fr-chip px-2 text-[11px] font-cinzel font-black text-amber-200" data-testid="profile-level-badge">Lv.{p.level}</span>
               {mine && <button className="absolute -bottom-1 -right-1 btn btn-sm !px-1.5 !py-0.5 !text-[10px]" onClick={() => setCosOpen("portrait")} title={tt("Change appearance")} data-testid="profile-change-avatar-button">{tt("Change")}</button>}
             </div>
