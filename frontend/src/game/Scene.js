@@ -607,8 +607,10 @@ export default function Scene({ place = "harbour" }) {
     let alive = true, unsub = null, ro = null, offFit = null;
     const onVis = () => (document.hidden || useGame.getState().paused ? app.ticker?.stop() : app.ticker?.start());
     const ready = (async () => {
-      await app.init({ width: host.current.clientWidth || window.innerWidth, height: host.current.clientHeight || window.innerHeight, backgroundColor: 0x062436, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
+      await app.init({ resizeTo: host.current, backgroundColor: 0x062436, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
       if (!alive) return;
+      app.canvas.style.width = "100%"; app.canvas.style.height = "100%"; app.canvas.style.display = "block";
+      host.current.querySelectorAll("canvas").forEach((c) => c.remove());
       host.current.appendChild(app.canvas);
       const fit = () => { const el = host.current; if (el && el.clientWidth && el.clientHeight) app.renderer.resize(el.clientWidth, el.clientHeight); };
       ro = new ResizeObserver(fit); ro.observe(host.current);
@@ -645,7 +647,11 @@ export default function Scene({ place = "harbour" }) {
       unsub?.();
       offFit?.();
       document.removeEventListener("visibilitychange", onVis);
-      ready.finally(() => { try { r.teardown?.(); app.destroy(true, { children: true }); } catch (e) { /* already gone */ } r.app = null; r.tex = null; r.teardown = null; });
+      ready.finally(() => {
+        const mine = r.app === app;
+        try { if (mine) r.teardown?.(); app.destroy(true, { children: true }); } catch (e) { /* already gone */ }
+        if (mine) { r.app = null; r.tex = null; r.teardown = null; }
+      });
     };
   }, []);
   return <div ref={host} className="absolute inset-0" data-testid="game-canvas" />;
