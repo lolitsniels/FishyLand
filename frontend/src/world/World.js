@@ -34,19 +34,18 @@ function useScale() {
 
 function TopBar({ u, place, here }) {
   return (
-    <div className="fr-panel flex items-center gap-3 px-3 py-2 pointer-events-auto" data-testid="player-panel">
-      <div className="w-14 h-14 rounded-full overflow-hidden border-[3px] border-amber-300 bg-gradient-to-b from-cyan-700 to-slate-900 shrink-0">
-        <img src={lookFace(u.avatar)} alt="" className="w-full h-full object-cover" data-testid="player-portrait" />
-      </div>
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2"><span className="font-cinzel font-bold text-amber-50 outline-text" data-testid="player-name">{u.username}</span><span className="fr-chip px-2 text-[11px] font-cinzel font-black text-amber-200" data-testid="player-level">Lv.{u.level}</span></div>
-        <div className="flex gap-2 text-xs font-cinzel font-bold flex-wrap">
-          <span className="fr-chip px-2 flex items-center gap-1" data-testid="gold-value"><Coins size={12} color="#ffd34d" />{(u.gold ?? 0).toLocaleString()}</span>
-          <span className="fr-chip px-2 flex items-center gap-1" title="Pearls are earned in game and only buy cosmetics" data-testid="pearls-value"><Gem size={12} color="#bff4ff" />{(u.pearls ?? 0).toLocaleString()}</span>
-          <span className="fr-chip px-2 text-emerald-300" data-testid="location-chip">{place}</span>
-          <span className="fr-chip px-2 flex items-center gap-1 text-cyan-200" title="Anglers here right now" data-testid="here-count"><Users size={12} />{here}</span>
+    <div className="pcard pointer-events-auto" data-testid="player-panel">
+      <div className="pcard-face"><img src={lookFace(u.avatar)} alt="" data-testid="player-portrait" /></div>
+      <span className="pcard-lv" data-testid="player-level">Lv.{u.level}</span>
+      <div className="pcard-name" data-testid="player-name">{u.username}</div>
+      <div className="pcard-place" data-testid="location-chip">{place} · <Users size={10} className="inline -mt-0.5" /> <span data-testid="here-count">{here}</span></div>
+      <div className="pcard-under">
+        <div className="pcard-chips">
+          <span data-testid="gold-value"><Coins size={12} color="#ffd34d" />{(u.gold ?? 0).toLocaleString()}</span>
+          <span title="Pearls are earned in game and only buy cosmetics" data-testid="pearls-value"><Gem size={12} color="#bff4ff" />{(u.pearls ?? 0).toLocaleString()}</span>
+          <span data-testid="energy-value"><Zap size={11} color="#7ff3ff" />{Math.floor(u.energy)}/{u.max_energy}</span>
         </div>
-        <div className="flex items-center gap-1 w-[220px]"><Zap size={12} color="#7ff3ff" /><Bar value={u.energy} max={u.max_energy} className="flex-1" testid="energy-bar" /><span className="text-[10px] font-cinzel w-12 text-right" data-testid="energy-value">{Math.floor(u.energy)}/{u.max_energy}</span></div>
+        <Bar value={u.energy} max={u.max_energy} testid="energy-bar" />
         <Bar value={u.xp_into_level ?? 0} max={u.xp_next || 1} color="linear-gradient(90deg,#b44dff,#ff8af0)" testid="xp-bar" />
       </div>
     </div>
@@ -91,6 +90,11 @@ export default function World() {
 
   const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(m === "harbour" ? "harbour" : user?.water || "millbrook").spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
+  useEffect(() => {
+    const on = (e) => { goTo(e.detail); nav("/game", { replace: true }); };
+    window.addEventListener("fr-mode", on);
+    return () => window.removeEventListener("fr-mode", on);
+  });
   useEffect(() => { if (page === "fish") { goTo("water"); nav("/game", { replace: true }); } }, [page, nav]);
   useEffect(() => {
     if (!user?.water) return;

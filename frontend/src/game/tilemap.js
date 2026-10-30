@@ -2,15 +2,15 @@ import { Texture, Sprite } from "pixi.js";
 
 // Object catalogue: art file, default width, footprint [w, h] as fraction of width, extras (glow/smoke/jet offsets as fractions of sprite size).
 export const OBJ = {
-  tackle_shop: { w: 400, fp: [0.86, 0.34], smoke: [0.5, 0.04] },
-  tavern: { w: 430, fp: [0.86, 0.34] },
-  guild_hall: { w: 500, fp: [0.9, 0.36] },
-  pearl_shop: { w: 380, fp: [0.86, 0.34] },
-  market_stall: { w: 330, fp: [0.86, 0.3] },
-  bait_hut: { w: 370, fp: [0.8, 0.3] },
-  house: { w: 300, fp: [0.84, 0.34], smoke: [0.73, 0.1] },
+  tackle_shop: { w: 400, fp: [0.9, 0.62], smoke: [0.5, 0.04] },
+  tavern: { w: 430, fp: [0.9, 0.62] },
+  guild_hall: { w: 500, fp: [0.92, 0.62] },
+  pearl_shop: { w: 380, fp: [0.9, 0.62] },
+  market_stall: { w: 330, fp: [0.9, 0.5] },
+  bait_hut: { w: 370, fp: [0.86, 0.5] },
+  house: { w: 300, fp: [0.88, 0.62], smoke: [0.73, 0.1] },
   quest_board: { w: 150, fp: [0.8, 0.12] },
-  fountain: { w: 270, fp: [0.9, 0.42], jet: [0.47, 0.24, 0.5, 0.6] },
+  fountain: { w: 270, fp: [0.94, 0.5], jet: [0.47, 0.24, 0.5, 0.6] },
   lantern: { w: 56, fp: [0.5, 0.12], glow: [0.22, 0.31] },
   oak: { w: 300, fp: [0.22, 0.08] },
   willow: { w: 300, fp: [0.24, 0.08] },
@@ -18,9 +18,9 @@ export const OBJ = {
   bush: { w: 130, fp: [0.8, 0.3] },
   rocks: { w: 180, fp: [0.86, 0.36] },
   barrels: { w: 130, fp: [0.9, 0.36] },
-  reeds: { w: 150, fp: [0, 0] },
-  rowboat: { w: 230, fp: [0, 0], bob: 1.2 },
-  ship: { w: 820, fp: [0, 0], bob: 2 },
+  reeds: { w: 150, fp: [0, 0], wet: true },
+  rowboat: { w: 230, fp: [0, 0], bob: 1.2, wet: true },
+  ship: { w: 820, fp: [0, 0], bob: 2, wet: true },
   bridge: { w: 700, fp: [0, 0], ground: true },
 };
 export const TERRAIN = ["grass", "sand", "dirt", "planks", "cobble"];
@@ -95,6 +95,17 @@ export function buildMap(map, img) {
     ctx.restore();
   }
 
+  for (const b of map.bridges || []) {
+    const [ax, ay] = b.a, [bx, by] = b.b, L = Math.hypot(bx - ax, by - ay), ang = Math.atan2(by - ay, bx - ax), hw = b.w / 2;
+    ctx.save(); ctx.translate(ax, ay); ctx.rotate(ang);
+    ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 16; ctx.shadowOffsetY = 12;
+    ctx.fillStyle = pattern(ctx, img.planks, TEX_K.planks); ctx.fillRect(-20, -hw, L + 40, b.w);
+    ctx.shadowColor = "transparent";
+    ctx.fillStyle = "#3a2412"; ctx.fillRect(-20, -hw - 6, L + 40, 8); ctx.fillRect(-20, hw - 2, L + 40, 8);
+    for (let x = -10; x <= L + 30; x += 70) for (const y of [-hw - 2, hw + 2]) { ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fillStyle = "#5a3a1c"; ctx.fill(); ctx.strokeStyle = "#2a180a"; ctx.lineWidth = 3; ctx.stroke(); }
+    ctx.restore();
+  }
+
   // walk grid: land minus water, plus docks/bridges, minus object footprints and the map rim
   const gw = Math.ceil(W / CELL), gh = Math.ceil(H / CELL);
   const m = document.createElement("canvas"); m.width = gw; m.height = gh;
@@ -103,11 +114,15 @@ export function buildMap(map, img) {
   g.fillStyle = g.strokeStyle = "#fff"; g.fillRect(0, 0, W, H);
   g.fillStyle = g.strokeStyle = "#000"; g.lineCap = g.lineJoin = "round";
   for (const s of map.water) { shape(g, s); if (s.line) { g.lineWidth = s.width + 30; g.stroke(); } else { g.lineWidth = 30; g.fill(); g.stroke(); } }
+  const gw0 = Math.ceil(W / CELL), gh0 = Math.ceil(H / CELL), wpx = g.getImageData(0, 0, gw0, gh0).data;
+  const isWater = (x, y) => { const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL); return cx >= 0 && cy >= 0 && cx < gw0 && cy < gh0 && wpx[(cy * gw0 + cx) * 4] < 128; };
+  const objects = map.objects.filter((o) => OBJ[o.k].wet || OBJ[o.k].ground || !isWater(o.x, o.y - 4));
   g.fillStyle = g.strokeStyle = "#fff";
   for (const d of map.docks || []) { pathPoly(g, d.poly); g.fill(); }
+  for (const b of map.bridges || []) { pathLine(g, [...b.a, ...b.b]); g.lineWidth = b.w - 18; g.stroke(); }
   for (const b of map.walkways || []) { pathLine(g, b.line); g.lineWidth = b.width; g.stroke(); }
   g.fillStyle = "#000";
-  for (const o of map.objects) {
+  for (const o of objects) {
     const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
     if (!fw) continue;
     const rx = Math.max(16, (w * fw) / 2), ry = Math.max(14, (w * fh) / 2);
@@ -125,7 +140,7 @@ export function buildMap(map, img) {
     c.getContext("2d").drawImage(cv, -x, -y);
     chunks.push({ x, y, tex: Texture.from(c) });
   }
-  return { chunks, nav: makeNav(grid, gw, gh) };
+  return { chunks, nav: { ...makeNav(grid, gw, gh), isWater }, objects };
 }
 
 function makeNav(grid, gw, gh) {
@@ -180,9 +195,9 @@ function makeNav(grid, gw, gh) {
 }
 
 // Place map objects: ground ones (bridges) go in `ground`, the rest are depth-sorted with the actors.
-export function placeObjects(map, tex, ground, actors) {
+export function placeObjects(objects, tex, ground, actors) {
   const views = [];
-  for (const o of map.objects) {
+  for (const o of objects) {
     const def = OBJ[o.k], t = tex[o.k];
     if (!t) continue;
     const s = new Sprite(t); s.anchor.set(0.5, 1);

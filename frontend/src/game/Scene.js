@@ -16,7 +16,7 @@ const FEET = { x: 470, y: 592 };
 const ANGLER_H = 185;
 const K = ANGLER_H / 250;
 const RARITY_GLOW = { legendary: 0xffd34d, mythic: 0xff3fa4, epic: 0xc06bff };
-const NAME_STYLE = { fontFamily: "Cinzel", fontWeight: "700", fontSize: 15, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 }, align: "center", dropShadow: { color: 0x000000, blur: 4, distance: 2, alpha: 0.8 } };
+const NAME_STYLE = { fontFamily: "Noto Sans", fontWeight: "800", fontSize: 15, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 }, align: "center", dropShadow: { color: 0x000000, blur: 4, distance: 2, alpha: 0.8 } };
 
 function canvasTex(w, h, draw) {
   const c = document.createElement("canvas");
@@ -328,7 +328,7 @@ function buildScene(app, tex, key, bgTex, mt) {
   actors.addChild(spotLayer);
   const groundLayer = new Container();
   base.addChild(groundLayer);
-  const objViews = tm ? placeObjects(cfg, mt.obj, groundLayer, actors) : [];
+  const objViews = tm ? placeObjects(tm.objects, mt.obj, groundLayer, actors) : [];
   const spotViews = cfg.spots.map((sp) => {
     const c = new Container(); c.x = sp.x; c.y = sp.y; c.eventMode = "static"; c.cursor = "pointer";
     let glow, ic = null;
@@ -690,11 +690,14 @@ function buildScene(app, tex, key, bgTex, mt) {
       const s = new Sprite(tex.ambient);
       s.anchor.set(0.5); s.scale.set(34 / tex.ambient.width); s.alpha = 0.9;
       const [lx, ly, lw, lh] = cfg.leap;
-      const x = lx + Math.random() * lw, y = ly + Math.random() * lh;
+      let x = lx + Math.random() * lw, y = ly + Math.random() * lh;
+      for (let i = 0; tm && i < 12 && !tm.nav.isWater(x, y); i++) { x = lx + Math.random() * lw; y = ly + Math.random() * lh; }
+      if (tm && !tm.nav.isWater(x, y)) { jumpAt = 1; s.destroy(); } else {
       ambient = { s, x, y, t: 0, dir: Math.random() > 0.5 ? 1 : -1 };
       if (ambient.dir < 0) s.scale.x *= -1;
       fxLayer.addChild(s);
       splash(x, y, 6, 0.4);
+      }
     }
     if (ambient) {
       ambient.t += dt * 1.6;

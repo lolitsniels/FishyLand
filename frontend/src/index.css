@@ -385,3 +385,4 @@ html body .reel-btn:not(.holding) { background: rgba(10, 9, 8, .86) !important; 
 .sf-purse b { color: #f3e4bd; font-size: 14px; min-width: 60px; text-align: right; }
 @media (max-width: 600px) { .sf-banner { padding: 14px; min-height: 120px; } .sf-banner-t { font-size: 19px; } .sf-banner-img { height: 90px; } .sf-grid { grid-template-columns: 1fr; } .sf-tab { padding: 7px 11px 6px; font-size: 11.5px; } .sf-body { padding: 8px; } }
 .sf-deal .sf-item-n { white-space: normal; line-height: 1.2; }
+

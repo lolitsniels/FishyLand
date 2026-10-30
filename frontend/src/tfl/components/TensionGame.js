@@ -263,7 +263,7 @@ export default function TensionGame({ enc, onFinish }) {
     <div className="space-y-3 fade-in" data-testid="tension-game">
       <div className={`fr-fight ${danger ? "shake" : ""}`} data-testid="fight-instrument">
         <div className="flex items-center justify-between gap-3 mb-1.5">
-          <span className={`font-deco font-black text-xl ${danger ? "text-red-400" : inZone ? "gold-text" : "text-cyan-100"} outline-text`} data-testid="fight-message">{enc.boss && <span className="text-xs font-cinzel mr-2 text-amber-300" data-testid="boss-phase">{tt("Boss · phase")} {view.phase}/2</span>}{view.msg}</span>
+          <span className="fight-msg" style={{ color: danger ? "#ff7a6b" : inZone ? "#ffe27a" : "#e6faff" }} data-testid="fight-message">{enc.boss && <span className="text-xs font-cinzel mr-2 text-amber-300" data-testid="boss-phase">{tt("Boss · phase")} {view.phase}/2</span>}{view.msg}</span>
           <span className="font-cinzel font-bold text-amber-100 outline-text num">{Math.max(0, view.time).toFixed(1)}s</span>
         </div>
         <div className="fr-panel p-1.5 !rounded-full">

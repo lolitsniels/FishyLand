@@ -44,6 +44,8 @@ function TestWaterCard() {
 }
 
 
+import { WorldMap } from "../../components/WorldMap";
+
 export default function Waters() {
   const { user, setUser, data } = useGame();
   const cond = useConditions();
@@ -55,6 +57,7 @@ export default function Waters() {
   };
   return (
     <div className="space-y-3 fade-in" data-testid="waters-page">
+      {data && <WorldMap waters={data.waters} user={user} mode={sessionStorage.getItem("fr_mode") || "harbour"} onTravel={travel} />}
       <Panel icon="waters" title={tt("Waters of the world")} right={`${user.unlocked_waters.length} / ${data?.waters.length} unlocked`}>
         <p className="text-[12.5px] text-[var(--text-2)] m-clamp">{tt("Each water holds its own pool of species. Passage is paid once; after that you may travel freely. Level requirements reflect how hard the local fish fight. Weather shifts every three hours; dawn and dusk bring the most bites, night brings the strangest fish, and tides matter on salt water.")}</p>
       </Panel>
