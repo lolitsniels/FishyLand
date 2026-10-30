@@ -132,7 +132,6 @@ const BaitName = ({ b, user, lookups, onClick }) => (
 
 function BaitTable() {
   const { user, setUser, data, lookups } = useGame();
-  const narrow = false;
   const [qty, setQty] = useState({});
   const [info, setInfo] = useState(null);
   const value = useBaitValue([user.water, user.gear?.rod, user.bait_discount]);
@@ -146,7 +145,7 @@ function BaitTable() {
   };
   const baits = data.baits.filter((b) => b.price !== null).sort((a, b) => a.luck - b.luck);
   return (
-    <Panel icon="worm" title={tt("Bait")} right={narrow ? null : <span className="text-[var(--muted)]">{tt("Click a bait to see what it earns at your water")}</span>} testId="shop-bait" bodyClass="!p-0">
+    <Panel icon="worm" title={tt("Bait")} right={<span className="text-[var(--muted)]">{tt("Click a bait to see what it earns at your water")}</span>} testId="shop-bait" bodyClass="!p-0">
       <div className="g-grid p-3">
         {baits.map((b) => { const r = baitRow(b, user, qty); return (
           <div key={b.id} className={`g-card rc-${tierRarity(Math.ceil((b.luck || 0) / 3) + 1)}`} data-testid={`shop-bait-${b.id}`}>

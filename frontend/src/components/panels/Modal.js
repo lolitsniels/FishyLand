@@ -6,12 +6,16 @@ export default function Modal({ title, children, width = 720, testid, onClose })
   const storeClose = useGame((s) => s.closeModal);
   const close = onClose || storeClose;
   useEffect(() => {
-    const k = (e) => e.key === "Escape" && close();
+    const k = (e) => {
+      if (e.key !== "Escape") return;
+      const nested = document.querySelector(".fixed.inset-0.z-50");
+      if (nested) nested.click(); else if (!document.querySelector('[role="dialog"]')) close();
+    };
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, [close]);
   return (
-    <div className="absolute inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-0 sm:p-3" onPointerDown={(e) => e.target === e.currentTarget && close()} data-testid={testid}>
+    <div className="absolute inset-0 z-50 grid grid-cols-[minmax(0,1fr)] place-items-center bg-black/60 backdrop-blur-sm p-0 sm:p-3" onPointerDown={(e) => e.target === e.currentTarget && close()} data-testid={testid}>
       <div className="fr-panel fr-modal rise flex flex-col w-full h-full sm:h-auto max-h-full sm:max-h-[90vh] mt-0 sm:mt-6 !rounded-none sm:!rounded-[6px]" style={{ maxWidth: width }}>
         {["tl", "tr", "bl", "br"].map((c) => <span key={c} className={`fr-corner ${c}`} />)}
         <div className="relative flex items-center justify-center px-12 pt-1 pb-2 border-b-2 border-amber-600/70 bg-gradient-to-b from-amber-900/50 to-transparent">

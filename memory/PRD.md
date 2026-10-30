@@ -26,10 +26,14 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - 2026-06: Phase 1 port — walkable harbour (8 signposts: Tackle Shop, Market, Guild Hall, Quest Board, Sea Serpent travel, Pearl Shop, Tournaments, Duel Pier),
   12 unique animated water scenes with 3 glowing fishing spots each, TFL cast/fight/land flow with TensionGame, live multiplayer presence,
   new Landing page (register / login / guest), Fishdex stand-in fish art, "Fish here" on Travel Map, mobile layout (390px) verified.
-- Testing: iteration_3 — backend 12/12, frontend all flows pass (testing agent fixed i18n init + reCAPTCHA no-key)
+- 2026-06: Menu reskin — every legacy TFL menu restyled (game-skin.css: gold-framed panels, pill buttons, plaque tables, ring-icon tabs).
+  Rebuilt core menus: Shop (gear/bait art cards with tier frames), Tackle Box (loadout bar + keepnet tiles + tackle cards), Fishdex (hero progress,
+  water chip strip, collectible cards), Travel Map (art map cards), Profile (hero + portrait + stat tiles). 46 new gear/bait/crate icons in /art/gear.
+  Modals full screen on phones, rendered outside the scaled HUD; Escape closes nested dialogs first; missing legacy art falls back to game art.
+- Testing: iteration_4 (menus) 88% → remaining issues fixed and self-verified; iteration_3 — backend 12/12, frontend all flows pass (testing agent fixed i18n init + reCAPTCHA no-key)
 
 ## Backlog
-- P1: Unique art for 416 species (currently 10 shared stand-in images, hue-shifted) and missing TFL gear/avatar icons
+- P1: Unique art for 416 species (currently 10 shared stand-in images, hue-shifted); achievement badges, boss and avatar art (currently fallbacks)
 - P1: Chat bubbles / emotes between players in the harbour; show peers' cosmetics
 - P1: Portal (Playgama/GameDistribution) build re-wire to the new App (PortalApp removed during port)
 - P2: Guilds, Bosses, Leaderboards with dedicated 2.5D locations; presence via shared store for multi-worker

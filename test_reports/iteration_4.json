@@ -1,0 +1,39 @@
+{
+  "summary": "Frontend-only test of the restyled menus (Shop, Tackle Box, Fishdex, Travel Map, Profile, plus Quests/Market/Leaderboards/Achievements from the More menu) on desktop 1920x1080 and mobile 390x844, logged in as TestAngler. Core flows work: shop tabs, gear cards with art, buying the T2 rod (card shows Equipped), buying bait (owned count and badge go 9 -> 14), info dialogs, keepnet tile toggle, list dialog, selling, re-equipping in the Tackle tab, Fishdex filters/search/species modal, travel and fish-here (both close the modal and open water mode), profile hero, all legacy pages, and close returning to /game. No JS page errors. Found and FIXED one critical mobile bug: the Journal and Profile modals were 980px and 566px wide on a 390px phone, which pushed the close button off-screen. Still open: missing art (broken images) in several legacy panels, and Escape on a nested dialog closes the whole menu.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Modal.js (page-modal) on mobile", "issue": "FIXED by testing agent. Fishdex and Profile modals overflowed sideways on 390px (panel 980px/566px wide, close button at x=969/555). Cause: the overlay was a grid with an auto track, so the min-content width of the wide water-chip strip (1552px scrollWidth) and the nowrap profile hero text stretched the track. Fix: added grid-cols-[minmax(0,1fr)] to the overlay div. Now every page modal is 390px with the close button visible; desktop is still 980px.", "selector": "[data-testid=page-modal]", "priority": "HIGH (fixed)"},
+      {"component": "Nested dialogs inside page-modal", "issue": "Pressing Escape while RodInfoDialog (Shop/Tackle) or SpeciesModal (Fishdex) is open closes the WHOLE page-modal and goes to /game, not just the inner dialog. Modal.js listens for keydown on window without checking for nested dialogs or stopping propagation.", "selector": "[data-testid=rod-info-open-*], [data-testid=journal-entry-*]", "priority": "MEDIUM"},
+      {"component": "Leaderboards", "issue": "Every avatar image is broken: /art/avatars/av_*.jpg is missing from public/art (the folder does not exist), so broken-image icons show on every row.", "selector": "/game/leaderboards img", "priority": "MEDIUM"},
+      {"component": "Achievements", "issue": "All 104 badge icons are broken: /art/badges/*.png does not exist and broken-image boxes are shown.", "selector": "/game/achievements img", "priority": "MEDIUM"},
+      {"component": "Fishdex Crew Bosses / Bosses tabs", "issue": "/art/leviathans/*.webp and /art/bosses/*.webp do not exist, so the BossPlate images are broken (no onError fallback). Halloween.js also uses /art/bosses/1099.webp.", "selector": "[data-testid=journal-tab-leviathans], [data-testid=journal-tab-bosses]", "priority": "MEDIUM"},
+      {"component": "Tackle Box > Crates & more", "issue": "crate_bronze/silver/gold.webp are missing from /art/gear (Crates.js has no fallback). scrap.webp and seal.webp are also missing; GearIcon hides those, so the impact is small.", "selector": "[data-testid=inventory-tab-other]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Fishdex hero", "issues": ["With a water chip selected, the hero shows the water name but the progress (1/413) and rarity counters are still global, which reads as per-water progress", "Profile says 'Species discovered 1 / 416' but Fishdex says 1 / 413 (secret species counted differently)", "Some undiscovered entries show an empty dark plate instead of a silhouette"]},
+      {"screen": "Tackle Box loadout bar", "issues": ["The small slot captions (ROD/REEL/LINE/BAIT) are hard to read over the bright water background"]},
+      {"screen": "Shop", "issues": ["The success toast sits over the modal title banner", "The owned-count badge (x0) on bait cards is small and low contrast"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add the missing art or onError fallbacks for /art/avatars/*, /art/badges/*, /art/bosses/*, /art/leviathans/*, and /art/gear/crate_*.webp, scrap.webp, seal.webp",
+    "Make Escape close only the topmost dialog. Options: nested dialogs call stopImmediatePropagation, or Modal.js ignores Escape when a nested [role=dialog]/fixed overlay exists",
+    "Optionally make the Fishdex hero progress per water when a water is selected, and line up the species totals between Profile and Fishdex"
+  ],
+  "critical_code_review_comments": [
+    "Modal.js: the Escape listener is global with no stack awareness. Nested dialogs (RodInfoDialog, SpeciesModal, BaitInfoDialog, ListDialog) close the parent modal too",
+    "Inventory.js ListDialog uses a fixed inset-0 overlay. It works, but inside the page-modal both overlays stack and Escape closes everything",
+    "Inventory.js tackle-card uses /art/gear/<id>.webp with no onError fallback (Slot has one), so any gear id added later without art will show a broken image",
+    "Shop.js: 'const narrow = false' is dead code"
+  ],
+  "updated_files": ["/app/frontend/src/components/panels/Modal.js (added grid-cols-[minmax(0,1fr)] to the overlay to fix mobile horizontal overflow)"],
+  "success_rate": {"backend": "N/A (not requested)", "frontend": "88%"},
+  "seed_data_creation": "TestAngler bought rod_fibre (250g, now equipped) and 5 bait_worm; sold its only keepnet fish (keepnet is now empty); current water is willow. Gold is about 4583.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Log in via POST /api/auth/login and put the token in localStorage owo_token, then open /game/<page>. Travel/fish-here close the modal and switch to water mode (expected). TestAngler now owns rod_cane and rod_fibre, so equip can be tested in the Tackle tab; its keepnet is empty, so catch a fish before testing sell/list. title-select only has 'Default' (no earned titles), so title switching could not be fully tested. Mobile overflow is fixed in Modal.js; re-check Journal/Profile at 390px.",
+  "rca of the issue": "Mobile overflow: the page-modal overlay is a CSS grid with an implicit auto column. A grid item's min-content contribution (the Fishdex .g-chips strip with nowrap chips, and the profile hero) widened the track past the viewport even with w-full. Constraining the track with minmax(0,1fr) lets the inner overflow-x:auto and truncate take effect. Escape bug: Modal adds a window keydown listener and nested dialogs add their own, so both fire on one key press."
+}

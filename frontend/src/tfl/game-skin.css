@@ -133,3 +133,9 @@ html body ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.35); }
 
 .profile-stats > div { border-radius: 10px; padding: 8px 10px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(200, 150, 31, 0.35); }
 .profile-stats .num { font-size: 16px; }
+@media (max-width: 639px) {
+  [data-testid="page-modal"] .fr-corner, [data-testid="more-modal"] .fr-corner { display: none; }
+  .g-slot { width: 72px; } .g-slot .well { width: 62px; height: 62px; } .g-slot .well img { width: 50px; height: 50px; }
+  .g-tab { min-width: 62px; padding: 5px 6px 4px; } .g-tab img { width: 28px; height: 28px; }
+  .g-card .art { height: 80px; }
+}
