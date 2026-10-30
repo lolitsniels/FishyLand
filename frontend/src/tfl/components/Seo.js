@@ -7,8 +7,8 @@
 import { useEffect } from "react";
 
 const SITE_NAME = "FishyLand";
-const SITE_URL = "https://thefishinglands.com";
-const OG_IMAGE = SITE_URL + "/art/banners/banner_1200x630.jpg";
+const SITE_URL = window.location.origin;
+const OG_IMAGE = SITE_URL + "/art/og.jpg";
 
 function setMeta(selector, attrs) {
   let el = document.head.querySelector(selector);

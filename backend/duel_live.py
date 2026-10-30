@@ -96,7 +96,10 @@ async def live_leave(user=Depends(get_current_user)):
 
 
 async def in_duel(user) -> bool:
-    return bool(await _active(str(user["_id"])))
+    """True while the angler's duel clock is running (plus a short grace for a fish hooked just before the buzzer)."""
+    t = _now()
+    return bool(await db.live_duels.find_one({"players": {"$elemMatch": {"id": str(user["_id"]), "left": {"$ne": True}}},
+                                              "start": {"$lte": _iso(t)}, "end": {"$gt": _iso(t - timedelta(seconds=20))}}))
 
 
 async def record_catch(user, name: str, weight: float):

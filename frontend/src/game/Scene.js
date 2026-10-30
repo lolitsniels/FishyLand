@@ -599,7 +599,7 @@ function buildScene(app, tex, key, bgTex, mt) {
     const now = performance.now();
     list.forEach((p) => {
       let v = peers.get(p.id);
-      if (!v) { v = makePeer(p); v.c.x = p.x; v.c.y = p.y; v.wp = []; peers.set(p.id, v); actors.addChild(v.c); }
+      if (!v) { v = makePeer(p); v.c.x = p.x; v.c.y = p.y; v.wp = []; v.seed = Math.random() * 6; peers.set(p.id, v); actors.addChild(v.c); }
       if (p.x !== v.tx || p.y !== v.ty) {
         // walk peers along the walk grid (never straight across water); far jumps or off-grid positions snap
         const far = Math.hypot(p.x - v.c.x, p.y - v.c.y) > 1400 || (tm && !canWalk(v.c.x, v.c.y)) || (tm && !canWalk(p.x, p.y));
@@ -614,14 +614,16 @@ function buildScene(app, tex, key, bgTex, mt) {
       const goal = v.wp[0] || { x: v.tx, y: v.ty };
       const dx = goal.x - v.c.x, dy = goal.y - v.c.y, d = Math.hypot(dx, dy);
       const walking = d > 2;
-      if (walking) { const st = Math.min(d, 230 * dt); v.c.x += (dx / d) * st; v.c.y += (dy / d) * st; if (Math.abs(dx) > 1) v.flip = dx < 0; }
+      // a little faster than our own walk when behind, so peers glide instead of stop-starting between updates
+      const left = v.wp.reduce((acc, q, i) => acc + Math.hypot(q.x - (i ? v.wp[i - 1].x : v.c.x), q.y - (i ? v.wp[i - 1].y : v.c.y)), 0);
+      if (walking) { const st = Math.min(d, 230 * (left > 120 ? 1.3 : 1) * dt); v.c.x += (dx / d) * st; v.c.y += (dy / d) * st; if (Math.abs(dx) > 1) v.flip = dx < 0; }
       const pd = depth(v.c.y);
       v.fig.scale.set(v.flip ? -pd : pd, pd);
-      v.fig.y = walking ? -Math.abs(Math.sin(time * 11 + v.c.x)) * 5 : 0;
+      v.fig.y = walking ? -Math.abs(Math.sin(time * 11 + v.seed)) * 5 : 0;
       v.name.scale.set(pd); v.name.y = -ANGLER_H * pd - 6; v.status.y = -ANGLER_H * pd - 22;
       { const b = fx.bubbles?.[v.uname]; v.bubble.show(b && b.until > Date.now() ? b.text : ""); v.bubble.y = -ANGLER_H * pd - 26; }
       v.status.text = v.phase === "fight" ? "Reeling in!" : ["cast", "wait", "bite"].includes(v.phase) ? "Fishing…" : v.phase === "landed" ? "Caught one!" : "";
-      v.f.setAngle(rodAngle(mode, v.phase, walking, time + v.c.x));
+      v.f.setAngle(rodAngle(mode, v.phase, walking, time + v.seed));
       v.c.zIndex = v.c.y;
     });
     if (QS.has("debugpeers")) window.__peerPos = [...peers.values()].map((v) => ({ x: v.c.x, y: v.c.y, onLand: canWalk(v.c.x, v.c.y) }));

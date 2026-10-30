@@ -7,6 +7,11 @@ import { useGame } from "../tfl/context/GameContext";
 import { createGuest } from "../tfl/lib/guest";
 import { CharacterPicker } from "../world/CharacterPicker";
 import { DEFAULT_LOOK } from "../game/look";
+import Seo from "../tfl/components/Seo";
+
+const HOME_LD = { "@context": "https://schema.org", "@type": "VideoGame", name: "FishyLand", url: window.location.origin, image: `${window.location.origin}/art/og.jpg`,
+  description: "Free online fishing MMO in your browser: walk the harbour with real players, fish 12 waters, catch hundreds of species and win live fishing duels.",
+  genre: ["Fishing", "MMO", "Casual"], gamePlatform: ["Web browser", "Mobile browser"], playMode: "MultiPlayer", applicationCategory: "Game", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } };
 
 const Motes = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -118,6 +123,8 @@ export default function Landing() {
 
   return (
     <div className="fl-home" data-testid="welcome-page">
+      <Seo title="FishyLand · Free Online Fishing MMO in Your Browser" type="website" path="/" jsonLd={HOME_LD}
+        description="FishyLand is a free online fishing MMO you play in your browser. Walk the harbour with real players, fish 12 waters, catch hundreds of species, fill your Fishdex, join a crew and win live fishing duels." />
       <header className="fl-top" data-testid="lp-topbar">
         <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl-logo-sm" />
         <div className="flex items-center gap-3">

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { api, errMsg, fmt, wt } from "../tfl/lib/api";
+import { api, errMsg, fmt, wt, ln, lengthUnit } from "../tfl/lib/api";
 import { useGame as useTfl } from "../tfl/context/GameContext";
 
 const STARS = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, mythic: 5 };
-const cmText = (cm) => (cm >= 100 ? `${(cm / 100).toFixed(2)} m` : `${Math.round(cm)} cm`);
 
 function Tape({ cm }) {
-  const end = cm >= 100 ? `${(cm / 100).toFixed(1)}m` : Math.round(cm);
+  const inch = lengthUnit() === "in";
+  const end = inch ? `${Math.round(cm / 2.54)}"` : cm >= 100 ? `${(cm / 100).toFixed(1)}m` : Math.round(cm);
   return (
     <div className="relative w-[200px] h-[38px] tape-in" data-testid="catch-tape">
       <img src="/art/hud/tape.webp" alt="" className="absolute inset-0 w-full h-full" />
@@ -60,7 +60,7 @@ export default function CatchCard({ res, onClose }) {
         <div className="flex items-end justify-between gap-3 px-1">
           <div className="flex flex-col items-center gap-1">
             <Tape cm={c.length_cm || 0} />
-            <div className="font-deco text-2xl text-[#ffe9a3] leading-none" data-testid="catch-length">{cmText(c.length_cm || 0)}</div>
+            <div className="font-deco text-2xl text-[#ffe9a3] leading-none" data-testid="catch-length">{ln(c.length_cm || 0)}</div>
             <div className="text-xs text-amber-100/80 font-bold" data-testid="catch-weight">{wt(c.weight)}</div>
           </div>
           <div className="flex flex-col items-center gap-1">

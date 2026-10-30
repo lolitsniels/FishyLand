@@ -84,7 +84,15 @@ export const kg = (w) => fmtW(weightUnit() === "lb" ? Number(w) * 2.20462 : Numb
 export const wt = (w) => `${kg(w)} ${weightUnit()}`;
 // Server-written sentences ('landed a 5.13 kg Huchen'), convert inline kg figures for lb players.
 export const wtText = (t) => (weightUnit() === "lb" && typeof t === "string" ? t.replace(/(\d+(?:\.\d+)?)\s?kg\b/g, (_, n) => `${kg(Number(n))} lb`) : t);
-export const ln = (cm) => (cm == null || Number.isNaN(Number(cm)) ? "-" : weightUnit() === "lb" ? `${(Number(cm) / 2.54).toFixed(1)} in` : `${cm} cm`);
+export const lengthUnit = () => {
+  try { const p = JSON.parse(localStorage.getItem("owo_prefs") || "{}"); return p.length_unit || ((p.weight_unit || defaultWeightUnit()) === "lb" ? "in" : "cm"); } catch { return "cm"; }
+};
+export const ln = (cm) => {
+  if (cm == null || Number.isNaN(Number(cm))) return "-";
+  const c = Number(cm);
+  if (lengthUnit() === "in") return c >= 91.44 ? `${Math.floor(c / 30.48)} ft ${Math.round((c % 30.48) / 2.54)} in` : `${(c / 2.54).toFixed(1)} in`;
+  return c >= 100 ? `${(c / 100).toFixed(2)} m` : `${Math.round(c * 10) / 10} cm`;
+};
 export const wtRange = (a, b) => (weightUnit() === "lb" ? `${Math.round(a * 2.20462 * 10) / 10}–${Math.round(b * 2.20462 * 10) / 10} lb` : `${a}–${b} kg`);
 export const ago = (isoStr) => {
   const s = Math.max(0, (Date.now() - new Date(isoStr).getTime()) / 1000);

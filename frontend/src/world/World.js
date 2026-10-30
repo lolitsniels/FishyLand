@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { ChatBox } from "./ChatBox";
 import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
+import { GameSettings } from "./GameSettings";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
@@ -68,7 +69,7 @@ function usePresence(loc) {
     const send = () => api.post("/world/pos", { loc, x: fx.me.x, y: fx.me.y, phase: fx.phase }).then((r) => { if (alive) { fx.others = r.data.players; setHere(r.data.here); } }).catch(() => {});
     fx.others = [];
     send();
-    const iv = setInterval(send, 1500);
+    const iv = setInterval(send, 600);
     return () => { alive = false; clearInterval(iv); fx.others = []; };
   }, [loc]);
   return here;
@@ -92,6 +93,7 @@ export default function World() {
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const prevWater = useRef(null);
   const page = loc.pathname.replace(/^\/game\/?/, "").split("/")[0];
   const water = data?.waters?.find((x) => x.key === user?.water);
@@ -203,12 +205,14 @@ export default function World() {
         <Modal title="Menu" testid="more-modal" width={620} onClose={() => setMore(false)}>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-4 py-2 justify-items-center">
             {[...MORE, ...(user.is_admin ? ["admin"] : [])].filter((k) => mode === "harbour" || !HARBOUR_ONLY.has(k)).map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
+            <Ring img="settings" label="Settings" size={52} testid="more-settings" onClick={() => { setMore(false); setSettingsOpen(true); }} />
           </div>
           <div className="flex justify-center mt-3">
             <button type="button" className="fr-btn fr-btn-dark px-5 py-1.5 text-sm flex items-center gap-2" onClick={async () => { await logout(); nav("/"); }} data-testid="logout-button"><LogOut size={14} /> Log out</button>
           </div>
         </Modal>
       )}
+      {settingsOpen && <GameSettings onClose={() => setSettingsOpen(false)} />}
       {page && page !== "fish" && (
         <Modal title={title} testid="page-modal" width={980} onClose={() => nav("/game")}>
           <div className="tfl-skin"><Outlet /></div>

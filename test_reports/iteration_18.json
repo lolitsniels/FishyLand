@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 18 (both). BACKEND: new pytest test_iter18_duel_no_rewards.py, 3/3 pass using real values from /auth/me, /inventory and /journal. A /fish/land during a live duel returns duel:true and xp 0, with no catch id or value. Inventory 13->13, gold 7563->7563, xp 3618->3618, journal species 13->13 and journal count 17->17 all stayed the same. The duel score went up for both views (me.kg and foe.kg = 3.472). At duel end: result win/lose, no reward field, winner's gold unchanged. After leaving the duel, a normal catch works again (xp>0, inventory +1). FRONTEND (two contexts, TestAngler + TestAngler2, entered through /game/duel duel-find): the lobby text includes 'no gold, xp or items'. P1 cast with Space on fish-1 (land forced to success=true). The duel catch popup showed catch-duel-score '+0.503 lb' and 'Added to your duel score' / 'The fish goes back in the water'. keep, sell, fishdex, xp and value buttons/elements were all absent (count 0), and catch-duel-back-btn closed the popup. Inventory stayed the same and DuelHud showed 0.23 kg for P1 me and P2 foe. Duel end screen: P1 'Victory!', P2 'Defeat', duel-reward count 0 on both, gold 7570->7570, and duel-back-harbour closed it. Normal Millbrook fishing regression: popup with Keep / View in Fishdex / Sell 5 g / '14 exp' / worth 7 g, inventory 13->14, Keep closes. Landing page: lp-char-preview src is /art/chars/idle_<g>_<skin>_<hair>.webp and updates on gender, skin and hair. All 40 idle files exist, the arms are relaxed (checked male and female), and the images load. Desktop 1920x800 and mobile 390x844 look fine, with no horizontal overflow. No page errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/fish/land (duel_live.in_duel)", "issue": "in_duel() uses _active(), which matches any duel with players.left != True and end > now-300s. It does not check the water/pond or that the duel is live. (1) A player who leaves the Duel Pier mid-duel (for example, a reload resets fr_mode to harbour) and fishes elsewhere has every catch swallowed: no fish, xp or gold. Those catches are still added to the duel score from another water. (2) For up to 5 min after the duel ends, if the player hasn't pressed 'Back to the harbour', any catch is swallowed: record_catch does nothing because end has passed, yet the land still returns duel:true. Suggested fix: make in_duel require start <= now < end AND the encounter water to be the duel water (store a duel flag on the encounter at cast time)."},
+      {"endpoint": "/api/duel/live/leave", "issue": "Calling leave during the live phase returns ok:true but does nothing (left is only set after end), so the player stays 'in duel' for scoring and land handling. Together with the issue above, this traps normal catches."},
+      {"endpoint": "server.py ~line 1577", "issue": "An old duel_live.record_catch call is left in the normal land path. It is harmless now because the in_duel branch returns earlier, but it is dead or confusing code."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Duel catch popup vs DuelHud", "issues": ["The popup shows the score in the user's weight unit ('+0.503 lb'), while the DuelHud scoreboard and result screen always show kg ('0.23 kg'). The units are inconsistent; the request expected '+X kg'. Use one unit (wt() everywhere or kg everywhere)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter18_duel_no_rewards.py", "/app/test_reports/pytest/iter18.xml"],
+  "action_items": [
+    "Limit duel_live.in_duel to live duels on the duel water. Otherwise catches made off the Duel Pier, or within 5 min after a duel ends, are silently thrown away.",
+    "Optional: show the duel catch score and the DuelHud in the same unit.",
+    "Optional: remove the unreachable record_catch call in the normal /fish/land path."
+  ],
+  "critical_code_review_comments": [
+    "duel_live._active window (end > now-300s) is reused for in_duel, which mixes up 'showing the result screen' with 'currently competing'.",
+    "server.py is over 4000 lines and should be split into modules."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter18_duel_no_rewards.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Played several duels with TestAngler vs TestAngler2 (now left/idle). TestAngler caught a few normal fish (one sold, Cobweb Carp kept in inventory).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run the duel API test with: pytest test_iter18_duel_no_rewards.py -n 0 (pytest.ini adds xdist). It takes about 200 s because it waits out the 180 s duel. It skips if TestAngler is still in a duel: wait until the end, then run python3 /app/tests/duel_api_check.py leave (leave during live does nothing). The user endpoint is /api/auth/me; /api/player does not exist. /api/journal returns a dict keyed by species_id. For the UI duel, use the iteration 17 approach: two contexts, duel-find, teleport window.__fx.me={x:840,y:725}, Space, route /api/fish/land with success=true. To get a quick winner, land through the API with requests inside the script.",
+  "test_credentials": "TestAngler / TestAngler2, Angler#2026 (from /app/memory/test_credentials.md)"
+}

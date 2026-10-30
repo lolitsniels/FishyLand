@@ -1574,7 +1574,6 @@ async def land(body: LandIn, user=Depends(get_current_user)):
         await db.users.update_one({"_id": user["_id"]}, {"$inc": {"stats.catches": 1, "stats.hex_hooks": 1}})
         hex_bonus = {"id": str(r2.inserted_id), "name": f["name"], "weight": twin["weight"], "value": twin["value"]}
         user = await db.users.find_one({"_id": user["_id"]})
-    await duel_live.record_catch(user, f["name"], weight)
     from crates import maybe_fish_drop
     crate_drop = await maybe_fish_drop(user)
     return {"success": True, "catch": catch, "hex_bonus": hex_bonus, "crate_drop": crate_drop, "candles": HALLOW_CANDLES.get(f["rarity"]) if f["id"] in HALLOW_IDS else None, "xp": xp, "xp_boost": boost_mult if boost_mult > 1 else None, "first_discovery": first, "level_up": new_level if new_level > old_level else None,

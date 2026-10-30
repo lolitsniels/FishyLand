@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, errMsg } from "../tfl/lib/api";
+import { api, errMsg, wt } from "../tfl/lib/api";
 import { toast } from "sonner";
 import { fx } from "../game/fx";
 
@@ -36,9 +36,9 @@ export function DuelHud() {
   return (
     <>
       <div className="duel-board pointer-events-auto" data-testid="duel-scoreboard">
-        <div className={`duel-side ${lead === "me" ? "lead" : ""}`}><b data-testid="duel-me-name">{m.me.username}</b><span className="duel-kg" data-testid="duel-me-kg">{m.me.kg.toFixed(2)} kg</span><small>{m.me.catches} fish</small></div>
+        <div className={`duel-side ${lead === "me" ? "lead" : ""}`}><b data-testid="duel-me-name">{m.me.username}</b><span className="duel-kg" data-testid="duel-me-kg">{wt(m.me.kg)}</span><small>{m.me.catches} fish</small></div>
         <div className="duel-clock" data-testid="duel-timer">{m.phase === "countdown" ? `Starts in ${startIn}` : m.phase === "live" ? fmtT(m.seconds_left) : "Time!"}</div>
-        <div className={`duel-side right ${lead === "foe" ? "lead" : ""}`}><b data-testid="duel-foe-name">{m.foe.username}</b><span className="duel-kg" data-testid="duel-foe-kg">{m.foe.kg.toFixed(2)} kg</span><small>{m.foe.catches} fish</small></div>
+        <div className={`duel-side right ${lead === "foe" ? "lead" : ""}`}><b data-testid="duel-foe-name">{m.foe.username}</b><span className="duel-kg" data-testid="duel-foe-kg">{wt(m.foe.kg)}</span><small>{m.foe.catches} fish</small></div>
       </div>
       {m.phase === "done" && (
         <div className="fixed inset-0 z-[70] grid place-items-center bg-black/60 pointer-events-auto" data-testid="duel-result">
@@ -48,7 +48,7 @@ export function DuelHud() {
             <div className="duel-final">
               {[m.me, m.foe].map((p, i) => (
                 <div key={p.username} className={i === 0 ? "me" : ""}>
-                  <b>{p.username}</b><span>{p.kg.toFixed(2)} kg</span><small>{p.catches} fish{p.best ? ` · best ${p.best.name} ${p.best.kg} kg` : ""}</small>
+                  <b>{p.username}</b><span>{wt(p.kg)}</span><small>{p.catches} fish{p.best ? ` · best ${p.best.name} ${wt(p.best.kg)}` : ""}</small>
                 </div>
               ))}
             </div>
