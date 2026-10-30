@@ -1,0 +1,44 @@
+{
+  "summary": "Phase-1 2.5D world port tested end-to-end (backend pytest 12/12 + Playwright desktop & mobile). Landing, register, login, guest, harbour walking (keys + tap), signpost prompts (+E), boat -> Travel Map, all 5 action-bar menus + More modal + logout, water mode (FIND SPOT -> FISH), cast/bite/TensionGame fight, catch card (Bowfin landed, gold 120->145, journal entry saved, no cheat_log flags, /fish/land 200 with no too-fast/too-slow), lost fight (slack toast -> idle), Back to Harbour, travel to Willow River (auto-switch to water mode, gold charged 150), multiplayer presence (API isolation by loc + UI __fx.others and here-count=2 with a 2nd user), pearls stripped from gear/bait, mobile 390x844 no horizontal overflow. Found and FIXED 2 critical frontend bugs: (1) i18n never initialised so every t() string in all TFL pages rendered blank (Buy buttons, tab labels, column headers, panel titles); (2) 'Play now' guest button did nothing because reCAPTCHA was loaded with an undefined site key. One HIGH UX gap remains: no way to re-enter your current water from the harbour.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/register, /api/auth/guest", "issue": "SIGNUPS_PER_IP_HOUR=3 is shared across everyone behind the preview ingress IP; tests hit 429 'Too many new accounts' quickly (cleared db.rate_events action=signup to continue). Expected prod behaviour, but note for testing."},
+      {"endpoint": "/api/world/pos", "issue": "Presence is an in-process dict (_pos) - will not be shared across multiple backend workers/replicas; fine for single worker."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "i18n (all TFL pages: Shop, Travel Map, Fishdex, Inventory, Profile...)", "issue": "FIXED by testing agent: initI18n() was never called, i18next.t() returned undefined so all tt() strings were empty (empty Buy buttons, unlabeled tabs, missing headers/titles). Added initI18n() call in src/index.js.", "selector": "[data-testid^='buy-'], [data-testid^='shop-tab-']", "priority": "CRITICAL (fixed)"},
+      {"component": "Landing guest button", "issue": "FIXED by testing agent: createGuest awaited recaptchaToken() with REACT_APP_RECAPTCHA_SITE_KEY undefined -> threw, no /api/auth/guest request was made. recaptchaToken now returns undefined when no site key (backend already skips check when RECAPTCHA_SECRET unset).", "selector": "[data-testid='lp-guest-button']", "priority": "CRITICAL (fixed)"}
+    ],
+    "integration_issues": [
+      {"flow": "Harbour -> current water", "issue": "After 'Back to Harbour' (or any page reload, which always starts in harbour mode), there is no UI path back into the water the user is currently assigned to: SAIL/boat opens Travel Map where the current water card only shows the text 'Fishing here' (no button), and travel only switches mode when user.water changes. Only workaround is URL /game/fish or travelling elsewhere and back.", "affected_selectors": ["[data-testid='cast-fish-button']", "[data-testid='travel-{key}-button']", "Waters.js line ~95 'Fishing here'"]}
+    ],
+    "design_issues": [
+      {"screen": "Mobile 390x844 HUD", "issues": ["useScale clamps HUD scale to 0.55 -> player panel text, action-bar labels and walk hint render ~5-6px, essentially unreadable; consider a mobile-specific layout or min scale ~0.75", "TFL page modals also rendered at 0.55 scale (Shop text very small)"]},
+      {"screen": "Harbour", "issues": ["Player nameplates overlap signpost labels (e.g. name covers 'Market' label at spawn)", "Gear icons missing in Shop item column (known art gap) and broken image icon on 'Drop a crab cage' button in Travel Map Millbrook card"]},
+      {"screen": "Landing", "issues": ["'416 species' feature vs Fishdex '413 discovered' total - inconsistent counts"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_world_phase1.py", "/app/backend/tests/presence_bot.py", "/app/test_reports/pytest/world_phase1.xml"],
+  "action_items": [
+    "Add a way to enter the current water from the harbour (e.g. 'Fish here'/'Go' button on the current water card in Travel Map, or make SAIL offer 'Return to <water>'); also consider persisting fx.mode across reloads",
+    "Improve mobile HUD readability (min scale or responsive layout)",
+    "Review the two fixes made by testing agent (src/index.js initI18n, tfl/lib/recaptcha.js no-key short-circuit)",
+    "Add TestAngler / TestAngler2 (Angler#2026) to /app/memory/test_credentials.md - currently missing from that file"
+  ],
+  "critical_code_review_comments": [
+    "World.js: page==='fish' and user.water effects call goTo() but omit it from deps; harmless now but fragile",
+    "Scene.js is 650 lines - near the 700-line split threshold",
+    "world_presence.py: no throttle on /world/pos and in-memory state; OK for phase 1",
+    "Headless browser ran at ~22fps and walking speed is dt-based so movement was slow in tests (not a bug)"
+  ],
+  "updated_files": ["/app/frontend/src/index.js", "/app/frontend/src/tfl/lib/recaptcha.js", "/app/backend/tests/test_world_phase1.py", "/app/backend/tests/presence_bot.py"],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "~92% (all requested flows pass after 2 fixes; 1 integration gap)"},
+  "test_credentials": "TestAngler / Angler#2026, TestAngler2 / Angler#2026 (login by username). Not listed in /app/memory/test_credentials.md.",
+  "seed_data_creation": "TestAngler raised in MongoDB to xp=3000 (Lv6), gold=5000; then travelled to willow (water now 'willow', gold 4850). Registered 2 TEST users T<hex> and 1 guest. Cleared db.rate_events signup entries.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "window.__fx gives scene state; setting __fx.dest walks the angler but does not auto-open signposts (only clicking a signpost sets autoOpen) - use spot-prompt or E. When walking to the boat, wait until __fx.near==='boat' and __fx.dest is null (route passes Quest Board). Fight controller: hold Space when tension-needle style.left < zone center. Run presence_bot.py <loc> <secs> to simulate a 2nd player. Clear db.rate_events {action:'signup'} if register/guest return 429."
+}

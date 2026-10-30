@@ -82,7 +82,7 @@ function SignupBox({ go }) {
 const FEATURES = [
   [Anchor, "Walk the harbour", "A living 2.5D port town. Stroll the docks, visit the shops and meet other anglers."],
   [Waves, "12 waters", "From quiet Millbrook to the Cinder Depths, each with its own weather, tides and fish."],
-  [Fish, "416 species", "Fight every catch on the line. Golden, Giant and Ancient variants for the lucky."],
+  [Fish, "400+ species", "Fight every catch on the line. Golden, Giant and Ancient variants for the lucky."],
   [Gem, "Never pay to win", "Pearls are earned by fishing and only buy cosmetics. Skill lands the big ones."],
 ];
 

@@ -24,6 +24,7 @@ export function loadRecaptcha() {
 }
 
 export async function recaptchaToken(action) {
+  if (!SITE_KEY) return undefined; // no key configured: backend skips the bot check too (IP limits still apply)
   const g = await loadRecaptcha();
   return g.execute(SITE_KEY, { action });
 }

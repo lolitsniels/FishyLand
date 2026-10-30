@@ -92,7 +92,7 @@ export default function Waters() {
                 {unlocked && progress?.[w.key] && <div className="mt-2 pt-2 border-t border-[var(--border)]"><WaterProgress p={progress[w.key]} compact stamp={false} testId={`water-progress-${w.key}`} /></div>}
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-[12px] text-[var(--text-2)]">{w.premium ? <span className="inline-flex items-center gap-1 text-[#f08a45]"><PassIcon size={12} /> {unlocked ? tt("Angler Pass water, open to you") : user.premium ? <>{tt("Angler Pass water · requires Lv")} {w.level}</> : <>{tt("Angler Pass water · Lv")} {w.level} {!NO_IAP && <> · <Link to="/game/support" className="underline">{tt("get an Angler Pass")}</Link></>}</>}</span> : unlocked ? tt("Passage paid") : w.fee === 0 ? tt("Free") : <>{tt("Passage")} <span className="num text-[#ffcfa8]">{fmt(w.fee)}g</span> {tt("· requires Lv")} {w.level}</>}</span>
-                  {here ? <span className="text-[12px] text-[var(--gold)]">{tt("Fishing here")}</span>
+                  {here ? <Link to="/game/fish" className="btn btn-sm btn-gold" data-testid={`fish-here-${w.key}-button`}>{tt("Fish here")}</Link>
                     : <button className={`btn btn-sm ${unlocked || canUnlock ? "btn-gold" : ""}`} disabled={!unlocked && !canUnlock} onClick={() => travel(w.key)} data-testid={`travel-${w.key}-button`}>{unlocked ? tt("Travel") : w.premium ? (user.premium ? tt("Locked") : tt("Angler Pass only")) : canUnlock ? tt("Pay passage & travel") : tt("Locked")}</button>}
                 </div>
               </div>

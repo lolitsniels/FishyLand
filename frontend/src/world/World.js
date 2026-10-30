@@ -25,7 +25,7 @@ const BAR_R = ["shop", "profile"];
 const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
 
 function useScale() {
-  const calc = () => { const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight; return { s: Math.max(0.55, Math.min(1.15, w / 1000, h / 640)), w, h }; };
+  const calc = () => { const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight; return { s: Math.max(w < 600 ? 0.74 : 0.55, Math.min(1.15, w / 1000, h / 640)), w, h }; };
   const [v, setV] = useState(calc);
   useEffect(() => { const r = () => setV(calc()); window.addEventListener("resize", r); window.visualViewport?.addEventListener("resize", r); return () => { window.removeEventListener("resize", r); window.visualViewport?.removeEventListener("resize", r); }; }, []);
   return v;
@@ -79,7 +79,7 @@ export default function World() {
   const fightEnc = useGame((st) => st.fightEnc);
   const result = useGame((st) => st.result);
   const ph = useGame((st) => st.phase);
-  const [mode, setMode] = useState(fx.mode);
+  const [mode, setMode] = useState(() => (fx.mode = sessionStorage.getItem("fr_mode") || fx.mode));
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
@@ -88,7 +88,7 @@ export default function World() {
   const water = data?.waters?.find((x) => x.key === user?.water);
   const here = usePresence(mode === "harbour" ? "harbour" : user?.water || "harbour");
 
-  const goTo = (m) => { fx.mode = m; fx.me = { ...sceneFor(m === "harbour" ? "harbour" : "water").spawn }; fx.dest = null; fx.autoOpen = null; fx.flip = false; setMode(m); };
+  const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(m === "harbour" ? "harbour" : "water").spawn }; fx.dest = null; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => { if (page === "fish") { goTo("water"); nav("/game", { replace: true }); } }, [page, nav]);
   useEffect(() => {
@@ -133,7 +133,7 @@ export default function World() {
       <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: w / s, height: h / s, transform: `scale(${s})` }} data-testid="game-hud">
         <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : water?.name} here={here} /></div>
         {mode === "water" && idle && !page && (
-          <button type="button" className="fr-btn fr-btn-dark absolute top-3 right-3 px-4 py-2 pointer-events-auto text-sm" onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
+          <button type="button" className="fr-btn fr-btn-dark absolute right-3 px-4 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
         )}
         {nearSpot && idle && !page && (
           <button type="button" className="fr-btn absolute left-1/2 -translate-x-1/2 bottom-[150px] px-6 py-2 pointer-events-auto pop" onClick={() => fx.openSpot(nearSpot.id)} data-testid="spot-prompt">

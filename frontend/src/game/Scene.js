@@ -340,7 +340,7 @@ function buildScene(app, tex, key, bgTex) {
   };
   const camTarget = () => {
     const { sc, sw, sh, small } = cam;
-    const fxX = mode === "harbour" ? fx.me.x : 690, fyY = mode === "harbour" ? fx.me.y - 60 : FEET.y;
+    const vis = sw / sc, fxX = mode === "harbour" ? fx.me.x : vis >= 900 ? 690 : Math.min(690, fx.me.x + vis * 0.22), fyY = mode === "harbour" ? fx.me.y - 60 : FEET.y;
     const tx = Math.min(0, Math.max(sw - BG_W * sc, sw / 2 - fxX * sc));
     const ty = Math.min(0, Math.max(sh - BG_H * sc, (mode === "harbour" ? sh * 0.6 : sh * (small ? 0.72 : 0.78)) - fyY * sc));
     return [tx, ty];
