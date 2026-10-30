@@ -27,7 +27,7 @@ export function ChatBox() {
         last.current = r.data[r.data.length - 1].at;
         if (!first.current) r.data.forEach((m) => { if (m.text) fx.bubbles[m.username] = { text: m.text, until: Date.now() + 6000 }; });
         first.current = false;
-        setRows((old) => [...old, ...r.data].slice(-80));
+        setRows((old) => { const seen = new Set(old.map((m) => m.id)); return [...old, ...r.data.filter((m) => !seen.has(m.id))].slice(-80); });
       } catch { /* offline: try again next tick */ }
     };
     pull();
@@ -39,7 +39,7 @@ export function ChatBox() {
     e.preventDefault();
     const t = text.trim();
     if (!t) return;
-    try { const r = await api.post(`/chat/${ch}`, { text: t }); setText(""); if (r.data?.id) { last.current = r.data.at || last.current; setRows((old) => [...old, r.data].slice(-80)); } fx.bubbles[user.username] = { text: t, until: Date.now() + 6000 }; } catch (er) { toast.error(errMsg(er)); }
+    try { const r = await api.post(`/chat/${ch}`, { text: t }); setText(""); if (r.data?.id) { last.current = r.data.at || last.current; setRows((old) => (old.some((m) => m.id === r.data.id) ? old : [...old, r.data].slice(-80))); } fx.bubbles[user.username] = { text: t, until: Date.now() + 6000 }; } catch (er) { toast.error(errMsg(er)); }
   };
   return (
     <div className={`chatbox pointer-events-auto ${open ? "open" : ""}`} data-testid="chat-box" onKeyDown={(e) => e.stopPropagation()}>

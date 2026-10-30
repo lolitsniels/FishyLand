@@ -231,6 +231,7 @@ export default function Crews() {
     const pick = (t) => { setTab(t); localStorage.setItem(`owo_crew_tab_${crew.id}`, t); };
     return (
       <div className="space-y-3 fade-in" data-testid="crew-detail-page">
+      {user.crew && <button type="button" className="btn btn-gold w-full" onClick={() => window.dispatchEvent(new CustomEvent("fr-mode", { detail: "crew" }))} data-testid="go-crew-island">{tt("Sail to your crew island")}</button>}
         <div className="panel px-3 py-2 flex items-center justify-between gap-3 flex-wrap">
           <div className="font-serif text-[15px] text-[#f4ead2] truncate"><CrewName crew={crew} /></div>
           <CrewTabs tab={cur} setTab={pick} member={member} canManage={canManage} />
@@ -277,6 +278,7 @@ export default function Crews() {
 
   return (
     <div className="space-y-3 fade-in" data-testid="crews-page">
+      {user.crew && <button type="button" className="btn btn-gold w-full" onClick={() => window.dispatchEvent(new CustomEvent("fr-mode", { detail: "crew" }))} data-testid="go-crew-island">{tt("Sail to your crew island")}</button>}
       <Panel icon="crews" title={tt("Crews")} right={<span className="num">{tt("weekly contest ends in")} {Math.max(0, Math.floor((new Date(d.week_end) - Date.now()) / 3600000))}h</span>}>
         <p className="text-[12.5px] text-[var(--text-2)] m-clamp">{tt("Crews of up to")} {d.max} {tt("anglers (more with a bigger hall) compete in a weekly crew challenge that rotates between total weight, species landed and rarity points, and share one big")} <b>{tt("weekly crew order")}</b> {tt("from a dockside patron, fill every line together and the payout is split by contribution, with a cut for the crew bank. The winning crew splits the gold, every member pockets Pearls, and the crew earns a win on its record. Members share a private chat channel and a crew hall: deposit gold into the crew bank and the leader (or an officer the leader appoints) builds perks, extra luck, market slots, faster energy and a grander hall, for everyone.")}</p>
         {mine ? <div className="mt-2 text-[13px]">{tt("You sail with")} <button className="text-[var(--gold)] underline" onClick={() => nav(`/game/crews/${mine.id}`)} data-testid="my-crew-link">[{mine.tag}] {mine.name}</button></div>

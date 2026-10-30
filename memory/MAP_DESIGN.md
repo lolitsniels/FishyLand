@@ -25,3 +25,11 @@ Learned from user feedback. Follow these for every new map in `frontend/src/game
 
 ## Verification
 - Use `/game?mapview=1` to see the whole map; check nothing overlaps paths, nothing half in water, all spots reachable.
+
+## More rules (round 12 feedback)
+- Never put lamps/props ON bridges, piers or their ends: keep >= 40px clear of bridge corridors and dock rectangles (enforced by `deck()` in settle), place lamps beside the path at bridge ends.
+- Overlapping ground shapes: draw all soft shadows first, then all fills (no dark seams where paths meet plazas).
+- Leaping fish: only species of that water (fx.leapArt), whole arc over open water (isWater && !walk at 5 points + above) - never from grass, never over bridges/piers.
+- Image QA after every generation: composite on magenta and look. rembg can eat light-coloured walls (pastel houses) -> try `u2net` model if `isnet-general-use` leaves holes. Kill semi-transparent dithering (alpha < 200 -> 0). Round buttons: force alpha=255 inside the circle. Check bottom bands for leftover checkerboard.
+- Islands: water `{ invert: poly }` = sea everywhere outside the island (even-odd fill).
+- Travel map: no moving boat, no glow/cloud overlays; pins are round water thumbnails.

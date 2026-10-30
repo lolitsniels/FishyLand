@@ -1,0 +1,36 @@
+{
+  "summary": "Frontend-only test (backend skipped). I ran Playwright as TestAngler at 1920x1080 and 390x844. 7 of 7 requested features work; I found and fixed 1 bug and found 1 new bug. (1) Water mode: the action bar shows exactly menu-waters, journal, inventory, quests, profile and more; there is no menu-shop. The More modal lists only Quests, Messages and Wiki. Going to /game/shop, /market, /crews, /pearl-shop and /tournaments, or doing a pushState to /game/market, always redirects to /game with the toast \"That's in the harbour. Sail back to visit it.\" The page modal never stays open. (2) Harbour: menu-shop uses /art/hud/tackle.webp (tackle box). The player card uses gold.webp and pearl.webp. The shop has 22 gold.webp and 1 pearl.webp images and 0 lucide coin/gem icons. The wallet shows GOLD 4,577 and PEARLS 0 with image icons. (3) Fight on the Millbrook bridge (1520,1065): cast-fish-button has visibility:hidden (class invisible) during phase=fight, so reel-button is the only reel control. Released and held states keep the same size (560x58) and frame; only the skin changes (btn_dark to btn_gold) and the label ('Hold to reel' / 'Reeling...'). The automated hold/release loop landed a Bluegill and the catch popup showed. (4) Buying 1 Earthworm showed the toast 'Bought 1 × Earthworms' with the panel.webp teak border-image, gold title (#ffd27a) and readable text. Gold went from 4,577 to 4,570. (5) The species modal (Fishdex) and look-dialog both use the teak frame, are readable, and close correctly. (6) In Millbrook ?mapview=1 no tree, reed, lamp, bush or rock stands in the water; the boat sits in the pond on purpose. (7) Chat: the sent message is added to the list from the POST response (about 0.6s after the response, with no 3s poll wait). New bug: a race causes duplicate lines. FIXED: the canvas Tackle Shop signpost in the harbour showed a blank dark square, because Scene.js loaded `art/ui//art/hud/tackle.webp.png`. After my fix it shows the green tackle box.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ChatBox send", "issue": "Duplicate chat lines (reproduced: 'TEST_fast1 7705' appeared twice). A poll GET goes out with the old `after` just before the POST returns. Its response contains the new message, and send() also appends r.data. Rows are not de-duplicated by id.", "selector": "[data-testid=chat-line]", "priority": "MEDIUM"},
+      {"component": "Harbour-only redirect toast", "issue": "Each redirect raises 2 identical toasts (seen in the [data-sonner-toast] list). Cause: the effect fires twice under React.StrictMode / re-render. Give it a fixed id, e.g. toast(msg, {id:'harbour-only'}).", "selector": "[data-sonner-toast]", "priority": "LOW"},
+      {"component": "Harbour signpost (Scene.js)", "issue": "FIXED by the testing agent: the Tackle Shop signpost icon was blank because an absolute img path was wrapped in art/ui/...png.", "selector": "canvas", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Gold icon consistency", "issues": ["The catch popup shows '6 g' and 'Sell 4 g' as text instead of the gold.webp coin.", "Shop bait buy buttons show 'Buy 70g' as text.", "Durability.js (repair price) and SellDialog.js still use the lucide <Coins> icon instead of gold.webp.", "PearlShop.js uses the lucide <Gem> in its header."]},
+      {"screen": "Mobile water HUD 390px", "issues": ["The hint 'Walk onto a glowing fishing spot to cast' still overlaps the collapsed chat box (issue carried over from iteration 10)."]},
+      {"screen": "Fish art", "issues": ["Bluegill is a blue-striped fish on the catch card but a golden fish in the Fishdex species modal. The art is inconsistent (it looks like the FishPlate hue-rotate is applied differently)."]},
+      {"screen": "Look dialog", "issues": ["The 'Your angler' title sits right on top of the 'ANGLER' label; it needs a few px of spacing."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "ChatBox.js: de-duplicate rows by id when appending (in both pull and send), e.g. setRows(old => old.some(x => x.id === m.id) ? old : [...old, m]).",
+    "World.js harbour-only redirect: use toast(msg, { id: 'harbour-only' }) so only one toast shows.",
+    "Replace the remaining text 'g' and lucide Coins/Gem with the <Gold>/<PearlIcon> components (CatchCard, Shop BaitBuy button, Durability.js, SellDialog.js, PearlShop header).",
+    "Mobile: move the hint above the chat box, or hide it when they overlap."
+  ],
+  "critical_code_review_comments": [
+    "World.js: the HARBOUR_ONLY redirect runs in an effect after render, so the page modal and its <Outlet/> mount for one frame (and may fire the page's API calls) before the redirect. Checking the guard before rendering the Modal would avoid this.",
+    "ChatBox.js: send() moves last.current forward, but a pull already in flight can still append the same message, so you get duplicates (see ui_bugs).",
+    "Scene.js signpost loader assumed every sp.img is a short key. maps.js now mixes keys and absolute paths; I patched the loader to accept both."
+  ],
+  "updated_files": ["/app/frontend/src/game/Scene.js"],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "92% (all 7 requested features pass; 1 new medium chat dedupe bug and a few polish items)"},
+  "seed_data_creation": "Posted Global chat messages TEST_instant*, TEST_api check, TEST_fast0/1 as TestAngler. Bought 1 Earthworm (-7 gold). Landed and kept 1 Bluegill on Millbrook.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Login: POST /api/auth/login, then set localStorage owo_token and sessionStorage fr_mode (water/harbour). Fight: in water mode, set window.__fx.me={...,x:1520,y:1065}, then dispatch pointerdown on cast-fish-button. Hold/release by comparing the tension-needle style.left with the tension-zone-box left+width/2 (mouse down/up). TestAngler gold is about 4,570."
+}

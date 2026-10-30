@@ -173,3 +173,14 @@ html body [data-sonner-toast][data-type="error"] [data-title] { color: #ff9a8a !
 html body .reel-btn { border: 14px solid transparent !important; border-image: url(/art/hud/btn_dark.webp) 70 140 fill / 14px 24px / 0 stretch !important; background: none !important; color: #f2f6ff !important; min-height: 58px; font: 800 17px var(--ui-font) !important; text-shadow: 0 1px 2px #000 !important; box-shadow: none !important; }
 html body .reel-btn.holding { border-image: url(/art/hud/btn_gold.webp) 80 140 fill / 14px 24px / 0 stretch !important; color: #2a1503 !important; text-shadow: 0 1px 0 rgba(255, 240, 200, .6) !important; background: none !important; }
 .pcard-ic { width: 18px; height: 18px; object-fit: contain; margin-top: -2px; }
+
+.wm-dot { display: block; width: clamp(22px, 3vw, 42px); height: clamp(22px, 3vw, 42px); border-radius: 50%; overflow: hidden; border: 3px solid #e2b45a; box-shadow: 0 0 0 2px #3a240f, 0 4px 8px rgba(0, 0, 0, .6); background: #0a2a44; }
+.wm-dot img { width: 100% !important; height: 100% !important; object-fit: cover; animation: none !important; filter: none !important; }
+.wm-pin.locked .wm-dot { filter: grayscale(1) brightness(.6); }
+.wm-pin.here .wm-dot { border-color: #7ff3ff; box-shadow: 0 0 0 2px #08303f, 0 0 14px #7ff3ff; }
+
+.pcard-bars { padding-left: 16px; }
+.pcard-zap { position: absolute; left: 168px; top: 79px; filter: drop-shadow(0 0 4px rgba(255, 210, 63, .8)); z-index: 1; }
+.pcard-bar.energy { height: 11px; border: 1px solid rgba(255, 210, 63, .6); }
+.pcard-bar.energy i { background: linear-gradient(180deg, #ffe66b, #ffb31a 60%, #e88a00); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
+.pcard-bar.energy span { line-height: 9px; font-size: 8.5px; color: #2a1503; text-shadow: 0 1px 0 rgba(255, 255, 255, .5); }

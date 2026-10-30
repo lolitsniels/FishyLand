@@ -19,7 +19,7 @@ export const TABS = [
 ];
 
 export function CrewTabs({ tab, setTab, member, canManage }) {
-  const shown = TABS.filter(([, , , need]) => !need || (need === "manage" ? canManage : member));
+  const shown = TABS.filter(([key]) => !["contest", "contract", "hall", "leviathan"].includes(key)).filter(([, , , need]) => !need || (need === "manage" ? canManage : member));
   return (
     <nav className="crew-tabs" data-testid="crew-tabs">
       {shown.map(([key, label, Icon]) => (

@@ -23,7 +23,8 @@ class PosIn(BaseModel):
 
 @api.post("/world/pos")
 async def world_pos(body: PosIn, user=Depends(get_current_user)):
-    loc = body.loc if body.loc == "harbour" or body.loc in WATER_BY_KEY else "harbour"
+    crew = (user.get("crew") or {}).get("id")
+    loc = f"crew:{crew}" if body.loc == "crew_island" and crew else body.loc if body.loc == "harbour" or body.loc in WATER_BY_KEY else "harbour"
     uid = str(user["_id"])
     t = time.time()
     _pos[uid] = {"id": uid, "username": user["username"], "level": level_from_xp(user["xp"])[0], "title": user.get("active_title") or "", "look": look_of(user.get("avatar")), "rod": (user.get("gear") or {}).get("rod", "rod_cane"),

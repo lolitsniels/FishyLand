@@ -13,6 +13,7 @@ import { Ring, Bar } from "../components/fr";
 import { useFight } from "./useFight";
 import { startMusic } from "../game/sfx";
 import CatchCard from "./CatchCard";
+import { fishArt } from "./useFight";
 import { toast } from "sonner";
 import { ChatBox } from "./ChatBox";
 import { QuickTackle } from "./QuickTackle";
@@ -27,6 +28,7 @@ export const PAGES = {
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
 const BAR_R_WATER = ["quests", "profile"];
+const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
 const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
@@ -48,7 +50,7 @@ function TopBar({ u, place, here }) {
       <div className="pcard-name" data-testid="player-name">{u.username}</div>
       <div className="pcard-place" data-testid="location-chip">{place} · <Users size={10} className="inline -mt-0.5" /> <span data-testid="here-count">{here}</span></div>
       <div className="pcard-bars" title={`Energy ${Math.floor(u.energy)}/${u.max_energy}`}>
-        <div className="pcard-bar"><i style={{ width: `${Math.min(100, (u.energy / u.max_energy) * 100)}%` }} data-testid="energy-bar" /><span data-testid="energy-value">{Math.floor(u.energy)}/{u.max_energy}</span></div>
+        <Zap size={14} className="pcard-zap" fill="#ffd23f" color="#8a5a00" strokeWidth={1.5} /><div className="pcard-bar energy"><i style={{ width: `${Math.min(100, (u.energy / u.max_energy) * 100)}%` }} data-testid="energy-bar" /><span data-testid="energy-value">{Math.floor(u.energy)}/{u.max_energy}</span></div>
         <div className="pcard-bar xp"><i style={{ width: `${Math.min(100, ((u.xp_into_level ?? 0) / (u.xp_next || 1)) * 100)}%` }} data-testid="xp-bar" /></div>
       </div>
       <img src="/art/hud/gold.webp" alt="Gold" className="pcard-ic gold" /><b className="pcard-v gold" data-testid="gold-value">{compact(u.gold)}</b>
@@ -84,19 +86,20 @@ export default function World() {
   const fightEnc = useGame((st) => st.fightEnc);
   const result = useGame((st) => st.result);
   const ph = useGame((st) => st.phase);
-  const [mode, setMode] = useState(() => { fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(fx.mode === "harbour" ? "harbour" : user?.water || "millbrook").spawn }; return fx.mode; });
+  const [mode, setMode] = useState(() => { fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(placeOf(fx.mode, user)).spawn }; return fx.mode; });
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
   const prevWater = useRef(null);
   const page = loc.pathname.replace(/^\/game\/?/, "").split("/")[0];
   const water = data?.waters?.find((x) => x.key === user?.water);
-  const here = usePresence(mode === "harbour" ? "harbour" : user?.water || "harbour");
+  const here = usePresence(placeOf(mode, user));
+  useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
 
-  const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(m === "harbour" ? "harbour" : user?.water || "millbrook").spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
+  const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(placeOf(m, user)).spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => {
-    if (mode === "water" && page && HARBOUR_ONLY.has(page)) { toast("That's in the harbour. Sail back to visit it."); nav("/game", { replace: true }); }
+    if (mode !== "harbour" && page && HARBOUR_ONLY.has(page) && !(mode === "crew" && page === "crews")) { toast("That's in the harbour. Sail back to visit it.", { id: "harbour-only" }); nav("/game", { replace: true }); }
   }, [mode, page, nav]);
   useEffect(() => {
     const on = (e) => { goTo(e.detail); nav("/game", { replace: true }); };
@@ -115,6 +118,7 @@ export default function World() {
     fx.openSpot = (id) => {
       if (id === "boat") nav("/game/waters");
       else if (id === "harbour") goTo("harbour");
+      else if (id === "crew-pond") toast("The crew pond has no fish yet. Your crew can stock it soon.", { id: "crew-pond" });
       else nav(`/game/${id}`);
     };
     const iv = setInterval(() => { setNear(fx.near); setAtSpot(fx.atSpot); }, 150);
@@ -144,7 +148,7 @@ export default function World() {
     return () => ro.disconnect();
   }, [w, s, user, data]);
   if (!user || !data) return <div className="fixed inset-0 grid place-items-center bg-[#04121c] gold-text font-deco text-2xl" data-testid="game-loading">Loading the harbour…</div>;
-  const nearSpot = sceneFor(mode === "harbour" ? "harbour" : user?.water || "millbrook").spots.find((x) => x.id === near && !x.fish);
+  const nearSpot = sceneFor(placeOf(mode, user)).spots.find((x) => x.id === near && !x.fish);
   const canFish = mode === "water" && !!atSpot;
   const title = PAGES[page]?.[0] || page;
   const idle = ph === "idle" && !result && !fightEnc;
@@ -153,9 +157,9 @@ export default function World() {
 
   return (
     <div className="fixed inset-0 overflow-hidden select-none" data-testid="game-page" data-mode={mode} onPointerDown={() => startMusic()}>
-      <Scene place={mode === "harbour" ? "harbour" : user.water || "millbrook"} />
+      <Scene place={placeOf(mode, user)} />
       <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: w / s, height: h / s, transform: `scale(${s})` }} data-testid="game-hud">
-        <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : water?.name} here={here} /></div>
+        <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : mode === "crew" ? `${user.crew?.name || "Crew"} Island` : water?.name} here={here} /></div>
         {mode === "water" && idle && !page && (
           <button type="button" className="fr-btn fr-btn-dark absolute right-3 px-4 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
         )}
@@ -180,14 +184,14 @@ export default function World() {
             className={`fish-btn fish-btn-img w-[96px] h-[96px] -mt-7 grid place-items-center ${ph === "fight" ? "invisible" : ""} ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
             <span className="fish-btn-label">{fishLabel}</span>
           </button>
-          {(mode === "water" ? BAR_R_WATER : BAR_R).map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
+          {(mode !== "harbour" ? BAR_R_WATER : BAR_R).map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <Ring img="settings" label="More" size={w < 600 ? 36 : 46} testid="menu-more" onClick={() => setMore(true)} />
         </div>
       </div>
       {more && (
         <Modal title="Menu" testid="more-modal" width={620} onClose={() => setMore(false)}>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-4 py-2 justify-items-center">
-            {[...MORE, ...(user.is_admin ? ["admin"] : [])].filter((k) => mode !== "water" || !HARBOUR_ONLY.has(k)).map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
+            {[...MORE, ...(user.is_admin ? ["admin"] : [])].filter((k) => mode === "harbour" || !HARBOUR_ONLY.has(k)).map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
           </div>
           <div className="flex justify-center mt-3">
             <button type="button" className="fr-btn fr-btn-dark px-5 py-1.5 text-sm flex items-center gap-2" onClick={async () => { await logout(); nav("/"); }} data-testid="logout-button"><LogOut size={14} /> Log out</button>

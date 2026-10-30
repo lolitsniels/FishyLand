@@ -281,7 +281,7 @@ function buildScene(app, tex, key, bgTex, mt) {
   const mode = key === "harbour" ? "harbour" : "water";
   TILED_ON = !!cfg.tiled;
   BG_W = cfg.tiled ? cfg.W : bgTex.width; BG_H = cfg.tiled ? cfg.H : 848;
-  const tm = cfg.tiled ? buildMap(cfg, mt.img) : null;
+  const tm = cfg.tiled ? (MAP_CACHE.get(key) || MAP_CACHE.set(key, buildMap(cfg, mt.img)).get(key)) : null;
   const canWalk = (x, y) => (tm ? tm.nav.walk(x, y) : inPoly(x, y, cfg.walk));
   const world = new Container();
   app.stage.addChild(world);
@@ -347,6 +347,8 @@ function buildScene(app, tex, key, bgTex, mt) {
   const groundLayer = new Container();
   base.addChild(groundLayer);
   const objViews = tm ? placeObjects(tm.objects, mt.obj, groundLayer, actors) : [];
+  const leapTex = [];
+  if (tm) [...new Set(fx.leapArt || [])].slice(0, 8).forEach((u) => Assets.load(u).then((t) => leapTex.push(t)).catch(() => {}));
   const spotViews = cfg.spots.map((sp) => {
     const c = new Container(); c.x = sp.x; c.y = sp.y; c.eventMode = "static"; c.cursor = "pointer";
     let glow, ic = null;
@@ -361,7 +363,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
       const ring = new Graphics().roundRect(-28, -68, 56, 56, 12).fill({ color: 0x0a1420, alpha: 0.72 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.28 });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
-      Assets.load(`art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
+      Assets.load(sp.img.startsWith("/") ? sp.img : `art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
       const lb = new Text({ text: sp.label, style: { fontFamily: "Noto Sans", fontWeight: "800", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
       lb.anchor.set(0.5, 0); lb.y = -10;
       c.addChild(glow, ring, ic, lb);
@@ -709,14 +711,17 @@ function buildScene(app, tex, key, bgTex, mt) {
 
     // ambient leaping fish
     jumpAt -= dt;
-    if (jumpAt <= 0 && !ambient && tex.ambient) {
-      const s = new Sprite(tex.ambient);
-      s.anchor.set(0.5); s.scale.set(34 / tex.ambient.width); s.alpha = 0.9;
-      const [lx, ly, lw, lh] = cfg.leap;
+    const leapT = tm ? leapTex[Math.floor(Math.random() * leapTex.length)] : tex.ambient;
+    if (jumpAt <= 0 && !ambient && leapT && cfg.leap) {
+      const s = new Sprite(leapT);
+      s.anchor.set(0.5); s.scale.set(34 / leapT.width); s.alpha = 0.9;
+      const [lx, ly, lw, lh] = cfg.leap, dir = Math.random() > 0.5 ? 1 : -1;
+      // the whole arc must be over open water: never from grass, never over a bridge or pier
+      const open = (x, y) => !tm || [0, 0.25, 0.5, 0.75, 1].every((k) => tm.nav.isWater(x + k * 50 * dir, y) && !tm.nav.walk(x + k * 50 * dir, y) && !tm.nav.walk(x + k * 50 * dir, y - 45) && tm.nav.isWater(x + k * 50 * dir, y + 20));
       let x = lx + Math.random() * lw, y = ly + Math.random() * lh;
-      for (let i = 0; tm && i < 12 && !tm.nav.isWater(x, y); i++) { x = lx + Math.random() * lw; y = ly + Math.random() * lh; }
-      if (tm && !tm.nav.isWater(x, y)) { jumpAt = 1; s.destroy(); } else {
-      ambient = { s, x, y, t: 0, dir: Math.random() > 0.5 ? 1 : -1 };
+      for (let i = 0; i < 20 && !open(x, y); i++) { x = lx + Math.random() * lw; y = ly + Math.random() * lh; }
+      if (!open(x, y)) { jumpAt = 1; s.destroy(); } else {
+      ambient = { s, x, y, t: 0, dir };
       if (ambient.dir < 0) s.scale.x *= -1;
       fxLayer.addChild(s);
       splash(x, y, 6, 0.4);
@@ -752,6 +757,7 @@ function buildScene(app, tex, key, bgTex, mt) {
   };
 }
 
+const MAP_CACHE = new Map();
 const TEX_KEYS = ["grass", "sand", "dirt", "planks", "cobble", "water", "river", "post"];
 async function loadMapArt(cfg) {
   const kinds = [...new Set(cfg.objects.map((o) => o.k))];

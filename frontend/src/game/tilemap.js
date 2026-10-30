@@ -50,8 +50,8 @@ const smoothLine = (ctx, pts) => {
     ctx.bezierCurveTo(p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6, p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6, p2[0], p2[1]);
   }
 };
-const shape = (ctx, s) => (s.line ? smoothLine(ctx, s.line) : s.smooth ? smoothPoly(ctx, s.smooth) : s.poly ? pathPoly(ctx, s.poly) : (ctx.beginPath(), ctx.ellipse(s.circle[0], s.circle[1], s.circle[2], s.circle[3] ?? s.circle[2], 0, 0, Math.PI * 2)));
-const paint = (ctx, s) => { shape(ctx, s); if (s.line) { ctx.lineWidth = s.width; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke(); } else ctx.fill(); };
+const shape = (ctx, s) => (s.invert ? (smoothPoly(ctx, s.invert), ctx.rect(-5000, -5000, 20000, 20000)) : s.line ? smoothLine(ctx, s.line) : s.smooth ? smoothPoly(ctx, s.smooth) : s.poly ? pathPoly(ctx, s.poly) : (ctx.beginPath(), ctx.ellipse(s.circle[0], s.circle[1], s.circle[2], s.circle[3] ?? s.circle[2], 0, 0, Math.PI * 2)));
+const paint = (ctx, s) => { shape(ctx, s); if (s.line) { ctx.lineWidth = s.width; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke(); } else ctx.fill("evenodd"); };
 
 // Paint the ground (land textures, sea/river cut-outs, docks) and build the walk grid.
 export function buildMap(map, img) {
@@ -59,12 +59,11 @@ export function buildMap(map, img) {
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
   ctx.fillStyle = pattern(ctx, img[map.base || "grass"], TEX_K[map.base || "grass"]); ctx.fillRect(0, 0, W, H);
-  for (const s of map.ground || []) {
-    ctx.save(); ctx.strokeStyle = ctx.fillStyle = "rgba(30,22,10,.22)"; ctx.filter = "blur(6px)"; ctx.translate(0, 6);
-    if (s.line) { shape(ctx, s); ctx.lineWidth = s.width + 10; ctx.lineCap = ctx.lineJoin = "round"; ctx.stroke(); } else { shape(ctx, s); ctx.lineWidth = 10; ctx.fill(); ctx.stroke(); }
-    ctx.restore();
-    ctx.fillStyle = ctx.strokeStyle = pattern(ctx, img[s.tex], TEX_K[s.tex]); paint(ctx, s);
-  }
+  // soft edge shadow for every ground shape first, then all fills, so overlapping paths merge without seams
+  ctx.save(); ctx.strokeStyle = ctx.fillStyle = "rgba(30,22,10,.22)"; ctx.filter = "blur(6px)"; ctx.translate(0, 6);
+  for (const s of map.ground || []) { if (s.line) { shape(ctx, s); ctx.lineWidth = s.width + 10; ctx.lineCap = ctx.lineJoin = "round"; ctx.stroke(); } else { shape(ctx, s); ctx.lineWidth = 10; ctx.fill(); ctx.stroke(); } }
+  ctx.restore();
+  for (const s of map.ground || []) { ctx.fillStyle = ctx.strokeStyle = pattern(ctx, img[s.tex], TEX_K[s.tex]); paint(ctx, s); }
   // banks under the water edge, then cut the water out so the animated water layer shows through
   for (const s of map.water) {
     ctx.save(); ctx.strokeStyle = pattern(ctx, img[s.bank || "sand"], TEX_K.sand); ctx.fillStyle = ctx.strokeStyle;
@@ -116,15 +115,17 @@ export function buildMap(map, img) {
   g.scale(1 / CELL, 1 / CELL);
   g.fillStyle = g.strokeStyle = "#fff"; g.fillRect(0, 0, W, H);
   g.fillStyle = g.strokeStyle = "#000"; g.lineCap = g.lineJoin = "round";
-  for (const s of map.water) { shape(g, s); if (s.line) { g.lineWidth = s.width + 30; g.stroke(); } else { g.lineWidth = 30; g.fill(); g.stroke(); } }
+  for (const s of map.water) { shape(g, s); if (s.line) { g.lineWidth = s.width + 30; g.stroke(); } else { g.lineWidth = 30; g.fill("evenodd"); if (!s.invert) g.stroke(); } }
   const gw0 = Math.ceil(W / CELL), gh0 = Math.ceil(H / CELL), wpx = g.getImageData(0, 0, gw0, gh0).data;
-  const isWater = (x, y) => { const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL); return cx >= 0 && cy >= 0 && cx < gw0 && cy < gh0 && wpx[(cy * gw0 + cx) * 4] < 128; };
+  const isWater = (x, y) => { const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL); return cx < 0 || cy < 0 || cx >= gw0 || cy >= gh0 || wpx[(cy * gw0 + cx) * 4] < 128; };
   // Land props must stand fully on dry ground: if any base point is in water, nudge to the nearest dry spot.
   const settle = (o) => {
     const def = OBJ[o.k];
     if (def.wet || def.ground) return o;
     const w = o.w || def.w, half = w * 0.4;
-    const dry = (x, y) => [[x, y], [x - half, y], [x + half, y], [x, y - w * 0.2], [x - half, y - w * 0.2], [x + half, y - w * 0.2]].every(([a, b]) => !isWater(a, b + 6) && !isWater(a, b + 24));
+    const deck = (x, y) => (map.docks || []).some((d) => { const xs = d.poly.filter((_, i) => i % 2 === 0), ys = d.poly.filter((_, i) => i % 2); return x > Math.min(...xs) - 30 && x < Math.max(...xs) + 30 && y > Math.min(...ys) - 30 && y < Math.max(...ys) + 40; })
+      || (map.bridges || []).some((b) => { const [ax, ay] = b.a, [bx, by] = b.b, L2 = (bx - ax) ** 2 + (by - ay) ** 2, t = Math.max(0, Math.min(1, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / L2)); return Math.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)) < b.w / 2 + 40; });
+    const dry = (x, y) => !deck(x, y) && !deck(x - half, y) && !deck(x + half, y) && [[x, y], [x - half, y], [x + half, y], [x, y - w * 0.2], [x - half, y - w * 0.2], [x + half, y - w * 0.2]].every(([a, b]) => !isWater(a, b + 6) && !isWater(a, b + 24));
     if (dry(o.x, o.y)) return o;
     for (let r = 16; r <= 480; r += 16) for (let k = 0; k < 16; k++) {
       const x = o.x + Math.cos((k * Math.PI) / 8) * r, y = o.y + Math.sin((k * Math.PI) / 8) * r;

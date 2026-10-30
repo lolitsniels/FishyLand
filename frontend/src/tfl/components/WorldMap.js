@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Lock } from "lucide-react";
 import { fmt } from "../lib/api";
 
@@ -7,24 +7,7 @@ const PINS = {
   harbour: [54.6, 42.5], millbrook: [43.5, 34], willow: [26, 22.5], greyfell: [50, 17], saltmarsh: [34, 52], harrow: [15, 47],
   coral: [42.7, 75.5], blackwater: [85.5, 39], frozen: [85.5, 19], sunken: [71, 55.5], ghostlight: [88.6, 66], temple: [75, 81.5], cinder: [15, 80],
 };
-const ROUTE = [[56, 50], [60, 60], [52, 66], [40, 62], [30, 58], [22, 64], [28, 72], [45, 88], [62, 70], [70, 62], [82, 52], [92, 50], [80, 46], [66, 48], [56, 50]];
 const goMode = (m) => window.dispatchEvent(new CustomEvent("fr-mode", { detail: m }));
-
-function Boat() {
-  const ref = useRef(null);
-  useEffect(() => {
-    let raf, t0 = performance.now();
-    const step = (now) => {
-      const k = ((Math.max(0, now - t0) / 1000) * 0.035) % 1, f = k * (ROUTE.length - 1), i = Math.floor(f), u = f - i;
-      const [ax, ay] = ROUTE[i], [bx, by] = ROUTE[i + 1];
-      if (ref.current) { ref.current.style.left = `${ax + (bx - ax) * u}%`; ref.current.style.top = `${ay + (by - ay) * u}%`; ref.current.style.transform = `translate(-50%,-80%) scaleX(${bx < ax ? -1 : 1})`; }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-  return <img ref={ref} src="/art/hud/boat.webp" alt="" className="wm-boat" />;
-}
 
 export function WorldMap({ waters, user, mode, onTravel, expedition }) {
   const [sel, setSel] = useState(null);
@@ -37,15 +20,13 @@ export function WorldMap({ waters, user, mode, onTravel, expedition }) {
   return (
     <div className="wm" data-testid="world-map" onClick={() => setSel(null)}>
       <img src="/art/hud/world_map.webp" alt="World map" className="wm-art" draggable={false} />
-      <div className="wm-shimmer" /><div className="wm-clouds" />
-      <Boat />
       {[["harbour", "The Harbour"], ...waters.map((w) => [w.key, w.name])].map(([key, name]) => {
         const w = waters.find((x) => x.key === key), st = w ? info(w) : { unlocked: true };
         const here = key === "harbour" ? mode === "harbour" : mode !== "harbour" && user.water === key;
         return (
           <button key={key} type="button" className={`wm-pin ${st.unlocked ? "" : "locked"} ${here ? "here" : ""} ${sel === key ? "on" : ""}`} style={{ left: `${PINS[key][0]}%`, top: `${PINS[key][1]}%` }}
             onClick={(e) => { e.stopPropagation(); setSel(key); }} data-testid={`map-pin-${key}`}>
-            <img src="/art/hud/pin.webp" alt="" />
+            <span className="wm-dot"><img src={key === "harbour" ? "/art/hud/sail.webp" : `/art/waters/${key}_thumb.jpg`} alt="" /></span>
             {expedition === key && <span className="wm-exp" data-testid={`map-expedition-${key}`}>Expedition</span>}
             <span className="wm-label">{name}{!st.unlocked && <Lock size={10} className="inline ml-1 -mt-0.5" />}</span>
           </button>

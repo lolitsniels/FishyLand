@@ -26,8 +26,8 @@ export const HARBOUR_MAP = {
     { k: "ship", x: 3060, y: 1590, w: 620 }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
     ...[400, 900, 1350, 1750, 2200, 2650].map((x) => ({ k: "lantern", x, y: 1125 })),
     ...[500, 1150, 1750, 2350].map((x) => ({ k: "lantern", x, y: 1745 })),
-    { k: "lantern", x: 2850, y: 1612 }, { k: "lantern", x: 3250, y: 1612 }, { k: "lantern", x: 1630, y: 2140 },
-    { k: "barrels", x: 1360, y: 950, w: 110 }, { k: "barrels", x: 2660, y: 950, w: 110 }, { k: "barrels", x: 2730, y: 1745, w: 100 }, { k: "barrels", x: 1100, y: 1590, w: 100 },
+    { k: "lantern", x: 2640, y: 1560 }, { k: "lantern", x: 1420, y: 1690 },
+    { k: "barrels", x: 1360, y: 950, w: 110 }, { k: "barrels", x: 2660, y: 950, w: 110 }, { k: "barrels", x: 1100, y: 1590, w: 100 },
     ...[[180, 560], [620, 520], [1000, 600], [1380, 560], [1780, 520], [2250, 560], [2600, 600]].map(([x, y]) => ({ k: "oak", x, y })),
     ...[[90, 900], [400, 380], [1200, 350], [1600, 330], [2050, 380], [2450, 330], [140, 1300]].map(([x, y]) => ({ k: "pine", x, y })),
     { k: "oak", x: 1000, y: 1400, w: 240 }, { k: "oak", x: 2050, y: 1420, w: 240 }, { k: "oak", x: 300, y: 1400, w: 240 },
@@ -78,7 +78,7 @@ export const MILLBROOK_MAP = {
     { k: "pine", x: 140, y: 800 }, { k: "pine", x: 1300, y: 2250 }, { k: "pine", x: 3050, y: 1100 }, { k: "pine", x: 2700, y: 300 }, { k: "pine", x: 1900, y: 2200 },
     { k: "rocks", x: 2650, y: 1000, w: 170 }, { k: "rocks", x: 380, y: 540, w: 150 }, { k: "rocks", x: 1200, y: 1650, w: 140 },
     { k: "bush", x: 900, y: 1300 }, { k: "bush", x: 2150, y: 800 }, { k: "bush", x: 2600, y: 1300 }, { k: "bush", x: 300, y: 1450 },
-    { k: "lantern", x: 1170, y: 1270 }, { k: "lantern", x: 1830, y: 900 }, { k: "lantern", x: 600, y: 1450 },
+    { k: "lantern", x: 1110, y: 1300 }, { k: "lantern", x: 1910, y: 850 }, { k: "lantern", x: 600, y: 1450 },
   ],
   spots: [
     { id: "harbour", label: "Back to Harbour", img: "crew", x: 300, y: 1180 },
@@ -91,4 +91,31 @@ export const MILLBROOK_MAP = {
   life: {},
 };
 
-export const TILED = { harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP };
+// Every crew gets its own island: clubhouse, round pond (not stocked yet), dock with the boat back to the harbour.
+export const CREW_ISLAND_MAP = {
+  tiled: true, W: 2400, H: 1800, scale: 0.74, spawn: { x: 1200, y: 1450 }, weather: "gulls",
+  base: "grass",
+  ground: [
+    { tex: "cobble", line: [1200, 1570, 1200, 1240], width: 110 },
+    { tex: "cobble", circle: [1200, 1000, 360, 250] },
+    { tex: "cobble", line: [1200, 760, 1200, 660], width: 140 },
+  ],
+  water: [{ invert: [320, 320, 1200, 190, 2080, 320, 2240, 900, 2080, 1500, 1200, 1620, 320, 1500, 160, 900], bankW: 100 }, { circle: [1200, 1000, 250, 160], bankW: 40, bank: "cobble" }],
+  docks: [{ poly: [1140, 1560, 1260, 1560, 1260, 1790, 1140, 1790], posts: [[1140, 1790], [1260, 1790], [1140, 1680], [1260, 1680]] }],
+  objects: [
+    { k: "guild_hall", x: 1200, y: 650, w: 440, fp: [0.92, 0.6] },
+    { k: "rowboat", x: 1370, y: 1760, w: 200 },
+    ...[[520, 520], [800, 420], [1600, 420], [1880, 520], [420, 1150], [1980, 1150], [700, 1400], [1700, 1400]].map(([x, y], i) => ({ k: i % 3 === 1 ? "pine" : "oak", x, y })),
+    { k: "bush", x: 860, y: 760 }, { k: "bush", x: 1540, y: 760 }, { k: "bush", x: 900, y: 1300 }, { k: "bush", x: 1500, y: 1300 },
+    { k: "lantern", x: 1080, y: 1300 }, { k: "lantern", x: 1320, y: 1300 }, { k: "lantern", x: 1080, y: 720 }, { k: "lantern", x: 1320, y: 720 },
+    { k: "rocks", x: 380, y: 900, w: 150 }, { k: "rocks", x: 2000, y: 880, w: 150 }, { k: "barrels", x: 1330, y: 1540, w: 100 },
+  ],
+  spots: [
+    { id: "crews", label: "Crew Clubhouse", img: "crew", x: 1200, y: 705 },
+    { id: "crew-pond", label: "Crew Pond · not stocked", img: "fishdex", x: 1200, y: 1215 },
+    { id: "harbour", label: "Boat to Harbour", img: "map", x: 1200, y: 1740 },
+  ],
+  sparkle: [0, 0, 2400, 1800], leap: null, life: {},
+};
+
+export const TILED = { harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP };
