@@ -1,0 +1,43 @@
+{
+  "summary": "Tested the character-look feature (male/female + skin + hair = avatar 'look:g_s_h') on backend and frontend. Backend: 14/14 new pytest cases pass, plus 12/12 phase-1 regression tests. Covered: register with a look, invalid or missing look falls back to m_1_1, guest default, legacy ids map to m_1_1, /me/look accepts valid values and returns 400 for bad ones (401 without a token), and presence peers include look and rod. Frontend: the landing picker updates the preview (m_1_1 -> f_1_1 -> f_2_1 -> f_2_3). Registering a new user as f_2_3 saves look:f_2_3 and shows the face_f_2_3 HUD portrait, with __fx.look/rod set. Guest gets m_1_1. Profile Change look -> dialog -> Save updates the profile and HUD portraits; Cancel works; Save is disabled until the look changes. Other players' profiles have no change button. Leaderboards show 68 face images, none broken. Market has no broken images. Pearl Shop shows Coming soon with the pearl balance and no Buy buttons; it opens from the harbour signpost via E. In the water, the character holds the equipped rod (rod_fibre); walking to fish-1, casting and the fight panel all work. Peers render with their rods. No JS page errors. Found 1 HIGH bug (the legacy portrait picker still writes legacy ids and wipes the chosen look), 1 MEDIUM mobile bug (the look dialog opens off-screen) and some minor issues.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/cosmetics/avatar (and /api/cosmetics/buy-avatar)", "issue": "Still accepts legacy portrait ids (e.g. av_lad). Reproduced: set look:f_2_3, then POST /cosmetics/avatar {avatar_id:'av_lad'}, and /auth/me returns look:m_1_1. The user's chosen character is silently lost. buy-avatar still lets users spend pearls on portraits, but the Pearl Shop should sell nothing yet.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "GET /api/profile/{username} (server.py ~2475) and the leaderboard/online/contest/chat look helpers", "issue": "These still return the raw stored avatar (legacy id or STARTER_AVATARS[0]) and avatar_name, not look_of(). The frontend lookFace() hides this, but the API is inconsistent with /auth/me. The profile also shows the legacy portrait name, e.g. '\"Net Mender\" · Fishing at…' for guests and legacy accounts."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Profile.js: legacy 'Change' button (profile-change-avatar-button)", "issue": "Still rendered on your own profile, hidden underneath the new Change look button (Playwright reports that change-look-button intercepts pointer events). If reached, it opens the old 'Change your appearance' CosmeticsModal with Portrait/Frame tabs (6 legacy portraits, all showing the same fallback art, plus a 'Buy new looks in the Pearl Shop' link). Picking one calls /cosmetics/avatar and resets the look to m_1_1. Remove the button/AvatarModal or repurpose it.", "selector": "[data-testid=profile-change-avatar-button]", "priority": "HIGH"},
+      {"component": "LookEditor look-dialog on mobile (390x844)", "issue": "The dialog uses 'fixed inset-0', but it renders inside page-modal, which has backdrop-filter:blur and a transform on .fr-modal. That makes the modal, not the viewport, the containing block. The overlay is 1765px tall and the panel is centred in the profile's scroll content (panel top y=667, Save at y=1005, below the 844px viewport). On a phone, tapping Change look seems to do nothing until you scroll. Fix: render it with createPortal(document.body).", "selector": "[data-testid=look-dialog]", "priority": "MEDIUM"},
+      {"component": "Harbour signpost tap-to-walk (Scene.js line 411/418)", "issue": "After tapping the Pearl Shop signpost, the hero stopped at x=1459.5 with dest (1464,637) and autoOpen='pearl-shop' still set. The auto-open never fired; the user has to press E or the prompt. Likely cause: the dest (sp.y+12) sits just outside the walk polygon. The x-step fails, the inPoly(me.x, ny) fallback succeeds with vy=0 (no movement), so dest is never cleared and d stays above 4. Also seen in headless: the spot-prompt mounts/unmounts while the hero walks. Fix: when no progress is made, clear dest and fire autoOpen if within the near radius.", "selector": "harbour signpost pearl-shop / [data-testid=spot-prompt]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Profile hero", "issues": ["The legacy avatar_name prefix (e.g. '\"Net Mender\" ·') still shows next to the new character face", "The tiny legacy 'Change' button overlaps the gold Change look button"]},
+      {"screen": "/game/pearl-shop opened directly", "issues": ["Fine overall; the 'You have 0 pearls saved' chip is readable"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_character_look.py", "/app/backend/tests/test_world_phase1.py", "/app/test_reports/pytest/pytest_char_look.xml"],
+  "action_items": [
+    "Remove or repurpose the legacy profile-change-avatar-button and the CosmeticsModal portrait tab. Make /api/cosmetics/avatar and /cosmetics/buy-avatar reject non-look ids, or disable them, so the chosen character cannot be overwritten",
+    "Render LookEditor's look-dialog through a React portal to document.body so it centres in the viewport on mobile",
+    "Optionally return look_of(avatar) from profile/leaderboard/online/chat/contest endpoints and drop avatar_name for looks",
+    "Optional: fix tap-to-walk getting stuck just short of a signpost (Pearl Shop), which stops autoOpen from firing"
+  ],
+  "critical_code_review_comments": [
+    "Profile.js still imports CosmeticsModal (AvatarModal) and renders the old Change button, which conflicts with LookEditor",
+    "AuthBox.js still uses AvatarPicker with legacy /art/avatars/*.jpg starters (it was not found mounted in current routes; it is dead code risk), and tfl/pages/game/PearlShop.js is now unused",
+    "LookEditor: setUser(r.data.user) works; the Profile reload is triggered by the user.avatar effect. Fine",
+    "Scene.js movement: the fallback branch inPoly(me.x, ny) with vy=0 counts as success, so the hero can 'move' forever without making progress"
+  ],
+  "updated_files": ["/app/backend/tests/test_character_look.py (new)"],
+  "success_rate": {"backend": "100% (26/26)", "frontend": "85%"},
+  "seed_data_creation": "Created several TEST_xxxxxxxx users via register (looks f_2_3, default). TestAngler2's look was changed during the tests and restored to look:m_3_2. TestAngler is still look:f_2_3 with rod_fibre. Guest_7xdcyk is the resumed guest for this IP (m_1_1).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest /app/backend/tests/test_character_look.py (it clears db.rate_events signup first). Log in by fetching /api/auth/login in the page and storing the token in localStorage owo_token. To fish: sessionStorage fr_mode, /game/fish, __fx.dest={x:545,y:508}, then cast-fish-button and fight-panel. To open the harbour Pearl Shop: walk near it with __fx.dest={x:1440,y:640} and press E. Retest the legacy Change button removal and the mobile look-dialog portal.",
+  "rca of the issue": "Look overwrite: /cosmetics/avatar stores a legacy id in user.avatar, and look_of() maps any non-look id to DEFAULT_LOOK, so the saved character is replaced by m_1_1. Mobile dialog: CSS position:fixed resolves against the nearest ancestor with transform/filter/backdrop-filter (page-modal uses backdrop-blur, and .fr-modal has a transform from the rise animation), so inset-0 covers the scrollable modal content, not the viewport."
+}

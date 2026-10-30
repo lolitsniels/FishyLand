@@ -2387,7 +2387,7 @@ async def leaderboards():
 async def _leaderboards():
     async def top(sort_field, proj):
         rows = await db.users.find({}, {"username": 1, "xp": 1, "gold": 1, "stats": 1, "avatar": 1, "frame": 1}).sort(sort_field, -1).limit(15).to_list(15)
-        return [{"username": r["username"], "level": level_from_xp(r["xp"])[0], "value": proj(r), "avatar": r.get("avatar") or STARTER_AVATARS[0], "frame": r.get("frame")} for r in rows]
+        return [{"username": r["username"], "level": level_from_xp(r["xp"])[0], "value": proj(r), "avatar": look_of(r.get("avatar")), "frame": r.get("frame")} for r in rows]
 
     # Top Mentors: anglers who brought in the most recruits (guests and same-network signups excluded).
     mentor_rows = await db.users.aggregate([
@@ -2406,7 +2406,7 @@ async def _leaderboards():
             continue
         mentors.append({"username": rec["username"], "level": level_from_xp(rec["xp"])[0], "value": row["count"],
                         "completed": rec.get("stats", {}).get("recruits_completed", 0),
-                        "avatar": rec.get("avatar") or STARTER_AVATARS[0], "frame": rec.get("frame")})
+                        "avatar": look_of(rec.get("avatar")), "frame": rec.get("frame")})
 
     return {
         "wealth": await top("gold", lambda r: r["gold"]),
@@ -2414,12 +2414,12 @@ async def _leaderboards():
         "collection": await top("stats.species", lambda r: r["stats"].get("species", 0)),
         "heaviest": [
             {"username": r["username"], "level": level_from_xp(r["xp"])[0], "value": r["stats"].get("heaviest_kg", 0), "name": r["stats"].get("heaviest_name"),
-             "avatar": r.get("avatar") or STARTER_AVATARS[0], "frame": r.get("frame")}
+             "avatar": look_of(r.get("avatar")), "frame": r.get("frame")}
             for r in await db.users.find({"stats.heaviest_kg": {"$gt": 0}}, {"username": 1, "xp": 1, "stats": 1, "avatar": 1, "frame": 1}).sort("stats.heaviest_kg", -1).limit(15).to_list(15)],
         "catches": await top("stats.catches", lambda r: r["stats"].get("catches", 0)),
         "mastery": await top("stats.mastery_total", lambda r: r["stats"].get("mastery_total", 0)),
         "duels": [{"username": r["username"], "level": level_from_xp(r["xp"])[0], "value": r["duel"].get("wins", 0), "name": f"{r['duel'].get('losses', 0)} lost · best streak {r['duel'].get('best_streak', 0)}",
-                   "avatar": r.get("avatar") or STARTER_AVATARS[0], "frame": r.get("frame")}
+                   "avatar": look_of(r.get("avatar")), "frame": r.get("frame")}
                   for r in await db.users.find({"duel.wins": {"$gt": 0}}, {"username": 1, "xp": 1, "duel": 1, "avatar": 1, "frame": 1}).sort([("duel.wins", -1), ("duel.best_streak", -1)]).limit(15).to_list(15)],
         "tournaments": [r for r in await top("stats.tournament_wins", lambda r: r["stats"].get("tournament_wins", 0)) if r["value"] > 0],
         "mentors": mentors,
@@ -2438,7 +2438,7 @@ async def online_players():
 
 async def _online_players():
     rows = await db.users.find({"last_seen": {"$gte": online_cutoff()}}, {"username": 1, "xp": 1, "water": 1, "avatar": 1, "frame": 1}).limit(50).to_list(50)
-    return [{"username": r["username"], "level": level_from_xp(r["xp"])[0], "water": r["water"], "avatar": r.get("avatar") or STARTER_AVATARS[0], "frame": r.get("frame")} for r in rows]
+    return [{"username": r["username"], "level": level_from_xp(r["xp"])[0], "water": r["water"], "avatar": look_of(r.get("avatar")), "frame": r.get("frame")} for r in rows]
 
 
 @api.get("/players")
@@ -2454,7 +2454,7 @@ async def players_list(q: str = "", sort: str = "level", online: bool = False, p
         .sort(order).skip(max(0, page) * per).limit(per).to_list(per)
     cut = online_cutoff()
     return {"total": total, "page": page, "per": per, "players": [
-        {"username": r["username"], "level": level_from_xp(r["xp"])[0], "water": r.get("water"), "avatar": r.get("avatar") or STARTER_AVATARS[0], "frame": r.get("frame"),
+        {"username": r["username"], "level": level_from_xp(r["xp"])[0], "water": r.get("water"), "avatar": look_of(r.get("avatar")), "frame": r.get("frame"),
          "title": title_for(level_from_xp(r["xp"])[0], r.get("stats") or {}, r.get("active_title"), bool(r.get("is_admin"))), "tag": (r.get("crew") or {}).get("tag"), "tag_colour": (r.get("crew") or {}).get("colour"), "online": (r.get("last_seen") or "") >= cut, "last_seen": r.get("last_seen"),
          "catches": (r.get("stats") or {}).get("catches", 0), "joined": r.get("created_at"), "supporter": bool(r.get("supporter")), "premium": premium_active(r), "admin": bool(r.get("is_admin")), "mod": r.get("role") == "mod"} for r in rows]}
 
@@ -2472,7 +2472,7 @@ async def player_profile(username: str):
     return {"username": u["username"], "level": level, "duel": {k: (u.get("duel") or {}).get(k, 0) for k in ("wins", "losses", "draws", "best_streak")},
             "badges": [{"id": b, "name": ACH_BY_ID[b]["name"], "desc": ACH_BY_ID[b]["desc"], "tier": ach_tier(ACH_BY_ID[b]["reward"])} for b in (u.get("badges") or []) if b in ACH_BY_ID and b in have_ach],
             "title": title_for(level, u["stats"], u.get("active_title"), is_admin_user(u)), "is_admin": is_admin_user(u), "is_mod": is_mod_user(u) and not is_admin_user(u), "supporter": bool(u.get("supporter")), "premium": premium_active(u), "stats": u["stats"], "water": u["water"],
-            "avatar": u.get("avatar") or STARTER_AVATARS[0], "avatar_name": AVATAR_BY_ID.get(u.get("avatar") or STARTER_AVATARS[0], {}).get("name"),
+            "avatar": look_of(u.get("avatar")), "avatar_name": None,
             "name_colour_hex": colour_hex(u), "frame": u.get("frame"), "rod_skin": u.get("rod_skin"),
             "pearls": u.get("pearls", 0), "durability": {slot: gear_dur(u, gid) for slot, gid in u["gear"].items()},
             "crew": u.get("crew"), "achievements": len(u.get("achievements", [])),
@@ -2533,7 +2533,7 @@ async def contest_standings(category, start_iso, end_iso, limit=10):
         try:
             oids = [ObjectId(i) for i in ids]
             async for u in db.users.find({"_id": {"$in": oids}}, {"avatar": 1, "frame": 1}):
-                looks[str(u["_id"])] = {"avatar": u.get("avatar") or STARTER_AVATARS[0], "frame": u.get("frame")}
+                looks[str(u["_id"])] = {"avatar": look_of(u.get("avatar")), "frame": u.get("frame")}
         except Exception:
             pass
     return [{"user_id": r["_id"], "username": r["username"], "value": round(r["value"], 2) if isinstance(r["value"], float) else r["value"], "name": r.get("name"), "rarity": r.get("rarity"),

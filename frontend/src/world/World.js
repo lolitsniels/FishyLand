@@ -16,7 +16,7 @@ import CatchCard from "./CatchCard";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
-  inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "bait"], waters: ["Travel Map", "rod"], profile: ["My Angler", "skills"],
+  inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "bait"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
   quests: ["Quests", "quests"], contracts: ["Contracts", "daily"], market: ["Market", "market"], crews: ["Guild Hall", "crew"], tournaments: ["Tournaments", "rankings"],
   duel: ["Duel Pier", "guild"], leaderboards: ["Leaderboards", "rankings"], achievements: ["Achievements", "daily"], crafting: ["Bait Crafting", "craft"],
   messages: ["Messages", "pass"], almanac: ["Almanac", "fishdex"], wiki: ["Wiki", "skills"], "pearl-shop": ["Pearl Shop", "pass"], admin: ["Admin", "settings"],
@@ -154,7 +154,7 @@ export default function World() {
             className={`fish-btn w-[92px] h-[92px] -mt-6 grid place-items-center ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
             <span className={`font-deco font-black text-[#3a1c02] ${fishLabel.length > 5 ? "text-[11px] leading-tight text-center" : "text-lg"}`}>{fishLabel}</span>
           </button>
-          {BAR_R.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
+          {BAR_R.map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <Ring img="settings" label="More" size={46} testid="menu-more" onClick={() => setMore(true)} />
         </div>
       </div>

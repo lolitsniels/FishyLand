@@ -5,7 +5,7 @@ from bson import ObjectId
 
 from fastapi import Depends
 
-from server import api, db, now, iso, cached, level_from_xp, STARTER_AVATARS, _leaderboards, get_current_user
+from server import look_of, api, db, now, iso, cached, level_from_xp, STARTER_AVATARS, _leaderboards, get_current_user
 
 SNAP_FIELDS = {"xp": "xp", "gold_earned": "stats.gold_earned", "mastery": "stats.mastery_total", "duel_wins": "duel.wins", "tourney": "stats.tournament_wins"}
 COUNTER_BOARDS = {"wealth": "gold_earned", "level": "xp", "mastery": "mastery", "duels": "duel_wins", "tournaments": "tourney"}
@@ -37,7 +37,7 @@ async def ensure_snapshot(key):
 
 
 def row(u, value, **extra):
-    return {"username": u["username"], "level": level_from_xp(u["xp"])[0], "value": value, "avatar": u.get("avatar") or STARTER_AVATARS[0], "frame": u.get("frame"), **extra}
+    return {"username": u["username"], "level": level_from_xp(u["xp"])[0], "value": value, "avatar": look_of(u.get("avatar")), "frame": u.get("frame"), **extra}
 
 
 async def users_by_id(ids):

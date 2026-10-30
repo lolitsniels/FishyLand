@@ -6,7 +6,7 @@ from datetime import timedelta
 from bson import ObjectId
 from fastapi import Depends, HTTPException
 
-from server import api, db, now, iso, get_current_user, public_user, cached, send_system_message, add_feed, check_achievements, notify, _contest_pipe, STARTER_AVATARS
+from server import look_of, api, db, now, iso, get_current_user, public_user, cached, send_system_message, add_feed, check_achievements, notify, _contest_pipe, STARTER_AVATARS
 
 CATS = {"catches": {"label": "Most Catches", "unit": "catches", "desc": "Land the most fish, any size."},
         "heaviest": {"label": "Biggest Catch", "unit": "kg", "desc": "One fish, the heaviest on the board wins."},
@@ -145,7 +145,7 @@ async def standings(tr):
         v = r["value"]
         if isinstance(v, float): v = round(v, 3 if tr["category"] == "smallest" else 2)
         u = looks.get(r["_id"], {})
-        out.append({"user_id": r["_id"], "username": r["username"], "value": v, "name": r.get("name"), "rarity": r.get("rarity"), "avatar": u.get("avatar") or STARTER_AVATARS[0], "frame": u.get("frame")})
+        out.append({"user_id": r["_id"], "username": r["username"], "value": v, "name": r.get("name"), "rarity": r.get("rarity"), "avatar": look_of(u.get("avatar")), "frame": u.get("frame")})
     for s in out:
         s["reward"] = payout(tr, s["value"])
     return out

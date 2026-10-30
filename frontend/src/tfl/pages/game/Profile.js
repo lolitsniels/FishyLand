@@ -68,7 +68,6 @@ export default function Profile() {
               <div className="g-portrait g-face" data-testid="profile-avatar"><img src={lookFace(p.avatar)} alt={p.username} /></div>
               {mine && <LookEditor />}
               <span className="absolute -top-1 -left-1 fr-chip px-2 text-[11px] font-cinzel font-black text-amber-200" data-testid="profile-level-badge">Lv.{p.level}</span>
-              {mine && <button className="absolute -bottom-1 -right-1 btn btn-sm !px-1.5 !py-0.5 !text-[10px]" onClick={() => setCosOpen("portrait")} title={tt("Change appearance")} data-testid="profile-change-avatar-button">{tt("Change")}</button>}
             </div>
             <div className="min-w-0 flex-1">
               <div className="label label-gold truncate">{p.title} {tt("· Level")} {p.level}{p.crew && <> · <button className="underline" onClick={() => nav(`/game/crews/${p.crew.id}`)}>[{p.crew.tag}] {p.crew.name}</button></>}</div>

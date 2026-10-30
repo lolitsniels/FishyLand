@@ -112,6 +112,7 @@ class AvatarIn(BaseModel):
 
 @api.post("/cosmetics/avatar")
 async def set_avatar(body: AvatarIn, user=Depends(get_current_user)):
+    raise HTTPException(410, "Portraits are retired: your angler look is your avatar")
     a = AVATAR_BY_ID.get(body.avatar_id)
     if not a: raise HTTPException(404, "Unknown avatar")
     if a["id"] not in owned_avatars(user): raise HTTPException(400, "You don't own that portrait yet. Buy it in the Pearl Shop.")
@@ -121,6 +122,7 @@ async def set_avatar(body: AvatarIn, user=Depends(get_current_user)):
 
 @api.post("/cosmetics/buy-avatar")
 async def buy_avatar(body: AvatarIn, user=Depends(get_current_user)):
+    raise HTTPException(410, "Portraits are retired: your angler look is your avatar")
     a = AVATAR_BY_ID.get(body.avatar_id)
     if not a: raise HTTPException(404, "Unknown avatar")
     if a["id"] in owned_avatars(user): raise HTTPException(400, "You already own that portrait")

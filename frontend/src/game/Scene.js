@@ -249,7 +249,8 @@ function buildScene(app, tex, key, bgTex) {
       c._ring = ring; c._beam = beam;
     } else {
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
-      const ring = new Graphics().circle(0, -40, 26).fill({ color: 0x1a0f06, alpha: 0.85 }).stroke({ width: 3, color: 0xf3c24d });
+      const ring = new Sprite(Texture.EMPTY); ring.anchor.set(0.5); ring.y = -40;
+      Assets.load("art/ui/tile_frame.webp").then((t) => { if (!ring.destroyed) { ring.texture = t; ring.scale.set(60 / t.width); } });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
       Assets.load(`art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } });
       const lb = new Text({ text: sp.label, style: { fontFamily: "Cinzel", fontWeight: "700", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
@@ -415,7 +416,9 @@ function buildScene(app, tex, key, bgTex) {
     if (moving) {
       const n = Math.hypot(vx, vy), sp = 230 * dt;
       const nx = me.x + (vx / n) * sp, ny = me.y + (vy / n) * sp * 0.8;
-      if (inPoly(nx, ny, cfg.walk)) { me.x = nx; me.y = ny; } else if (inPoly(nx, me.y, cfg.walk)) me.x = nx; else if (inPoly(me.x, ny, cfg.walk)) me.y = ny; else fx.dest = null;
+      const ox = me.x, oy = me.y;
+      if (inPoly(nx, ny, cfg.walk)) { me.x = nx; me.y = ny; } else if (inPoly(nx, me.y, cfg.walk)) me.x = nx; else if (inPoly(me.x, ny, cfg.walk)) me.y = ny;
+      if (fx.dest && Math.hypot(me.x - ox, me.y - oy) < 0.5) { const id = Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) < 40 ? fx.autoOpen : null; fx.dest = null; fx.autoOpen = null; if (id) fx.openSpot?.(id); }
       if (Math.abs(vx) > 0.2) fx.flip = vx < 0;
     }
     if (!moving && mode === "water") fx.flip = false;

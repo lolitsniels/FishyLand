@@ -8,7 +8,7 @@ from typing import List, Optional
 from fastapi import Depends, HTTPException
 from pydantic import BaseModel
 
-from server import (api, db, now, iso, get_current_user, public_user, level_from_xp, pick_species, roll_weight, roll_variant, notify,
+from server import (look_of, api, db, now, iso, get_current_user, public_user, level_from_xp, pick_species, roll_weight, roll_variant, notify,
                     encounter_params, validate_fight, gear_tier, gear_bonuses, WATER_BY_KEY, MAX_ENERGY, max_energy, energy_cap, DUEL_LEVEL, POTION_ENERGY, POTION_COOLDOWN_H, potion_next_at, uncache)
 from game_data import BAIT_BY_ID, GEAR_BY_ID
 import duel_ladder
@@ -55,7 +55,7 @@ def _kit(p, water):
 
 
 def _player(u):
-    return {"username": u["username"], "avatar": u.get("avatar"), "frame": u.get("frame"), "level": level_from_xp(u["xp"])[0], "name_colour_hex": public_user(u)["name_colour_hex"],
+    return {"username": u["username"], "avatar": look_of(u.get("avatar")), "frame": u.get("frame"), "level": level_from_xp(u["xp"])[0], "name_colour_hex": public_user(u)["name_colour_hex"],
             "gear": _gear(u), "score": 0, "weight": 0.0, "landed": 0, "lost": 0, "casts": 0, "status": "idle", "status_text": "Getting ready…", "pending": None,
             "last_cast": None, "last_seen": iso(now())}
 

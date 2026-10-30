@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { api, errMsg } from "../tfl/lib/api";
 import { useGame } from "../tfl/context/GameContext";
@@ -19,8 +20,8 @@ export function LookEditor() {
   return (
     <>
       <button type="button" className="btn btn-sm btn-gold absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap z-[2]" onClick={() => { setLook(user.avatar); setOpen(true); }} data-testid="change-look-button">Change look</button>
-      {open && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-3" onClick={(e) => e.target === e.currentTarget && setOpen(false)} data-testid="look-dialog">
+      {open && createPortal(
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/60 p-3" onClick={(e) => e.target === e.currentTarget && setOpen(false)} data-testid="look-dialog">
           <div className="fr-panel fr-modal p-5 w-full max-w-[420px] rise">
             <h3 className="font-deco gold-text text-lg text-center mb-4">Your angler</h3>
             <CharacterPicker value={look} onChange={setLook} testid="look-picker" />
@@ -30,7 +31,7 @@ export function LookEditor() {
               <button type="button" className="fr-btn px-5 py-1.5 text-sm" disabled={busy || look === user.avatar} onClick={save} data-testid="look-save">{busy ? "Saving…" : "Save look"}</button>
             </div>
           </div>
-        </div>
+        </div>, document.body
       )}
     </>
   );
