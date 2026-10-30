@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -32,7 +32,7 @@ export function GuideNav({ current }) {
         ))}
       </ul>
       <div className="mt-3 pt-3 border-t border-[var(--border)]">
-        <Link to="/" className="btn btn-gold btn-sm w-full text-center" data-testid="guide-nav-play">{tt("Play The Fishing Lands free")}</Link>
+        <Link to="/" className="btn btn-gold btn-sm w-full text-center" data-testid="guide-nav-play">{tt("Play Fishing Realms free")}</Link>
       </div>
     </nav>
   );
@@ -43,7 +43,7 @@ export default function MarketingShell({ children, active }) {
     <div className="min-h-screen bg-[var(--bg-deep)]" data-testid={`marketing-page-${active || "index"}`}>
       <header className="border-b border-[var(--border)] bg-[var(--bg)]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-3">
-          <Link to="/" aria-label={tt("The Fishing Lands home")}><Logo /></Link>
+          <Link to="/" aria-label={tt("Fishing Realms home")}><Logo /></Link>
           <nav aria-label={tt("Primary")} className="hidden md:flex items-center gap-4 text-[12px] text-[var(--text-2)]">
             <Link to="/wiki" className={`hover:text-[var(--gold)] ${active === "wiki" ? "text-[var(--gold)]" : ""}`} data-testid="marketing-nav-wiki">{tt("Wiki")}</Link>
             <Link to="/guides" className={`hover:text-[var(--gold)] ${active === "index" ? "text-[var(--gold)]" : ""}`}>{tt("Guides")}</Link>
@@ -88,7 +88,7 @@ export default function MarketingShell({ children, active }) {
             </ul>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto px-6 pb-6 text-[11px] text-[var(--muted)]">{tt("© The Fishing Lands. All other game names are trademarks of their respective owners; used here for descriptive comparison only.")}</div>
+        <div className="max-w-6xl mx-auto px-6 pb-6 text-[11px] text-[var(--muted)]">{tt("© Fishing Realms. All other game names are trademarks of their respective owners; used here for descriptive comparison only.")}</div>
       </footer>
     </div>
   );

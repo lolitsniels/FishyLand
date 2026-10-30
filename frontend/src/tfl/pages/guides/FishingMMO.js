@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -20,12 +20,12 @@ export default function FishingMMO() {
       {
         "@type": "Question",
         name: "Is there a free fishing MMO?",
-        acceptedAnswer: { "@type": "Answer", text: "Yes. The Fishing Lands is a free browser-based fishing MMO with a shared player market and 300+ species. RuneScape has a free-to-play tier with fishing as one of its skills. Fishao, previously the best-known free browser fishing MMO, has shut down." },
+        acceptedAnswer: { "@type": "Answer", text: "Yes. Fishing Realms is a free browser-based fishing MMO with a shared player market and 300+ species. RuneScape has a free-to-play tier with fishing as one of its skills. Fishao, previously the best-known free browser fishing MMO, has shut down." },
       },
       {
         "@type": "Question",
         name: "Do fishing MMOs work on mobile?",
-        acceptedAnswer: { "@type": "Answer", text: "Browser-based fishing MMOs like The Fishing Lands work on modern mobile browsers with a touch-friendly layout. Client MMOs with fishing as a skill (RuneScape, Final Fantasy XIV) also have mobile or handheld versions." },
+        acceptedAnswer: { "@type": "Answer", text: "Browser-based fishing MMOs like Fishing Realms work on modern mobile browsers with a touch-friendly layout. Client MMOs with fishing as a skill (RuneScape, Final Fantasy XIV) also have mobile or handheld versions." },
       },
     ],
   };
@@ -52,7 +52,7 @@ export default function FishingMMO() {
       </ul>
 
       <H2>Dedicated fishing MMOs</H2>
-      <GameCard name="The Fishing Lands" tag="Browser · Free · Persistent" verdict="The dedicated fishing MMO experience without an install.">
+      <GameCard name="Fishing Realms" tag="Browser · Free · Persistent" verdict="The dedicated fishing MMO experience without an install.">
         <p>Runs in any modern browser. Twelve waters, 340+ species, a live player-driven market, crews, seasonal bosses and a shared world feed. Your account
           persists forever, and every catch shows up on the same server everyone else is fishing on.</p>
         <p className="mt-2 text-[12px] text-[var(--gold-dim)]">Free at <Link to="/" className="underline">thefishinglands.com</Link>.</p>
@@ -93,7 +93,7 @@ export default function FishingMMO() {
 
       <H2>How to choose</H2>
       <H3>You want browser convenience</H3>
-      <p><Link to="/" className="text-[var(--gold)] underline">The Fishing Lands</Link>. See also our <Link to="/guides/best-browser-fishing-games" className="text-[var(--gold)] underline">best browser fishing games</Link>.</p>
+      <p><Link to="/" className="text-[var(--gold)] underline">Fishing Realms</Link>. See also our <Link to="/guides/best-browser-fishing-games" className="text-[var(--gold)] underline">best browser fishing games</Link>.</p>
       <H3>You want fishing tucked inside a huge world</H3>
       <p>Old School RuneScape (free), FFXIV (paid).</p>
       <H3>You want a realistic sim with online play</H3>
@@ -101,9 +101,9 @@ export default function FishingMMO() {
 
       <H2>Fishing MMO FAQ</H2>
       <H3>Is there a free fishing MMO?</H3>
-      <p>Yes: The Fishing Lands is free and runs in a browser. RuneScape's free tier includes fishing as one of its 1-99 skills. Fishao, once the go-to answer to this question, has shut down.</p>
+      <p>Yes: Fishing Realms is free and runs in a browser. RuneScape's free tier includes fishing as one of its 1-99 skills. Fishao, once the go-to answer to this question, has shut down.</p>
       <H3>Do fishing MMOs work on mobile?</H3>
-      <p>Browser-based ones do. The Fishing Lands runs on iOS and Android browsers with a touch-friendly fight bar.</p>
+      <p>Browser-based ones do. Fishing Realms runs on iOS and Android browsers with a touch-friendly fight bar.</p>
       <H3>Is fishing PvP a thing?</H3>
       <p>Not directly. The competition in every fishing MMO worth playing is over records, rankings and market prices, not knocking each other into the water.</p>
 

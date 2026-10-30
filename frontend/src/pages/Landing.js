@@ -102,19 +102,23 @@ const ABOUT = [
 const GUIDES = [["Fishao Alternatives", "fishao-alternatives"], ["Games Like Fishao", "games-like-fishao"], ["Best Browser Fishing Games", "best-browser-fishing-games"], ["Fishing MMO Guide", "fishing-mmo"], ["Online Fishing Games", "online-fishing-games"], ["Game wiki", null]];
 const icon = (i) => (i.includes("/") ? `art/${i}` : `art/ui/${i}.png`);
 
+const FISH_ART = ["azure_perch", "coral_snapper", "crystal_angelfish", "glimmer_minnow", "golden_sunray", "lagoon_carp", "moonfin_trout", "prism_koi", "starwhale", "stormscale_pike"];
+
 function CatchTicker({ catches }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (catches.length < 2) return undefined;
+    const t = setInterval(() => setI((n) => (n + 1) % catches.length), 4000);
+    return () => clearInterval(t);
+  }, [catches.length]);
   if (!catches.length) return null;
-  const row = [...catches, ...catches, ...catches].slice(0, Math.max(12, catches.length * 2));
+  const c = catches[i % catches.length];
   return (
-    <div className="relative z-20 overflow-hidden border-b-2 border-amber-600/70 bg-gradient-to-r from-[#2a1406] via-[#4a260c] to-[#2a1406] shadow-[0_4px_14px_rgba(0,0,0,.6)]" data-testid="lp-catch-ticker">
-      <div className="lp2-marquee flex gap-10 py-1.5 whitespace-nowrap w-max">
-        {row.map((c, i) => (
-          <span key={i} className="flex items-center gap-2 font-cinzel text-sm text-amber-50">
-            <img src={`/art/fish/${["azure_perch", "coral_snapper", "crystal_angelfish", "glimmer_minnow", "golden_sunray", "lagoon_carp", "moonfin_trout", "prism_koi", "starwhale", "stormscale_pike"][c.species_id % 10]}.png`} alt="" className="h-7 w-auto drop-shadow" />
-            <b className="text-amber-300">{c.username}</b> landed <b className={`rar-${c.rarity}`}>{c.lb} lb {c.name}</b>
-          </span>
-        ))}
-      </div>
+    <div className="lp2-catchbar relative z-20 flex justify-center items-center h-10" data-testid="lp-catch-ticker">
+      <span key={i} className="lp2-catch-fade flex items-center gap-2 font-cinzel text-sm text-amber-50 whitespace-nowrap" data-testid="lp-catch-current">
+        <img src={`/art/fish/${FISH_ART[c.species_id % 10]}.png`} alt="" className="h-7 w-auto drop-shadow" />
+        <b className="text-amber-300">{c.username}</b> landed <b className={`rar-${c.rarity}`}>{c.lb} lb {c.name}</b>
+      </span>
     </div>
   );
 }
@@ -123,7 +127,7 @@ function Hero({ user, go, setShots }) {
   const [look] = useState(() => ["look:f_1_3", "look:m_2_0"]);
   return (
     <section className="relative" data-testid="lp-hero">
-      <img src="art/logo_tfl.webp" alt="The Fishing Lands" className="lp2-logo w-[min(640px,92%)] h-auto mx-auto lg:mx-0 drop-shadow-[0_10px_30px_rgba(0,0,0,.8)]" data-testid="lp-logo" />
+      <img src="art/logo_tfl.webp" alt="Fishing Realms" className="lp2-logo w-[min(640px,92%)] h-auto mx-auto lg:mx-0 drop-shadow-[0_10px_30px_rgba(0,0,0,.8)]" data-testid="lp-logo" />
       <p className="mt-4 text-base sm:text-lg max-w-xl text-amber-50/95 leading-relaxed text-center lg:text-left [text-shadow:0_2px_6px_#000]" data-testid="lp-tagline">
         Grab a rod and join thousands of anglers in one shared world. Walk the harbour, catch hundreds of species, fight legendary bosses, trade on the Market and become the most famous angler in the Lands.
       </p>
@@ -210,7 +214,6 @@ export default function Landing() {
       <div className="fixed inset-0 bg-gradient-to-b from-[#04121c]/55 via-[#04121c]/25 to-[#04121c]/95" aria-hidden="true" />
       <div className="fixed inset-0 lp2-rays pointer-events-none" aria-hidden="true" />
       <Motes />
-      <CatchTicker catches={catches} />
       <header className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3" data-testid="lp-topbar">
         <div className="flex gap-4 text-xs font-cinzel font-bold" data-testid="lp-top-stats">
           {stats && <><span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" /><b data-testid="lp-online">{fmt(stats.online)}</b> online</span>
@@ -254,8 +257,8 @@ export default function Landing() {
       <News items={news} />
 
       <section className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 mt-14" data-testid="lp-about">
-        <h2 className="font-deco gold-text text-2xl sm:text-3xl lp2-h">About The Fishing Lands</h2>
-        <p className="mt-3 text-sm sm:text-base text-amber-50/85 max-w-3xl leading-relaxed">The Fishing Lands is a free multiplayer fishing game you play in your browser. You start with a cheap rod at Millbrook Pond and work your way out to twelve waters, each with its own species, conditions and bosses.</p>
+        <h2 className="font-deco gold-text text-2xl sm:text-3xl lp2-h">About Fishing Realms</h2>
+        <p className="mt-3 text-sm sm:text-base text-amber-50/85 max-w-3xl leading-relaxed">Fishing Realms is a free multiplayer fishing game you play in your browser. You start with a cheap rod at Millbrook Pond and work your way out to twelve waters, each with its own species, conditions and bosses.</p>
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4" data-testid="lp-features">
           {ABOUT.map(([ic, t, d], i) => (
             <div key={t} className="fr-panel p-4 pt-3 flex flex-col items-center text-center gap-2 lp2-lift" data-testid={`lp-feature-${i}`}>
@@ -274,7 +277,7 @@ export default function Landing() {
       <footer className="relative z-10 mt-16 border-t-2 border-amber-600/60 bg-[#04121c]/90" data-testid="lp-footer">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-cinzel text-amber-100/70">
           <img src="art/logo_tfl.webp" alt="" className="h-10 w-auto" />
-          <span className="text-amber-200">© The Fishing Lands</span>
+          <span className="text-amber-200">© Fishing Realms</span>
           <Link to="/about" data-testid="wl-footer-about">About</Link>
           <Link to="/contact" data-testid="wl-footer-contact">Contact</Link>
           <Link to="/privacy" data-testid="wl-footer-privacy">Privacy</Link>

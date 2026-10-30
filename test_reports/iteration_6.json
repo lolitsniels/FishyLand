@@ -1,0 +1,42 @@
+{
+  "summary": "Tested the iteration-6 changes. Backend: 33/33 pass. That is 7 new tests in test_iter6_portraits_landing.py plus the character-look and phase-1 regression suites. /cosmetics/avatar and /cosmetics/buy-avatar return 410 and leave the look unchanged. GET /api/players/{username} returns look:* and avatar_name null; a legacy 'av_lad' user maps to look:m_1_1. Leaderboards return only look:* avatars. Landing desktop (1920): every section renders (ticker scrolling, online/players, wiki, login, image logo, tagline, no-p2w, trailer, mascots, board, 6 shots, facts, 3 news cards with loaded images, 7 feature cards, guides, footer) with no broken images. The shot viewer opens from the trailer and all 6 shots; prev/next and backdrop close work. Login with TestAngler goes to /game. Register with a new TEST_ user goes to /game. Landing mobile (390): no horizontal scroll, sections stack, the login popover fits. Game HUD: all 6 menu-* buttons are fr-tile with tile_frame.webp, painted icons (map.png, face_f_2_3.webp for My Angler) and red ribbon labels. Hover lifts by 4px. All open their pages (waters, journal, inventory, shop, profile, more-modal). The cast button is a rounded square (18px radius); SAIL opens /game/waters. Signposts are square tile frames. Tapping Tackle Shop auto-opened /game/shop. Tapping Pearl Shop is STILL STUCK. Profile (mobile 390): no legacy button, no portrait name. look-dialog is portalled to body and centred; Save is visible at y=542 and saving works (TestAngler2 was restored to m_3_2). Fishing regression: walking to fish-1, casting and the fight panel all work. No JS page errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "tests/test_world_phase1.py::TestPresence", "issue": "Flaky only when run after the other suites in one sequential session (2 presence tests see no peers). They pass alone and under xdist. This is test-ordering or presence-TTL state, not an app bug."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Harbour signpost tap-to-walk (Scene.js ~L412-421)", "issue": "Pearl Shop signpost (dest 1464,637) still never auto-opens. Sampled __fx.me every 500ms: the hero ping-pongs between x=1459.5 and x=1471.0 forever, with dest and autoOpen still set and moving=true. RCA: the step size (230*dt, about 11.5px at low FPS) is larger than twice the d<4 arrival threshold, so the hero overshoots every frame. The new no-progress check (moved <0.5) never triggers because the hero does move. Tackle Shop only worked by chance. Fix: clamp the step to the remaining distance, e.g. `const step = Math.min(230*dt, d)`, or snap me to dest when d <= step, then fire autoOpen.", "selector": "harbour signpost pearl-shop", "priority": "MEDIUM"},
+      {"component": "Game HUD action bar on mobile 390x844", "issue": "The tile bar is about 450px wide on a 390px viewport. menu-waters spans x=-29..32 (the 'Travel Map' label is clipped to 'l map') and menu-more spans 379..419 (half off-screen). Reduce the tile size and gaps under the sm breakpoint, or let the bar scroll or wrap.", "selector": "[data-testid=menu-waters], [data-testid=menu-more]", "priority": "MEDIUM"},
+      {"component": "Landing lp-shot-viewer", "issue": "The viewer is rendered inside a z-10 section, so the catch ticker and top bar (z-20) draw above the dark overlay. Clicking the top strip hits the ticker, not the backdrop, so the viewer does not close there. Also, the <img> has no key, so the previous large image stays visible until the new full-size jpg (200-360KB) loads; we saw caption 'Climb the weekly…' over the willow image. Fix: createPortal to body and add key={open} to the img (or show a thumbnail first).", "selector": "[data-testid=lp-shot-viewer]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Harbour (desktop)", "issues": ["The hint pill 'Tap to walk or use WASD…' overlaps the Tournaments signpost label at the default camera position"]},
+      {"screen": "More menu", "issues": ["Duplicate icons: Pearl Shop and Messages use the same art, Tournaments and Leaderboards both use the trophy, Contracts and Achievements both use the chest"]},
+      {"screen": "Landing", "issues": ["Looks good: big logo, mascots and framed shots. The Register button looks grey when disabled (fine), but it could read as broken; consider gold with reduced opacity"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter6_portraits_landing.py", "/app/backend/tests/test_character_look.py", "/app/backend/tests/test_world_phase1.py", "/app/test_reports/pytest/pytest_iter6.xml"],
+  "action_items": [
+    "Fix the tap-to-walk overshoot in Scene.js: clamp the step to the remaining distance (or snap to dest) so the Pearl Shop signpost auto-opens",
+    "Make the HUD tile bar fit 390px phones (smaller tiles or gaps on mobile, or a scrollable bar); Travel Map and More are clipped now",
+    "Portal lp-shot-viewer to document.body and key the img by index to avoid the stale image and the ticker drawing over the overlay",
+    "Optional: move the harbour hint pill so it does not cover the Tournaments signpost; give the More-menu entries unique icons"
+  ],
+  "critical_code_review_comments": [
+    "cosmetics.py set_avatar/buy_avatar: dead code after `raise HTTPException(410)`. Remove it, along with AvatarIn/owned_avatars if unused",
+    "Scene.js L421: the no-progress check compares movement per frame, which cannot detect oscillation. A step clamp is the robust fix",
+    "Landing.js CatchTicker maps species_id % 10 to 10 hard-coded fish images, so ticker fish art does not match the named species",
+    "Landing.js Hero: useState(() => [...]) for a constant look array; the destructured `look` is a constant, so a plain const is enough"
+  ],
+  "updated_files": ["/app/backend/tests/test_iter6_portraits_landing.py (new)"],
+  "success_rate": {"backend": "100% (33/33, 2 presence tests order-flaky)", "frontend": "88%"},
+  "seed_data_creation": "Registered TEST_110767x via the landing UI. The pytest legacy-user test creates a TEST_ user and deletes it. TestAngler2's look was changed to m_3_4 and restored to look:m_3_2.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Profile endpoint is GET /api/players/{username} (not /profile). Run pytest with -n 0 for sequential runs (pytest.ini uses xdist); clear db.rate_events {action:'signup'} if register returns 429. To reproduce the Pearl Shop stuck walk: log in as TestAngler at 1920x1080 on /game, click the screen at (636,716), then poll __fx.me.x; it oscillates around 1464. Mobile HUD clipping: check the bounding rects of menu-waters and menu-more at 390px.",
+  "rca of the issue": "Signpost stuck: the per-frame step is 230*dt. At about 20fps that is about 11.5px, larger than the 8px window of the d<4 arrival test, so the hero alternates sides of dest. The 'moved < 0.5px' fallback never fires because it does move each frame. Mitigation: step = Math.min(230*dt, d), or snap to dest when d <= step."
+}

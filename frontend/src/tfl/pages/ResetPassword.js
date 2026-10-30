@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands, Copyright © 2026. All rights reserved.
+ * Fishing Realms, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -35,7 +35,7 @@ export default function ResetPassword() {
   };
   return (
     <MarketingShell active="reset">
-      <Seo title={tt("Reset password, The Fishing Lands")} description={tt("Set a new password for your Fishing Lands angler.")} path="/reset-password" />
+      <Seo title={tt("Reset password, Fishing Realms")} description={tt("Set a new password for your Fishing Realms angler.")} path="/reset-password" />
       <main className="max-w-md mx-auto px-4 sm:px-6 py-10" data-testid="reset-page">
         <div className="panel panel-gold">
           <div className="panel-head"><span>{tt("Set a new password")}</span></div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
-const TRAILER = ["trailer", "The Fishing Lands trailer", "mp4"];
+const TRAILER = ["trailer", "Fishing Realms trailer", "mp4"];
 const SHOTS = [
   TRAILER,
   ["fishing_anim", "A real catch: hold to reel and keep the needle in the green", "webp"],

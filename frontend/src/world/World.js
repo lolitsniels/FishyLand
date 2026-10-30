@@ -148,14 +148,14 @@ export default function World() {
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1" data-testid="action-bar">
-          {BAR_L.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
+          {BAR_L.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <button type="button" data-testid="cast-fish-button" disabled={mode === "water" && (!canFish || !idle)}
             onPointerDown={(e) => { e.preventDefault(); onFish(); }}
             className={`fish-btn w-[92px] h-[92px] -mt-6 grid place-items-center ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
             <span className={`font-deco font-black text-[#3a1c02] ${fishLabel.length > 5 ? "text-[11px] leading-tight text-center" : "text-lg"}`}>{fishLabel}</span>
           </button>
-          {BAR_R.map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
-          <Ring img="settings" label="More" size={46} testid="menu-more" onClick={() => setMore(true)} />
+          {BAR_R.map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
+          <Ring img="settings" label="More" size={w < 600 ? 36 : 46} testid="menu-more" onClick={() => setMore(true)} />
         </div>
       </div>
       {more && (

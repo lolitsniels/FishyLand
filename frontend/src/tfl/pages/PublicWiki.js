@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -12,7 +12,7 @@ import { Empty } from "../components/ui-bits";
 import { WikiView } from "./game/Wiki";
 
 export const WIKI_TITLE = "Game Wiki: Rules, Odds, Fish & Rewards";
-export const WIKI_DESC = "The complete rulebook for The Fishing Lands, read live from the game: bite and luck odds, rarity tables, every water and fish, tackle, bait recipes, economy, quests, bosses, crews, duels, tournaments and Pearls.";
+export const WIKI_DESC = "The complete rulebook for Fishing Realms, read live from the game: bite and luck odds, rarity tables, every water and fish, tackle, bait recipes, economy, quests, bosses, crews, duels, tournaments and Pearls.";
 
 const embedded = () => {
   if (typeof document === "undefined") return null;
@@ -28,14 +28,14 @@ export function PublicWikiShell({ children }) {
     name: WIKI_TITLE,
     url: SITE_URL + "/wiki",
     description: WIKI_DESC,
-    isPartOf: { "@type": "WebSite", name: "The Fishing Lands", url: SITE_URL },
+    isPartOf: { "@type": "WebSite", name: "Fishing Realms", url: SITE_URL },
   };
   return (
     <MarketingShell active="wiki">
       <Seo title={WIKI_TITLE} description={WIKI_DESC} path="/wiki" type="website" jsonLd={jsonLd} />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8" data-testid="public-wiki">
         <p className="label label-gold mb-2">Wiki</p>
-        <h1 className="font-display text-3xl md:text-4xl text-[#f4ead2]">The Fishing Lands Wiki</h1>
+        <h1 className="font-display text-3xl md:text-4xl text-[#f4ead2]">Fishing Realms Wiki</h1>
         <p className="mt-3 mb-6 text-[14px] text-[var(--text-2)] max-w-3xl">Every rule of the game in one place. The numbers below are read straight from the live server, so drop rates, prices, energy, quest rewards and event timers are always what the game is actually using right now.</p>
         {children}
       </div>

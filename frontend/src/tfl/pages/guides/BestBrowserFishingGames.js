@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -23,7 +23,7 @@ export default function BestBrowserFishingGames() {
 
       <H2>Games that want to be your hobby</H2>
 
-      <GameCard name="The Fishing Lands" tag="Persistent MMO · Free">
+      <GameCard name="Fishing Realms" tag="Persistent MMO · Free">
         <p>The deepest option in a browser today. A persistent shared world, 340+ species, twelve waters, a full player-driven market, crews, a live world feed
           and a real fight per catch. No install; your character keeps its gold, gear and journal between sessions forever.</p>
         <p className="mt-2 text-[12px] text-[var(--gold-dim)]">Free at <Link to="/" className="underline">thefishinglands.com</Link>.</p>
@@ -81,7 +81,7 @@ export default function BestBrowserFishingGames() {
       <H3>FAQ</H3>
       <div className="not-prose space-y-3">
         <div className="panel p-3">
-          <div className="font-display text-[13.5px] text-[#f4ead2]">Is The Fishing Lands really free?</div>
+          <div className="font-display text-[13.5px] text-[#f4ead2]">Is Fishing Realms really free?</div>
           <p className="text-[13px] text-[var(--text-2)] mt-1">Yes. No install, no paywall, no forced signup, you can even <Link to="/" className="underline">play as a guest</Link> and claim the account later if you decide to stay.</p>
         </div>
         <div className="panel p-3">

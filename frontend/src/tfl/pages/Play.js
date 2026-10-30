@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands, Copyright © 2026. All rights reserved.
+ * Fishing Realms, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -35,7 +35,7 @@ export default function Play() {
       <img src="/art/ad/fish_left.webp" alt="" className="play-art play-art-left" aria-hidden="true" />
       <img src="/art/ad/angler.webp" alt="" className="play-art play-art-angler" aria-hidden="true" />
       <div className="play-content">
-        <img src="/art/logo_anchor.webp" alt="The Fishing Lands" className="play-emblem" />
+        <img src="/art/logo_anchor.webp" alt="Fishing Realms" className="play-emblem" />
         <div className="play-kicker" data-testid="play-kicker">{t.kicker}</div>
         <h1 className="play-title" data-testid="play-title">{t.h1a} <span>{t.h1b}</span><br />{t.h1c}</h1>
         <p className="play-sub" data-testid="play-sub">{t.sub}</p>

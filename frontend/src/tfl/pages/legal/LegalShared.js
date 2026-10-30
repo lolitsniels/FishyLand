@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands, Copyright © 2026. All rights reserved.
+ * Fishing Realms, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -27,8 +27,8 @@ export function LegalLayout({ slug, title, description, updated, children, jsonL
     description,
     url: SITE_URL + path,
     dateModified: updated,
-    isPartOf: { "@type": "WebSite", name: "The Fishing Lands", url: SITE_URL },
-    publisher: { "@type": "Organization", name: "The Fishing Lands", url: SITE_URL, logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png" } },
+    isPartOf: { "@type": "WebSite", name: "Fishing Realms", url: SITE_URL },
+    publisher: { "@type": "Organization", name: "Fishing Realms", url: SITE_URL, logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png" } },
   };
   return (
     <MarketingShell active={slug}>
@@ -55,7 +55,7 @@ export function LegalLayout({ slug, title, description, updated, children, jsonL
               <li><Link to="/guides" className="text-[#c8bfb5] hover:text-[var(--gold)] hover:underline">Fishing game guides</Link></li>
             </ul>
             <div className="mt-3 pt-3 border-t border-[var(--border)]">
-              <Link to="/" className="btn btn-gold btn-sm w-full text-center" data-testid="legal-nav-play">Play The Fishing Lands free</Link>
+              <Link to="/" className="btn btn-gold btn-sm w-full text-center" data-testid="legal-nav-play">Play Fishing Realms free</Link>
             </div>
           </nav>
         </aside>

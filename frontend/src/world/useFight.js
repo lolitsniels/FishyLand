@@ -13,7 +13,7 @@ const FISH_ART = {
 export const fishArt = (rarity, seed = 0) => { const a = FISH_ART[rarity] || FISH_ART.rare; return `art/fish/${a[Math.abs(seed) % a.length]}.png`; };
 const phase = (p) => { setFxPhase(p); useGame.getState().setPhase(p); };
 
-// Cast -> bite -> TensionGame (Fishing Lands rules) -> land, all decided by the Fishing Lands server.
+// Cast -> bite -> TensionGame (Fishing Realms rules) -> land, all decided by the Fishing Realms server.
 export function useFight() {
   const { setUser } = useTfl();
   const encRef = useRef(null);

@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -39,7 +39,7 @@ export default function FishaoAlternatives() {
 
       <H2>The seven alternatives</H2>
       <div className="grid md:grid-cols-2 gap-3 not-prose">
-        <GameCard name="The Fishing Lands" tag="Browser MMO · Free" verdict="Fishao fans who want the collection game with more depth.">
+        <GameCard name="Fishing Realms" tag="Browser MMO · Free" verdict="Fishao fans who want the collection game with more depth.">
           Full disclosure: this is our game. Persistent browser MMO with 340+ species, 12 waters, a tension-bar fight for every bite, a live player market, crews,
           bosses and quests. No install, no launcher. If you spent hours filling the Fishao journal, our journal will feel familiar: <Link to="/" className="underline">try it free</Link>.
         </GameCard>
@@ -69,9 +69,9 @@ export default function FishaoAlternatives() {
 
       <H2>How to pick between them</H2>
       <H3>If you mainly want the collection loop</H3>
-      <p>Go for <Link to="/" className="text-[var(--gold)] underline">The Fishing Lands</Link> or Cat Goes Fishing. Both give you a big illustrated journal that fills as you fish.</p>
+      <p>Go for <Link to="/" className="text-[var(--gold)] underline">Fishing Realms</Link> or Cat Goes Fishing. Both give you a big illustrated journal that fills as you fish.</p>
       <H3>If you mainly want other players in the water with you</H3>
-      <p>The Fishing Lands (shared server, chat, market, crews) or Webfishing (cozy voice-chat lobbies).</p>
+      <p>Fishing Realms (shared server, chat, market, crews) or Webfishing (cozy voice-chat lobbies).</p>
       <H3>If you want a "real" fishing experience</H3>
       <p>Fishing Planet. Steeper learning curve, but authentic species and physics.</p>
 

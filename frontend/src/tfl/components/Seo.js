@@ -1,12 +1,12 @@
 /*
- * The Fishing Lands, Copyright © 2026. All rights reserved.
+ * Fishing Realms, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
  */
 import { useEffect } from "react";
 
-const SITE_NAME = "The Fishing Lands";
+const SITE_NAME = "Fishing Realms";
 const SITE_URL = "https://thefishinglands.com";
 const OG_IMAGE = SITE_URL + "/art/banners/banner_1200x630.jpg";
 

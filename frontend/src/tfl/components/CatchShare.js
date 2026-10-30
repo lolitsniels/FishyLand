@@ -21,7 +21,7 @@ export function CatchShare({ c, username, lbs }) {
   const claim = () => { if (bonus) api.post("/share/reward").then((r) => { if (r.data.gold) toast.success(`+${r.data.gold} gold for sharing your ${c.boss ? "boss kill" : "catch"}`); setUser(r.data.user); }).catch(() => {}); };
   const link = `${window.location.origin}/api/share/catch?s=${c.species_id}&w=${c.weight}&v=${c.variant || "normal"}&u=${encodeURIComponent(username || "")}&un=${lbs.endsWith("kg") ? "kg" : "lb"}`;
   const v = c.variant && c.variant !== "normal" ? `${c.variant} ` : "";
-  const text = c.boss ? `I just slew the boss ${c.name} (${lbs}) in The Fishing Lands!` : c.name.startsWith("The ") ? `I just landed ${c.name} (${v}${lbs}) in The Fishing Lands!` : `I just landed a ${lbs} ${v}${c.name} in The Fishing Lands!`;
+  const text = c.boss ? `I just slew the boss ${c.name} (${lbs}) in Fishing Realms!` : c.name.startsWith("The ") ? `I just landed ${c.name} (${v}${lbs}) in Fishing Realms!` : `I just landed a ${lbs} ${v}${c.name} in Fishing Realms!`;
   const u = encodeURIComponent(link), t = encodeURIComponent(text);
   const copy = async () => { try { await navigator.clipboard.writeText(`${text} ${link}`); toast.success("Share link copied"); claim(); } catch { toast.error("Could not copy"); } };
   if (!share_buttons) return null;

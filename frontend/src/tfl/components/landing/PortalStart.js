@@ -24,7 +24,7 @@ export function PortalStart() {
     <div className="lp-page portal-start" data-testid="portal-start">
       <div className="lp-bg" aria-hidden="true"><div className="lp-bg-town" style={{ backgroundImage: "url(/art/landing_water.webp)" }} /></div>
       <div className="portal-start-in">
-        <img src="/art/landing_logo.webp" alt="The Fishing Lands" className="portal-logo" data-testid="portal-logo" />
+        <img src="/art/landing_logo.webp" alt="Fishing Realms" className="portal-logo" data-testid="portal-logo" />
         <p className="portal-tag">A free fishing MMO. Catch 400+ fish with players from all over the world.</p>
         <button type="button" className="lp-cta gd-play" onClick={play} disabled={busy} data-testid="portal-play">{busy ? "Casting..." : user ? `Continue as ${user.username}` : "Play"}</button>
         {!user && <div className="portal-login"><span>Have an account?</span><LoginDrop /></div>}

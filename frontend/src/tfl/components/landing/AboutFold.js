@@ -14,9 +14,9 @@ const POINTS = [
 export function AboutFold() {
   return (
     <details className="lp-about" data-testid="lp-about">
-      <summary data-testid="lp-about-toggle">About The Fishing Lands</summary>
+      <summary data-testid="lp-about-toggle">About Fishing Realms</summary>
       <div className="lp-about-body">
-        <p>The Fishing Lands is a free multiplayer fishing game you play in your browser. You start with a cheap rod at Millbrook Pond and work your way out to twelve waters, each with its own species, conditions and bosses.</p>
+        <p>Fishing Realms is a free multiplayer fishing game you play in your browser. You start with a cheap rod at Millbrook Pond and work your way out to twelve waters, each with its own species, conditions and bosses.</p>
         <div className="lp-about-grid">{POINTS.map(([h, t]) => <div key={h}><h3>{h}</h3><p>{t}</p></div>)}</div>
         <div className="lp-about-guides">
           <span>Guides:</span> {GUIDES.map((g, i) => <span key={g.slug}>{i > 0 && " · "}<Link to={`/guides/${g.slug}`}>{g.title}</Link></span>)} · <Link to="/wiki">Game wiki</Link>

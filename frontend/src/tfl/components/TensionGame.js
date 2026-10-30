@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -261,39 +261,26 @@ export default function TensionGame({ enc, onFinish }) {
   const danger = view.tension > 88 || view.tension < 6;
   return (
     <div className="space-y-3 fade-in" data-testid="tension-game">
-      <div className={`fish-instrument ${danger ? "fi-danger" : ""}`} data-testid="fight-instrument">
-        <span className="fi-bolt tl" /><span className="fi-bolt tr" /><span className="fi-bolt bl" /><span className="fi-bolt br" />
-        <div className="fi-plate">
-          <span className={`fi-msg ${danger ? "text-[#f0a5a3]" : inZone ? "text-[var(--ok)]" : "text-[var(--text-2)]"}`} data-testid="fight-message">{enc.boss && <span className={`tag mr-2 ${view.phase === 2 ? "text-[#f0a5a3] border-[#d9534f] shake" : "text-[var(--r-legendary)]"}`} data-testid="boss-phase">{tt("Boss · phase")} {view.phase}/2{view.phase === 2 && tt(" · RALLYING")}</span>}{view.msg}</span>
-          <span className="fi-dial num">{Math.max(0, view.time).toFixed(1)}s</span>
+      <div className={`fr-fight ${danger ? "shake" : ""}`} data-testid="fight-instrument">
+        <div className="flex items-center justify-between gap-3 mb-1.5">
+          <span className={`font-deco font-black text-xl ${danger ? "text-red-400" : inZone ? "gold-text" : "text-cyan-100"} outline-text`} data-testid="fight-message">{enc.boss && <span className="text-xs font-cinzel mr-2 text-amber-300" data-testid="boss-phase">{tt("Boss · phase")} {view.phase}/2</span>}{view.msg}</span>
+          <span className="font-cinzel font-bold text-amber-100 outline-text num">{Math.max(0, view.time).toFixed(1)}s</span>
         </div>
-        <div className="fi-body">
-          <div className="fi-reel" aria-hidden><span className={`reel-spin ${hold ? "on" : ""} ${danger ? "strain" : ""}`} style={REEL_BG} data-testid="fight-reel" /></div>
-          <div className="fi-gauges">
-            <div className="fi-row">
-              <div className="fi-label"><span>{tt("Line tension")}</span><span className="num">{Math.round(view.tension)}</span></div>
-              <div className={`fi-track ${danger ? "shake" : ""}`} style={WATER_BG} data-testid="tension-frame">
-                <span className="fi-line" aria-hidden />
-                <div className="tension-ticks" aria-hidden />
-                <div className={`fi-zone ${view.needle ? "fi-zone-needle" : ""}`} style={{ left: `${view.zc - zw / 2}%`, width: `${zw}%` }} data-testid={view.needle ? "needle-zone" : undefined} />
-                <div className="fi-zone-danger" />
-                <img src={BOBBER_SRC} alt="" className="fi-bobber" style={{ left: `${view.tension}%` }} draggable="false" decoding="sync" data-testid="tension-needle" />
-              </div>
-            </div>
-            <div className="fi-row">
-              <div className="fi-label"><span>{enc.pull ? tt("Haul, every % is a fathom gained") : tt("Landing progress")}</span><span className="num">{Math.round(view.progress)}%</span></div>
-              <div className="fi-track fi-track-slim" style={WATER_BG} data-testid="progress-frame">
-                <div className="tension-ticks" aria-hidden />
-                <div className={`fi-fill ${enc.boss && view.phase === 2 ? "legendary" : ""}`} style={{ width: `${view.progress}%` }} data-testid="progress-fill" />
-                <img src={HOOK_SRC} alt="" className="fi-hook" style={{ left: `${view.progress}%` }} draggable="false" decoding="sync" />
-                {enc.boss && <div className="progress-marker" style={{ left: `${enc.phase2_at || 50}%` }} title={tt("Phase 2 begins here")} />}
-              </div>
-            </div>
+        <div className="fr-panel p-1.5 !rounded-full">
+          <div className="relative h-7 rounded-full overflow-hidden border border-black/70" data-testid="tension-frame"
+            style={{ background: `linear-gradient(90deg, #ff2d2d 0%, #ff8a1f ${Math.max(2, view.zc - zw / 2 - 14)}%, #ffd33b ${Math.max(3, view.zc - zw / 2 - 2)}%, #3dff7f ${view.zc - zw / 2}%, #3dff7f ${view.zc + zw / 2}%, #ffd33b ${Math.min(97, view.zc + zw / 2 + 2)}%, #ff8a1f ${Math.min(98, view.zc + zw / 2 + 14)}%, #ff2d2d 100%)` }}>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-black/35" />
+            <div className="absolute top-0 bottom-0 border-x-2 border-white/80 shadow-[0_0_12px_#3dff7f]" style={{ left: `${view.zc - zw / 2}%`, width: `${zw}%` }} data-testid={view.needle ? "needle-zone" : "tension-zone-box"} />
+            <div className="absolute top-[-4px] bottom-[-4px] w-[7px] -ml-[3.5px] bg-white rounded shadow-[0_0_10px_#fff,0_0_22px_#7ff3ff]" style={{ left: `${view.tension}%` }} data-testid="tension-needle" />
           </div>
+        </div>
+        <div className="flex items-center gap-3 mt-2">
+          <span className={`font-cinzel font-black text-sm outline-text w-28 ${danger ? "text-red-400" : inZone ? "text-emerald-300" : "text-amber-300"}`} data-testid="tension-zone">{danger ? "SNAPPING!" : inZone ? "PERFECT" : "DANGER"}</span>
+          <div className="flex-1 fr-bar !h-3.5" data-testid="progress-frame"><i style={{ width: `${view.progress}%`, background: "linear-gradient(90deg,#1fd3ff,#3dff7f,#fff2a6)", transition: "none" }} data-testid="progress-fill" /></div>
+          <span className="font-cinzel font-bold text-sm text-amber-100 outline-text w-12 text-right num">{Math.round(view.progress)}%</span>
         </div>
         {view.beat && <BeatLane b={view.beat} />}
         {view.hook && <HookBar h={view.hook} />}
-        {enc.boss && <div className="fi-note" data-testid="boss-fight-note">{view.phase === 1 ? `It rallies at ${enc.phase2_at || (enc.pull ? 60 : 50)}%.` : "It rallies: hold on."}</div>}
       </div>
       <button
         ref={btnRef}

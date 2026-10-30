@@ -138,9 +138,10 @@ function makeWeather(type, layer, soft) {
   }[type];
   const gulls = [];
   if (type === "gulls" || type === "spray") {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < (type === "gulls" ? 9 : 4); i++) {
       const g = new Graphics();
-      g._p = Math.random() * 6; g.x = Math.random() * BG_W; g.y = 60 + Math.random() * 180; g._s = 25 + Math.random() * 25;
+      g._p = Math.random() * 6; g.x = Math.random() * BG_W; g.y = 50 + Math.random() * 220; g._d = Math.random() < 0.35 ? -1 : 1;
+      g._k = 0.7 + Math.random() * 0.9; g._s = (22 + Math.random() * 30) * g._d * g._k; g.scale.set(g._k);
       layer.addChild(g); gulls.push(g);
     }
   }
@@ -161,10 +162,12 @@ function makeWeather(type, layer, soft) {
   }
   return (dt, time) => {
     gulls.forEach((g) => {
-      g.x += g._s * dt; if (g.x > BG_W + 40) { g.x = -40; g.y = 60 + Math.random() * 180; }
-      const f = Math.sin(time * 8 + g._p) * 5;
-      g.clear().moveTo(-10, f).quadraticCurveTo(-5, -3, 0, 0).quadraticCurveTo(5, -3, 10, f).stroke({ width: 2, color: 0xffffff, alpha: 0.9 });
-      g.y += Math.sin(time + g._p) * 0.2;
+      g.x += g._s * dt;
+      if (g.x > BG_W + 40 && g._d > 0) { g.x = -40; g.y = 50 + Math.random() * 220; } else if (g.x < -40 && g._d < 0) { g.x = BG_W + 40; g.y = 50 + Math.random() * 220; }
+      const glide = Math.sin(time * 0.7 + g._p) > 0.3, f = glide ? -1.5 : Math.sin(time * 8 + g._p) * 6;
+      g.clear().moveTo(-12, f).quadraticCurveTo(-6, -4, 0, 0).quadraticCurveTo(6, -4, 12, f).stroke({ width: 2.4, color: 0xffffff, alpha: 0.95 })
+        .ellipse(0, 1, 3, 1.6).fill({ color: 0xffffff, alpha: 0.95 });
+      g.y += Math.sin(time * 1.3 + g._p) * 0.25;
     });
     parts.forEach((q) => {
       q._life += dt;
@@ -177,6 +180,65 @@ function makeWeather(type, layer, soft) {
       if (P.drift && q.x > BG_W + 200) q.x = -200;
       if (P.water && q._life > q._max) reset(q);
       if (q.y > BG_H + 20 || q.y < -20) reset(q);
+    });
+  };
+}
+
+// "Living map" props: fountain jets, bobbing boats, water rings, lantern flicker, chimney smoke.
+function makeLife(L, back, front, soft, bgTex) {
+  if (!L) return () => {};
+  const r = (a, b) => a + Math.random() * (b - a);
+  const boats = (L.boats || []).map(([x, y, w, h, amp]) => {
+    const s = new Sprite(new Texture({ source: bgTex.source, frame: new Rectangle(x, y, w, h) }));
+    s.anchor.set(0.5, 1); s.x = x + w / 2; s.y = y + h; s._y = s.y; s._a = amp; s._p = Math.random() * 6;
+    back.addChild(s); return s;
+  });
+  const drops = [];
+  const [bx, by, bw, bh] = L.basin || [0, 0, 0, 0];
+  (L.fountain || []).forEach(([x, y]) => {
+    for (let i = 0; i < 14; i++) {
+      const d = new Sprite(soft); d.anchor.set(0.5); d.blendMode = "add"; d.tint = 0xd8fbff; d.scale.set(r(0.06, 0.12));
+      d._o = [x, y]; d._t = Math.random(); d.alpha = 0; back.addChild(d); drops.push(d);
+    }
+  });
+  const rings = new Graphics(); back.addChild(rings);
+  const ringPts = [...(L.rings || []).map(([x, y]) => ({ x, y, w: 1, t: Math.random() * 2 }))];
+  if (L.basin) for (let i = 0; i < 4; i++) ringPts.push({ x: bx, y: by, w: 0.45, basin: true, t: Math.random() * 2 });
+  const lamps = (L.lanterns || []).map(([x, y, k = 1]) => {
+    const g = new Sprite(soft); g.anchor.set(0.5); g.blendMode = "add"; g.tint = 0xffb547; g.x = x; g.y = y; g._k = k; g._p = Math.random() * 9;
+    front.addChild(g); return g;
+  });
+  const smoke = [];
+  (L.chimneys || []).forEach(([x, y]) => {
+    for (let i = 0; i < 9; i++) {
+      const m = new Sprite(soft); m.anchor.set(0.5); m.tint = 0xcfc8c0; m._o = [x, y]; m._t = i / 9; front.addChild(m); smoke.push(m);
+    }
+  });
+  return (dt, time) => {
+    boats.forEach((b) => { b.y = b._y + Math.sin(time * 1.1 + b._p) * b._a; b.rotation = Math.sin(time * 0.8 + b._p) * 0.006 * b._a; });
+    drops.forEach((d) => {
+      d._t += dt * 0.9;
+      if (d._t >= 1) { d._t = 0; d._vx = r(-38, 38); d._vy = r(-30, -5); }
+      const t = d._t * 0.9;
+      d.x = d._o[0] + (d._vx || 0) * t; d.y = d._o[1] + (d._vy || 0) * t + 170 * t * t;
+      d.alpha = d.y > by + 4 ? 0 : 0.85 * Math.sin(Math.min(1, d._t * 1.4) * Math.PI);
+    });
+    rings.clear();
+    ringPts.forEach((p) => {
+      p.t += dt * (p.basin ? 0.7 : 0.45);
+      if (p.t > 1) { p.t = 0; if (p.basin) { p.x = bx + r(-bw, bw) * 0.6; p.y = by + r(-bh, bh) * 0.5; } }
+      const rad = (8 + p.t * 46) * p.w;
+      rings.ellipse(p.x, p.y, rad, rad * 0.3).stroke({ width: 1.6, color: 0xeaffff, alpha: (1 - p.t) * 0.55 });
+    });
+    lamps.forEach((g) => {
+      const f = 0.75 + 0.15 * Math.sin(time * 9 + g._p) + 0.1 * Math.sin(time * 23 + g._p * 2) + (Math.random() < 0.02 ? -0.25 : 0);
+      g.alpha = 0.55 * f; g.scale.set(1.5 * g._k * (0.92 + f * 0.12));
+    });
+    smoke.forEach((m) => {
+      m._t += dt * 0.12; if (m._t > 1) m._t -= 1;
+      const t = m._t;
+      m.x = m._o[0] + t * 60 + Math.sin(time * 0.9 + t * 6) * 8; m.y = m._o[1] - t * 120;
+      m.scale.set(0.45 + t * 1.6); m.alpha = Math.sin(t * Math.PI) * 0.28;
     });
   };
 }
@@ -249,8 +311,7 @@ function buildScene(app, tex, key, bgTex) {
       c._ring = ring; c._beam = beam;
     } else {
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
-      const ring = new Sprite(Texture.EMPTY); ring.anchor.set(0.5); ring.y = -40;
-      Assets.load("art/ui/tile_frame.webp").then((t) => { if (!ring.destroyed) { ring.texture = t; ring.scale.set(60 / t.width); } });
+      const ring = new Graphics().roundRect(-28, -68, 56, 56, 12).fill({ color: 0x0a1420, alpha: 0.72 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.28 });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
       Assets.load(`art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } });
       const lb = new Text({ text: sp.label, style: { fontFamily: "Cinzel", fontWeight: "700", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
@@ -338,6 +399,9 @@ function buildScene(app, tex, key, bgTex) {
   const front = new Container();
   world.addChild(front);
   const weather = makeWeather(cfg.weather, front, soft);
+  const lifeBack = new Container(), lifeFront = new Container();
+  base.addChild(lifeBack); fxLayer.addChild(lifeFront);
+  const life = makeLife(cfg.life, lifeBack, lifeFront, soft, bgTex);
 
   const ripplesList = [];
   const addRipple = (x, y, big = 1) => ripplesList.push({ x, y, t: 0, big });
@@ -402,6 +466,7 @@ function buildScene(app, tex, key, bgTex) {
     });
     clouds.forEach((c) => { c.x += c._s * dt; if (c.x > BG_W + 200) c.x = -200; });
     weather(dt, time);
+    life(dt, time);
 
     // walking (click/tap destination or WASD/arrow keys)
     const me = fx.me, idleFight = fx.phase === "idle";
@@ -409,12 +474,12 @@ function buildScene(app, tex, key, bgTex) {
     if (idleFight) {
       if (fx.keys.has("left")) vx -= 1; if (fx.keys.has("right")) vx += 1; if (fx.keys.has("up")) vy -= 1; if (fx.keys.has("down")) vy += 1;
       if (vx || vy) { fx.dest = null; fx.autoOpen = null; }
-      else if (fx.dest) { const dx = fx.dest.x - me.x, dy = fx.dest.y - me.y, d = Math.hypot(dx, dy); if (d < 4) { fx.dest = null; if (fx.autoOpen) { const id = fx.autoOpen; fx.autoOpen = null; fx.openSpot?.(id); } } else { vx = dx / d; vy = dy / d; } }
+      else if (fx.dest) { const dx = fx.dest.x - me.x, dy = fx.dest.y - me.y, d = Math.hypot(dx, dy); if (d < Math.max(4, 240 * dt)) { if (inPoly(fx.dest.x, fx.dest.y, cfg.walk)) { me.x = fx.dest.x; me.y = fx.dest.y; } fx.dest = null; if (fx.autoOpen) { const id = fx.autoOpen; fx.autoOpen = null; fx.openSpot?.(id); } } else { vx = dx / d; vy = dy / d; } }
     } else fx.dest = null;
     const moving = !!(vx || vy);
     fx.moving = moving;
     if (moving) {
-      const n = Math.hypot(vx, vy), sp = 230 * dt;
+      const n = Math.hypot(vx, vy), sp = Math.min(230 * dt, fx.dest ? Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) / 0.8 + 0.5 : 1e9);
       const nx = me.x + (vx / n) * sp, ny = me.y + (vy / n) * sp * 0.8;
       const ox = me.x, oy = me.y;
       if (inPoly(nx, ny, cfg.walk)) { me.x = nx; me.y = ny; } else if (inPoly(nx, me.y, cfg.walk)) me.x = nx; else if (inPoly(me.x, ny, cfg.walk)) me.y = ny;

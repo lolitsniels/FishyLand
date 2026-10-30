@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -46,7 +46,7 @@ export default function Players() {
   const pages = d ? Math.max(1, Math.ceil(d.total / d.per)) : 1;
   return (
     <div className="space-y-3" data-testid="players-page">
-      <Panel icon="angler" title={<span className="flex items-center gap-1.5">{tt("Anglers of the Fishing Lands")}</span>} right={d && <span className="num">{d.total.toLocaleString()} {onlyOnline ? tt("online") : tt("registered")}</span>} testId="players-panel">
+      <Panel icon="angler" title={<span className="flex items-center gap-1.5">{tt("Anglers of the Fishing Realms")}</span>} right={d && <span className="num">{d.total.toLocaleString()} {onlyOnline ? tt("online") : tt("registered")}</span>} testId="players-panel">
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <label className="flex items-center gap-2 border border-[var(--border-2)] bg-[var(--bg-deep)] px-2 flex-1 min-w-[200px]">
             <Search size={13} className="text-[var(--muted)] shrink-0" />

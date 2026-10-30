@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -21,7 +21,7 @@ export default function GamesLikeFishao() {
         this list ranks candidates by, rather than by species count or budget.
       </p>
 
-      <H2>1. The Fishing Lands</H2>
+      <H2>1. Fishing Realms</H2>
       <p>
         Yes, we're biased. But if you liked Fishao because of the journal, the shared server and the persistent economy, this is the closest thing to it
         available in a browser today.
@@ -76,8 +76,8 @@ export default function GamesLikeFishao() {
 
       <H2>Quick picks</H2>
       <div className="grid md:grid-cols-2 gap-3 not-prose">
-        <GameCard name="Closest to Fishao's shared world" verdict="The Fishing Lands">Browser, persistent, shared economy.</GameCard>
-        <GameCard name="Closest to Fishao's collection book" verdict="Cat Goes Fishing / The Fishing Lands">Both track a big illustrated catalogue.</GameCard>
+        <GameCard name="Closest to Fishao's shared world" verdict="Fishing Realms">Browser, persistent, shared economy.</GameCard>
+        <GameCard name="Closest to Fishao's collection book" verdict="Cat Goes Fishing / Fishing Realms">Both track a big illustrated catalogue.</GameCard>
         <GameCard name="Closest to Fishao's town chat" verdict="Webfishing">Cozy multiplayer pond hangout.</GameCard>
         <GameCard name="Closest to Fishao's minigames" verdict="Stardew Valley">Snappy, skill-based cast timing.</GameCard>
       </div>

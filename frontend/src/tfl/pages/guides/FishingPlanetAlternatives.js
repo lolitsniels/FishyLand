@@ -1,5 +1,5 @@
 /*
- * The Fishing Lands. Copyright © 2026. All rights reserved.
+ * Fishing Realms. Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
@@ -8,8 +8,8 @@ import { Link } from "react-router-dom";
 import { GuideLayout, H2, H3, GameCard, Compare, Faq, faqLd } from "./GuideShared";
 
 const QA = [
-  ["Is there a game like Fishing Planet that runs in a browser?", "Yes. The Fishing Lands is a free fishing MMO that runs in any modern browser on PC, Mac or phone. It is less of a simulator than Fishing Planet, but it has a shared world, a player market and 340+ species to collect."],
-  ["What is a good free alternative to Fishing Planet?", "Russian Fishing 4 is the closest free simulator. If you want something lighter that you can play in short sessions, The Fishing Lands is free in the browser with no download."],
+  ["Is there a game like Fishing Planet that runs in a browser?", "Yes. Fishing Realms is a free fishing MMO that runs in any modern browser on PC, Mac or phone. It is less of a simulator than Fishing Planet, but it has a shared world, a player market and 340+ species to collect."],
+  ["What is a good free alternative to Fishing Planet?", "Russian Fishing 4 is the closest free simulator. If you want something lighter that you can play in short sessions, Fishing Realms is free in the browser with no download."],
   ["Is Fishing Planet pay to win?", "Not strictly, but progress is much faster with premium gear, licences and membership. Many players look for alternatives because the free grind feels slow."],
 ];
 
@@ -27,7 +27,7 @@ export default function FishingPlanetAlternatives() {
         But it is also a big download, the free grind is slow, and every new lake comes with a licence to buy. If you're looking for something similar, or something that fixes what bugs you, this guide is for you.
       </p>
 
-      <H2>Fishing Planet vs The Fishing Lands at a glance</H2>
+      <H2>Fishing Planet vs Fishing Realms at a glance</H2>
       <Compare testId="compare-fishing-planet" them="Fishing Planet" rows={[
         ["Price", "Free to play, paid DLC and premium", "Free, optional cosmetics and Angler Pass"],
         ["Install", "Large client download", "None, runs in your browser"],
@@ -53,7 +53,7 @@ export default function FishingPlanetAlternatives() {
 
       <H2>The six alternatives</H2>
       <div className="grid md:grid-cols-2 gap-3 not-prose">
-        <GameCard name="The Fishing Lands" tag="Browser MMO · Free" verdict="Fishing Planet players who want a shared world and short sessions.">
+        <GameCard name="Fishing Realms" tag="Browser MMO · Free" verdict="Fishing Planet players who want a shared world and short sessions.">
           Full disclosure: this is our game. One persistent world with 12 waters, a tension-bar fight for every bite, a live player market, crews, bosses and crates with rare rods.
           It's not a simulator, it's a collection and progression game, and it runs in a browser tab on any device. <Link to="/" className="underline">Try it free</Link>.
         </GameCard>
@@ -78,7 +78,7 @@ export default function FishingPlanetAlternatives() {
       <H3>You want the same realism, just free and deeper</H3>
       <p>Russian Fishing 4.</p>
       <H3>You want something you can play anywhere, in short sessions</H3>
-      <p><Link to="/" className="text-[var(--gold)] underline">The Fishing Lands</Link>. No download, works on your phone, and your progress, trades and crew are always there.</p>
+      <p><Link to="/" className="text-[var(--gold)] underline">Fishing Realms</Link>. No download, works on your phone, and your progress, trades and crew are always there.</p>
       <H3>You want to explore beautiful waters at your own pace</H3>
       <p>Call of the Wild: The Angler.</p>
 
