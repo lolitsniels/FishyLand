@@ -25,7 +25,7 @@ export function useFight() {
     if (fx.phase !== "idle" || fx.mode !== "water" || !fx.atSpot || st.result) return;
     phase("cast"); sfx("cast");
     const sp = fx.fishSpot || { x: 560, y: 560 };
-    fx.target = { x: Math.max(690, sp.x + 170 + Math.random() * 220), y: Math.min(760, Math.max(420, sp.y - 50 + Math.random() * 130)) };
+    fx.target = sp.cast ? { x: sp.cast[0] + (Math.random() - 0.5) * 60, y: sp.cast[1] + (Math.random() - 0.5) * 30 } : { x: Math.max(690, sp.x + 170 + Math.random() * 220), y: Math.min(760, Math.max(420, sp.y - 50 + Math.random() * 130)) };
     try {
       const { data: r } = await api.post("/fish/cast");
       if (r.user) setUser(r.user);

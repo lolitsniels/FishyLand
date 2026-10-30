@@ -90,7 +90,7 @@ def pick_for(c, rows):
 
 def make_offer(user, rnd, taken):
     level, _ = level_from_xp(user["xp"])
-    cands = [f for k in user["unlocked_waters"] for f in FISH_BY_WATER[k] + CAGE_FISH_BY_WATER.get(k, []) if f["id"] not in taken]
+    cands = [f for k in user["unlocked_waters"] for f in FISH_BY_WATER[k] if f["id"] not in taken]
     f = rnd.choices(cands, weights=[RARITY_W[x["rarity"]] for x in cands])[0]
     r = f["rarity"]; ri = RARITY_ORDER.index(r)
     avg = (f["min_kg"] + f["max_kg"]) / 2

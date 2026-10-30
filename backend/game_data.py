@@ -462,11 +462,10 @@ FISH.extend(SECRET_FISH)
 FISH_BY_ID.update({f["id"]: f for f in SECRET_FISH})
 # Crab Cage species: journal/market/inventory like any fish, but only caught by cages, never on a rod.
 from cages_data import CAGE_FISH  # noqa: E402
-FISH.extend(CAGE_FISH)
-FISH_BY_ID.update({f["id"]: f for f in CAGE_FISH})
+FISH_BY_ID.update({f["id"]: f for f in CAGE_FISH})  # crab cages removed; ids kept only so old records still resolve
 SAME_SPECIES.update({f["id"]: {f["id"]} for f in CAGE_FISH})
 # Completion pool of a water = its rod fish + its 5 cage critters (variants stay rod-only: cage critters have none).
-WATER_POOL = {k: v + [f for f in CAGE_FISH if f["water"] == k] for k, v in FISH_BY_WATER.items()}
+WATER_POOL = dict(FISH_BY_WATER)
 
 RODS = [
     {"id": "rod_cane", "name": "Cane Pole", "tier": 1, "price": 0, "power": 1.0, "control": 1.0, "desc": "A bamboo pole and a prayer."},

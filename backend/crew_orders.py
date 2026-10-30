@@ -41,7 +41,7 @@ async def _crew_waters(c):
 
 
 def _pick(rnd, water, rarity):
-    every = FISH_BY_WATER[water] + CAGE_FISH_BY_WATER.get(water, [])  # crab cage species count too
+    every = FISH_BY_WATER[water]  # crab cage species count too
     pool = [f for f in every if f["rarity"] == rarity] or [f for f in every if f["rarity"] in ("common", "uncommon")]
     return rnd.choice(pool)
 

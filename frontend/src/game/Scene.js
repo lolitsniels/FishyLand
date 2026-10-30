@@ -5,11 +5,13 @@ import { fx } from "./fx";
 import { useGame } from "../store";
 import { gameReady } from "../portal";
 import { sceneFor, inPoly } from "./scenes";
+import { buildMap, placeObjects } from "./tilemap";
 import { lookSprite, parseLook, HAND } from "./look";
 import ROD_META from "./rodMeta.json";
 
 let BG_W = 1264;
-const BG_H = 848;
+let BG_H = 848;
+let TILED_ON = false;
 const FEET = { x: 470, y: 592 };
 const ANGLER_H = 185;
 const K = ANGLER_H / 250;
@@ -140,7 +142,7 @@ function makeWeather(type, layer, soft) {
   if (type === "gulls" || type === "spray") {
     for (let i = 0; i < (type === "gulls" ? 9 : 4); i++) {
       const g = new Graphics();
-      g._p = Math.random() * 6; g.x = Math.random() * BG_W; g.y = 50 + Math.random() * 220; g._d = Math.random() < 0.35 ? -1 : 1;
+      g._p = Math.random() * 6; g.x = Math.random() * BG_W; g.y = TILED_ON ? Math.random() * BG_H : 50 + Math.random() * 220; g._d = Math.random() < 0.35 ? -1 : 1;
       g._k = 0.7 + Math.random() * 0.9; g._s = (22 + Math.random() * 30) * g._d * g._k; g.scale.set(g._k);
       layer.addChild(g); gulls.push(g);
     }
@@ -149,7 +151,7 @@ function makeWeather(type, layer, soft) {
   const r = (a, b) => a + Math.random() * (b - a);
   const reset = (q, init) => {
     q.x = r(0, BG_W);
-    q.y = P.water ? r(480, 840) : P.sky ? r(10, 320) : P.drift ? r(280, 440) : P.vy[0] < 0 ? (init ? r(0, BG_H) : BG_H + 10) : init ? r(0, BG_H) : -10;
+    q.y = TILED_ON && (P.water || P.sky || P.drift) ? r(0, BG_H) : P.water ? r(480, 840) : P.sky ? r(10, 320) : P.drift ? r(280, 440) : P.vy[0] < 0 ? (init ? r(0, BG_H) : BG_H + 10) : init ? r(0, BG_H) : -10;
     q._life = 0; q._max = r(2, 5); q._vy = r(P.vy[0], P.vy[1]); q._vx = P.drift ? r(4, 12) : r(-8, 8); q._p = Math.random() * 6;
   };
   for (let i = 0; P && i < P.n; i++) {
@@ -163,7 +165,8 @@ function makeWeather(type, layer, soft) {
   return (dt, time) => {
     gulls.forEach((g) => {
       g.x += g._s * dt;
-      if (g.x > BG_W + 40 && g._d > 0) { g.x = -40; g.y = 50 + Math.random() * 220; } else if (g.x < -40 && g._d < 0) { g.x = BG_W + 40; g.y = 50 + Math.random() * 220; }
+      const gy = () => (TILED_ON ? Math.random() * BG_H : 50 + Math.random() * 220);
+      if (g.x > BG_W + 40 && g._d > 0) { g.x = -40; g.y = gy(); } else if (g.x < -40 && g._d < 0) { g.x = BG_W + 40; g.y = gy(); }
       const glide = Math.sin(time * 0.7 + g._p) > 0.3, f = glide ? -1.5 : Math.sin(time * 8 + g._p) * 6;
       g.clear().moveTo(-12, f).quadraticCurveTo(-6, -4, 0, 0).quadraticCurveTo(6, -4, 12, f).stroke({ width: 2.4, color: 0xffffff, alpha: 0.95 })
         .ellipse(0, 1, 3, 1.6).fill({ color: 0xffffff, alpha: 0.95 });
@@ -182,6 +185,18 @@ function makeWeather(type, layer, soft) {
       if (q.y > BG_H + 20 || q.y < -20) reset(q);
     });
   };
+}
+
+// Derive fountain jets, lantern glows and chimney smoke from placed map objects.
+function lifeFromObjects(base, views) {
+  const L = { ...base, fountain: [], lanterns: [], chimneys: [] };
+  views.forEach(({ o, def, w, h }) => {
+    const at = (fx0, fy0) => [o.x + (o.flip ? 0.5 - fx0 : fx0 - 0.5) * w, o.y - (1 - fy0) * h];
+    if (def.glow) L.lanterns.push([...at(...def.glow), 0.9]);
+    if (def.smoke) L.chimneys.push(at(...def.smoke));
+    if (def.jet) { const [jx, jy] = at(def.jet[0], def.jet[1]), [bx, by] = at(def.jet[2], def.jet[3]); L.fountain.push([jx, jy]); L.basin = [bx, by, w * 0.28, w * 0.07]; }
+  });
+  return L;
 }
 
 // "Living map" props: fountain jets, bobbing boats, water rings, lantern flicker, chimney smoke.
@@ -243,30 +258,42 @@ function makeLife(L, back, front, soft, bgTex) {
   };
 }
 
-function buildScene(app, tex, key, bgTex) {
+function buildScene(app, tex, key, bgTex, mt) {
   const cfg = sceneFor(key);
   const mode = key === "harbour" ? "harbour" : "water";
-  BG_W = bgTex.width;
+  TILED_ON = !!cfg.tiled;
+  BG_W = cfg.tiled ? cfg.W : bgTex.width; BG_H = cfg.tiled ? cfg.H : 848;
+  const tm = cfg.tiled ? buildMap(cfg, mt.img) : null;
+  const canWalk = (x, y) => (tm ? tm.nav.walk(x, y) : inPoly(x, y, cfg.walk));
   const world = new Container();
   app.stage.addChild(world);
   const soft = softTex(), star = starTex();
-  const depth = (y) => cfg.scale * Math.max(0.7, Math.min(1.25, 0.78 + ((y - 470) / 240) * 0.3));
+  const depth = (y) => cfg.tiled ? cfg.scale : cfg.scale * Math.max(0.7, Math.min(1.25, 0.78 + ((y - 470) / 240) * 0.3));
 
   // Layer 0-2: painted world, water shader, waterfalls
   const base = new Container();
   world.addChild(base);
-  base.addChild(new Sprite(bgTex));
   const dispSprite = new Sprite(dispTex());
   dispSprite.scale.set(2.2);
   dispSprite.alpha = 0;
-  base.addChild(dispSprite);
-  const water = new Sprite(bgTex);
-  const mask = new Graphics();
-  cfg.water.forEach((p) => mask.poly(p).fill(0xffffff));
-  base.addChild(mask);
-  water.mask = mask;
-  water.filters = [new DisplacementFilter({ sprite: dispSprite, scale: mode === "harbour" ? 9 : 16 })];
-  base.addChild(water);
+  let waterTile = null;
+  if (tm) {
+    waterTile = new TilingSprite({ texture: mt.img_tex[cfg.water_tex || "water"], width: BG_W, height: BG_H });
+    waterTile.tileScale.set(0.38);
+    base.addChild(dispSprite, waterTile);
+    waterTile.filters = [new DisplacementFilter({ sprite: dispSprite, scale: 14 })];
+    tm.chunks.forEach((c) => { const sp = new Sprite(c.tex); sp.x = c.x; sp.y = c.y; base.addChild(sp); });
+  } else {
+    base.addChild(new Sprite(bgTex));
+    base.addChild(dispSprite);
+    const water = new Sprite(bgTex);
+    const mask = new Graphics();
+    cfg.water.forEach((p) => mask.poly(p).fill(0xffffff));
+    base.addChild(mask);
+    water.mask = mask;
+    water.filters = [new DisplacementFilter({ sprite: dispSprite, scale: mode === "harbour" ? 9 : 16 })];
+    base.addChild(water);
+  }
   const caustics = [];
   const [sx, sy, sw0, sh0] = cfg.sparkle;
   for (let i = 0; i < 9; i++) {
@@ -277,7 +304,7 @@ function buildScene(app, tex, key, bgTex) {
     base.addChild(c); caustics.push(c);
   }
   const sTex = streakTex();
-  const falls = cfg.falls.map(([x, y, w, h]) => {
+  const falls = (cfg.falls || []).map(([x, y, w, h]) => {
     const ts = new TilingSprite({ texture: sTex, width: w, height: h });
     ts.x = x; ts.y = y; ts.alpha = 0.32; ts.blendMode = "add"; ts._sp = 3 + Math.random() * 2;
     base.addChild(ts);
@@ -299,6 +326,9 @@ function buildScene(app, tex, key, bgTex) {
   const spotLayer = new Container();
   spotLayer.zIndex = -1;
   actors.addChild(spotLayer);
+  const groundLayer = new Container();
+  base.addChild(groundLayer);
+  const objViews = tm ? placeObjects(cfg, mt.obj, groundLayer, actors) : [];
   const spotViews = cfg.spots.map((sp) => {
     const c = new Container(); c.x = sp.x; c.y = sp.y; c.eventMode = "static"; c.cursor = "pointer";
     let glow, ic = null;
@@ -319,13 +349,20 @@ function buildScene(app, tex, key, bgTex) {
       c.addChild(glow, ring, ic, lb);
     }
     c.hitArea = sp.fish ? new Rectangle(-40, -16, 80, 32) : new Rectangle(-34, -70, 68, 80);
-    c.on("pointertap", (e) => { e.stopPropagation(); fx.dest = { x: sp.x, y: sp.y + (sp.fish ? 0 : 12) }; fx.autoOpen = sp.fish ? null : sp.id; });
-    spotLayer.addChild(c);
+    c.on("pointertap", (e) => { e.stopPropagation(); walkTo(sp.x, sp.y + (sp.fish ? 0 : 12), sp.fish ? null : sp.id); });
+    if (cfg.tiled) { c.zIndex = sp.fish ? sp.y - 60 : sp.y + 4; actors.addChild(c); } else spotLayer.addChild(c);
     return { sp, c, glow, ic };
   });
   world.eventMode = "static";
   world.hitArea = new Rectangle(0, 0, BG_W, BG_H);
-  world.on("pointertap", (e) => { const p = world.toLocal(e.global); if (inPoly(p.x, p.y, cfg.walk)) { fx.dest = { x: p.x, y: p.y }; fx.autoOpen = null; } });
+  const walkTo = (x, y, autoOpen = null) => {
+    fx.autoOpen = autoOpen;
+    if (!tm) { fx.path = []; fx.dest = { x, y }; return; }
+    const p = tm.nav.path(fx.me, { x, y });
+    if (!p) { fx.dest = null; fx.autoOpen = null; return; }
+    fx.path = p; fx.dest = fx.path.shift();
+  };
+  world.on("pointertap", (e) => { const p = world.toLocal(e.global); if (tm || inPoly(p.x, p.y, cfg.walk)) walkTo(p.x, p.y); });
   actors.addChild(body);
   const hero = makeFigure();
   hero.c.position.set(FEET.x, FEET.y);
@@ -354,7 +391,7 @@ function buildScene(app, tex, key, bgTex) {
     fxLayer.addChild(s); sparkles.push(s);
   }
   const mists = [];
-  for (let i = 0; cfg.mist.length && i < 26; i++) {
+  for (let i = 0; cfg.mist?.length && i < 26; i++) {
     const m = new Sprite(soft);
     m.anchor.set(0.5); m.alpha = 0; m._life = Math.random();
     m._home = cfg.mist[i % cfg.mist.length];
@@ -401,7 +438,7 @@ function buildScene(app, tex, key, bgTex) {
   const weather = makeWeather(cfg.weather, front, soft);
   const lifeBack = new Container(), lifeFront = new Container();
   base.addChild(lifeBack); fxLayer.addChild(lifeFront);
-  const life = makeLife(cfg.life, lifeBack, lifeFront, soft, bgTex);
+  const life = makeLife(tm ? lifeFromObjects(cfg.life, objViews) : cfg.life, lifeBack, lifeFront, soft, bgTex);
 
   const ripplesList = [];
   const addRipple = (x, y, big = 1) => ripplesList.push({ x, y, t: 0, big });
@@ -433,13 +470,19 @@ function buildScene(app, tex, key, bgTex) {
     const sw = app.screen.width, sh = app.screen.height;
     const small = Math.min(sw, sh) < 560;
     const zoom = mode === "harbour" ? Math.min(sw / 900, sh / 560) : Math.min(sw / 760, sh / 470);
-    cam.sc = Math.max(sw / BG_W, sh / BG_H, small ? zoom : 0, mode === "harbour" ? sw / 1400 : 0);
+    cam.sc = cfg.tiled ? (fx.mapView ? Math.min(sw / BG_W, sh / BG_H) : Math.max(0.5, Math.min(1.1, Math.min(sw, sh * 1.4) / 820))) : Math.max(sw / BG_W, sh / BG_H, small ? zoom : 0, mode === "harbour" ? sw / 1400 : 0);
     cam.sw = sw; cam.sh = sh; cam.small = small;
     world.scale.set(cam.sc);
     cam.x = null;
   };
   const camTarget = () => {
     const { sc, sw, sh, small } = cam;
+    if (cfg.tiled) {
+      if (fx.mapView) return [(sw - BG_W * sc) / 2, (sh - BG_H * sc) / 2];
+      const cx = BG_W * sc <= sw ? (sw - BG_W * sc) / 2 : Math.min(0, Math.max(sw - BG_W * sc, sw / 2 - fx.me.x * sc));
+      const cy = BG_H * sc <= sh ? (sh - BG_H * sc) / 2 : Math.min(0, Math.max(sh - BG_H * sc, sh * 0.55 - (fx.me.y - 60) * sc));
+      return [cx, cy];
+    }
     const vis = sw / sc, fxX = mode === "harbour" ? fx.me.x : vis >= 900 ? 690 : Math.min(690, fx.me.x + vis * 0.22), fyY = mode === "harbour" ? fx.me.y - 60 : FEET.y;
     const tx = Math.min(0, Math.max(sw - BG_W * sc, sw / 2 - fxX * sc));
     const ty = Math.min(0, Math.max(sh - BG_H * sc, (mode === "harbour" ? sh * 0.6 : sh * (small ? 0.72 : 0.78)) - fyY * sc));
@@ -467,6 +510,8 @@ function buildScene(app, tex, key, bgTex) {
     clouds.forEach((c) => { c.x += c._s * dt; if (c.x > BG_W + 200) c.x = -200; });
     weather(dt, time);
     life(dt, time);
+    if (waterTile) { waterTile.tilePosition.x += dt * 6; waterTile.tilePosition.y += dt * 3; }
+    objViews.forEach((v) => { if (v.def.bob) { v.s.y = v.o.y + Math.sin(time * 1.1 + v.o.x) * v.def.bob; v.s.rotation = Math.sin(time * 0.8 + v.o.x) * 0.004 * v.def.bob; } });
 
     // walking (click/tap destination or WASD/arrow keys)
     const me = fx.me, idleFight = fx.phase === "idle";
@@ -474,7 +519,7 @@ function buildScene(app, tex, key, bgTex) {
     if (idleFight) {
       if (fx.keys.has("left")) vx -= 1; if (fx.keys.has("right")) vx += 1; if (fx.keys.has("up")) vy -= 1; if (fx.keys.has("down")) vy += 1;
       if (vx || vy) { fx.dest = null; fx.autoOpen = null; }
-      else if (fx.dest) { const dx = fx.dest.x - me.x, dy = fx.dest.y - me.y, d = Math.hypot(dx, dy); if (d < Math.max(4, 240 * dt)) { if (inPoly(fx.dest.x, fx.dest.y, cfg.walk)) { me.x = fx.dest.x; me.y = fx.dest.y; } fx.dest = null; if (fx.autoOpen) { const id = fx.autoOpen; fx.autoOpen = null; fx.openSpot?.(id); } } else { vx = dx / d; vy = dy / d; } }
+      else if (fx.dest) { const dx = fx.dest.x - me.x, dy = fx.dest.y - me.y, d = Math.hypot(dx, dy); if (d < Math.max(4, 240 * dt)) { if (canWalk(fx.dest.x, fx.dest.y)) { me.x = fx.dest.x; me.y = fx.dest.y; } fx.dest = fx.path?.length ? fx.path.shift() : null; if (!fx.dest && fx.autoOpen) { const id = fx.autoOpen; fx.autoOpen = null; fx.openSpot?.(id); } } else { vx = dx / d; vy = dy / d; } }
     } else fx.dest = null;
     const moving = !!(vx || vy);
     fx.moving = moving;
@@ -482,11 +527,11 @@ function buildScene(app, tex, key, bgTex) {
       const n = Math.hypot(vx, vy), sp = Math.min(230 * dt, fx.dest ? Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) / 0.8 + 0.5 : 1e9);
       const nx = me.x + (vx / n) * sp, ny = me.y + (vy / n) * sp * 0.8;
       const ox = me.x, oy = me.y;
-      if (inPoly(nx, ny, cfg.walk)) { me.x = nx; me.y = ny; } else if (inPoly(nx, me.y, cfg.walk)) me.x = nx; else if (inPoly(me.x, ny, cfg.walk)) me.y = ny;
-      if (fx.dest && Math.hypot(me.x - ox, me.y - oy) < 0.5) { const id = Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) < 40 ? fx.autoOpen : null; fx.dest = null; fx.autoOpen = null; if (id) fx.openSpot?.(id); }
+      if (canWalk(nx, ny)) { me.x = nx; me.y = ny; } else if (canWalk(nx, me.y)) me.x = nx; else if (canWalk(me.x, ny)) me.y = ny;
+      if (fx.dest && Math.hypot(me.x - ox, me.y - oy) < 0.5) { fx.path = []; const id = Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) < 40 ? fx.autoOpen : null; fx.dest = null; fx.autoOpen = null; if (id) fx.openSpot?.(id); }
       if (Math.abs(vx) > 0.2) fx.flip = vx < 0;
     }
-    if (!moving && mode === "water") fx.flip = false;
+    if (!moving && mode === "water") fx.flip = cfg.tiled ? (fx.phase !== "idle" ? fx.target.x < me.x : fx.flip) : false;
     const ds = depth(me.y);
     body.scale.set(fx.flip ? -ds : ds, ds);
     body.x = me.x; body.y = me.y - (moving ? Math.abs(Math.sin(time * 11)) * 5 : 0);
@@ -674,14 +719,29 @@ function buildScene(app, tex, key, bgTex) {
   };
 }
 
+const TEX_KEYS = ["grass", "sand", "dirt", "planks", "cobble", "water", "river"];
+async function loadMapArt(cfg) {
+  const kinds = [...new Set(cfg.objects.map((o) => o.k))];
+  const [tx, ob] = await Promise.all([
+    Promise.all(TEX_KEYS.map((k) => Assets.load(`art/map/t_${k}.webp`))),
+    Promise.all(kinds.map((k) => Assets.load(`art/map/${k}.webp`))),
+  ]);
+  const img = {}, img_tex = {}, obj = {};
+  TEX_KEYS.forEach((k, i) => { tx[i].source.addressMode = "repeat"; img_tex[k] = tx[i]; img[k] = tx[i].source.resource; });
+  kinds.forEach((k, i) => (obj[k] = ob[i]));
+  return { mt: { img, img_tex, obj } };
+}
+
 export default function Scene({ place = "harbour" }) {
   const host = useRef(null);
   const rig = useRef({ app: null, tex: null, teardown: null, place, seq: 0 });
   const mount = (r) => {
     const seq = ++r.seq, key = r.place;
-    Assets.load(sceneFor(key).bg).then((bg) => {
+    const cfg = sceneFor(key);
+    const load = cfg.tiled ? loadMapArt(cfg) : Assets.load(cfg.bg).then((bg) => ({ bg }));
+    load.then(({ bg, mt }) => {
       if (seq !== r.seq || !r.app) return;
-      r.teardown?.(); r.teardown = buildScene(r.app, r.tex, key, bg);
+      r.teardown?.(); r.teardown = buildScene(r.app, r.tex, key, bg, mt);
     });
   };
 

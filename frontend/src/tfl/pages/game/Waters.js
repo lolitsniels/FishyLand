@@ -15,7 +15,6 @@ import { Lock } from "lucide-react";
 import { WaterProgress, useWaterProgress } from "../../components/WaterProgress";
 import { t as tt } from "../../i18n";
 import { NO_IAP } from "../../lib/portal";
-import { CageSlot, useCages } from "../../components/CrabCages";
 
 const MOODS = [[0.15, "Calm", "#7fc9a0"], [0.45, "Choppy", "#e0b341"], [0.8, "Rough", "#f08a45"], [2, "Wild", "#e0645a"]];
 function WaterMood({ w }) {
@@ -50,7 +49,6 @@ export default function Waters() {
   const cond = useConditions();
   const ev = useExpedition();
   const progress = useWaterProgress();
-  const [cages, reloadCages] = useCages();
   const travel = async (key) => {
     try { const r = await api.post("/waters/travel", { water: key }); setUser(r.data); toast.success(tt("You travel to {{v0}}.", { v0: data.waters.find((w) => w.key === key).name })); }
     catch (e) { toast.error(errMsg(e)); }
@@ -75,7 +73,6 @@ export default function Waters() {
                 {here && <div className="absolute top-2 left-2 z-[2] fr-chip px-2 text-[10.5px] font-cinzel font-bold text-[#ffe9a3]">{tt("You are here")}</div>}
                 {ev?.active?.water === w.key && <div className="absolute bottom-12 left-2 z-[2] text-[10.5px] uppercase tracking-widest bg-[rgba(10,9,8,.85)] text-[var(--energy)] px-2 py-0.5 rounded-full border border-[var(--energy)]" data-testid={`expedition-badge-${w.key}`}>{tt("Expedition active")}</div>}
                 <div className="absolute top-2 right-2 z-[2]"><WaterMood w={w} /></div>
-                <CageSlot water={w} here={here} unlocked={unlocked} st={cages} onChange={reloadCages} />
                 {progress?.[w.key]?.complete && <div className="absolute top-9 right-2 z-[2] fr-chip px-2 text-[10.5px] font-cinzel text-[var(--gold)]" data-testid={`water-complete-${w.key}`}>{tt("Complete")}</div>}
                 <div className="title"><div className="font-deco gold-text text-[17px] leading-tight">{w.name}</div><div className="text-[11px] text-[#cff6ff] font-cinzel">{w.type}</div></div>
               </div>
@@ -85,7 +82,6 @@ export default function Waters() {
                 <div className="flex items-center gap-2 mt-2 text-[11px]">
                   <span className="text-[var(--muted)]">{pool.length} {tt("species:")}</span>
                   {["common", "uncommon", "rare", "epic", "legendary", "mythic"].map((r) => <span key={r} className={`num rar-${r}`}>{pool.filter((f) => f.rarity === r).length}</span>)}
-                  {data.fish.some((f) => f.cage && f.water === w.key) && <span className="text-[var(--muted)] ml-auto" data-testid={`cage-species-${w.key}`}>{tt("incl.")} {pool.filter((f) => f.cage).length} {tt("by cage")}</span>}
                 </div>
                 {unlocked && progress?.[w.key] && <div className="mt-2 pt-2 border-t border-[var(--border)]"><WaterProgress p={progress[w.key]} compact stamp={false} testId={`water-progress-${w.key}`} /></div>}
                 <div className="flex items-center justify-between mt-3">

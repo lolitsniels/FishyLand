@@ -15,9 +15,8 @@ import { Panel, Gold, Empty } from "../../components/ui-bits";
 import { t as tt } from "../../i18n";
 import { FishPlate } from "../../components/FishPlate";
 import { GearIcon } from "../../components/GearIcon";
-import { DeskTabs } from "../../components/MobileSheets";
+import { ShopFrame } from "../../components/ShopFrame";
 import { MarketSell } from "../../components/MarketSell";
-import { pixelIcon } from "../../components/PixelIcon";
 
 export default function Market() {
   const { user, setUser, lookups } = useGame();
@@ -66,38 +65,47 @@ export default function Market() {
         </div>
       </Panel>
 
-      <Panel bodyClass="!p-0" testId="market-listings">
+      <div data-testid="market-listings">
           {rows.length === 0 ? <Empty>{tt("No listings match.")}</Empty> : (
-            <table className="table">
-              <thead><tr><th>{tt("Item")}</th><th>{tt("Details")}</th><th>{tt("Seller")}</th><th className="r">{tt("Listed")}</th><th className="r">{tt("Price")}</th><th></th></tr></thead>
-              <tbody>
-                {rows.map((l) => {
-                  const mine = l.seller_id === user.id;
-                  return (
-                    <tr key={l.id} data-testid={`listing-${l.id}`}>
-                      <td><span className="inline-flex items-center gap-1.5">{l.kind === "fish" ? <FishPlate speciesId={l.item.species_id} name={l.item.name} className="w-9 h-5" /> : <GearIcon id={l.kind === "scrap" ? "scrap" : l.kind === "gear" ? l.item.gear_id : l.kind === "pass" || l.kind === "potion" || l.kind === "crate" ? l.item.item_id : l.kind === "bait" ? l.item.bait_id : l.item.ingredient_id} className="!w-9 !h-5" />}<span className={`font-medium rar-${l.item.rarity}`}>{l.item.name}</span></span>{l.qty > 1 && <span className="num text-[var(--muted)]"> ×{l.qty}</span>}{l.item.variant && l.item.variant !== "normal" && <span className="tag tag-variant ml-1.5">{l.item.variant}</span>}{l.kind === "fish" && lookups?.fishById[l.item.species_id]?.baitable && <span className="text-[10px] text-[var(--muted)] ml-1.5" title={tt("Can be used as live bait / crafting ingredient")}>{tt("crafting")}</span>}{l.kind === "fish" && l.kind === "fish" && wantedFor(wanted, l.item) && <WantedTag c={wantedFor(wanted, l.item)} className="ml-1.5" />}</td>
-                      <td className="text-[12px] text-[var(--text-2)]">{details(l)}</td>
-                      <td><button className="hover:text-[var(--gold)]" onClick={() => nav(`/game/profile/${l.seller}`)}>{l.seller}</button>{!mine && <button className="ml-1.5 text-[11px] text-[var(--muted)] hover:text-[var(--gold)] underline" onClick={() => nav(`/game/messages/${l.seller}`)} data-testid={`msg-seller-${l.id}`}>{tt("whisper")}</button>}</td>
-                      <td className="r text-xs text-[var(--muted)]">{ago(l.created_at)}</td>
-                      <td className="r"><Gold n={l.price} /></td>
-                      <td className="r">{mine ? <button className="btn btn-sm btn-danger" onClick={() => cancel(l)} data-testid={`cancel-${l.id}`}>{tt("Withdraw")}</button> : <button className="btn btn-sm btn-gold" disabled={user.gold < l.price}  onClick={() => buy(l)} data-testid={`buy-${l.id}`}>{tt("Buy")}</button>}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="sf-grid">
+              {rows.map((l) => {
+                const mine = l.seller_id === user.id;
+                const icon = l.kind === "fish" ? null : l.kind === "scrap" ? "scrap" : l.kind === "gear" ? l.item.gear_id : ["pass", "potion", "crate"].includes(l.kind) ? l.item.item_id : l.kind === "bait" ? l.item.bait_id : l.item.ingredient_id;
+                return (
+                  <div key={l.id} className={`sf-item rc-${l.item.rarity || "common"}`} data-testid={`listing-${l.id}`}>
+                    <div className="sf-item-art">{l.kind === "fish" ? <FishPlate speciesId={l.item.species_id} name={l.item.name} className="w-14 h-9" /> : <GearIcon id={icon} className="!w-12 !h-12" />}{l.qty > 1 && <span className="sf-item-badge">×{l.qty}</span>}</div>
+                    <div className="min-w-0 flex-1 flex flex-col">
+                      <div className={`sf-item-n rar-${l.item.rarity}`} title={l.item.name}>{l.item.name}{l.item.variant && l.item.variant !== "normal" && <span className="sf-item-tag">{l.item.variant}</span>}{l.kind === "fish" && wantedFor(wanted, l.item) && <WantedTag c={wantedFor(wanted, l.item)} className="ml-1.5" />}</div>
+                      <div className="sf-item-sub">{details(l)}</div>
+                      <div className="sf-item-sub">{tt("by")} <button className="hover:text-[var(--gold)] underline decoration-dotted" onClick={() => nav(`/game/profile/${l.seller}`)}>{l.seller}</button>{!mine && <button className="ml-1.5 hover:text-[var(--gold)] underline" onClick={() => nav(`/game/messages/${l.seller}`)} data-testid={`msg-seller-${l.id}`}>{tt("whisper")}</button>} · {ago(l.created_at)}</div>
+                      <div className="flex items-center justify-between gap-2 mt-auto pt-1.5"><Gold n={l.price} />{mine ? <button className="btn btn-sm btn-danger" onClick={() => cancel(l)} data-testid={`cancel-${l.id}`}>{tt("Withdraw")}</button> : <button className="btn btn-sm btn-gold" disabled={user.gold < l.price} onClick={() => buy(l)} data-testid={`buy-${l.id}`}>{tt("Buy")}</button>}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
-        </Panel>
+      </div>
     </div>
   );
 
+  const CATS = [["", "Everything", "market"], ["fish", "Fish", "fishdex"], ["bait", "Bait", "bait"], ["gear", "Tackle", "rod"], ["ingredient", "Ingredients", "craft"], ["crate", "Crates", "daily"], ["pass", "Angler Passes", "pass"]];
+  const side = (
+    <>
+      <div className="sf-side-h">{tt("Categories")}</div>
+      {CATS.map(([k, label, ic]) => (
+        <button key={k || "all"} type="button" className={`sf-deal w-full text-left ${kind === k && tab !== "sell" ? "on" : ""}`} onClick={() => { setKind(k); if (tab === "sell") setTab("browse"); }} data-testid={`market-cat-${k || "all"}`}>
+          <img src={`/art/ui/${ic}.png`} alt="" /><div className="sf-item-n">{tt(label)}</div>
+        </button>
+      ))}
+    </>
+  );
   return (
-    <div className="space-y-3 fade-in" data-testid="market-page">
-      <DeskTabs pinned inline testId="market-tabs" value={tab} onChange={(t) => { if (t !== tab) setRows([]); setTab(t); }} items={[
-        { id: "browse", label: "Buy", Icon: pixelIcon("market"), node: listView },
-        { id: "sell", label: "Sell", Icon: pixelIcon("coin"), node: <MarketSell /> },
-        { id: "mine", label: "My listings", Icon: pixelIcon("chest"), node: listView },
-      ]} />
+    <div className="fade-in" data-testid="market-page">
+      <ShopFrame testid="market-tabs" tabs={[["browse", tt("Buy")], ["sell", tt("Sell")], ["mine", tt("My listings")]]} value={tab} onChange={(t) => { if (t !== tab) setRows([]); setTab(t); }} side={side}
+        wallet={{ gold: user.gold }} action={<span className="sf-item-sub">{Math.round((user.market_fee ?? 0.05) * 100)}{tt("% fee to seller")}</span>}>
+        {tab === "sell" ? <MarketSell /> : listView}
+      </ShopFrame>
     </div>
   );
 }

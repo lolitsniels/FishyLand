@@ -80,7 +80,7 @@ export default function World() {
   const fightEnc = useGame((st) => st.fightEnc);
   const result = useGame((st) => st.result);
   const ph = useGame((st) => st.phase);
-  const [mode, setMode] = useState(() => { fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(fx.mode === "harbour" ? "harbour" : "water").spawn }; return fx.mode; });
+  const [mode, setMode] = useState(() => { fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(fx.mode === "harbour" ? "harbour" : user?.water || "millbrook").spawn }; return fx.mode; });
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
@@ -89,12 +89,13 @@ export default function World() {
   const water = data?.waters?.find((x) => x.key === user?.water);
   const here = usePresence(mode === "harbour" ? "harbour" : user?.water || "harbour");
 
-  const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(m === "harbour" ? "harbour" : "water").spawn }; fx.dest = null; fx.autoOpen = null; fx.flip = false; setMode(m); };
+  const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(m === "harbour" ? "harbour" : user?.water || "millbrook").spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => { if (page === "fish") { goTo("water"); nav("/game", { replace: true }); } }, [page, nav]);
   useEffect(() => {
     if (!user?.water) return;
     if (prevWater.current && prevWater.current !== user.water) { goTo("water"); nav("/game", { replace: true }); }
+    if (!prevWater.current && fx.mode === "water") fx.me = { ...sceneFor(user.water).spawn };
     prevWater.current = user.water;
   }, [user?.water, nav]);
   useEffect(() => { fx.username = user?.username || ""; fx.title = user?.active_title || ""; fx.look = user?.avatar; fx.rod = user?.gear?.rod || "rod_cane"; }, [user]);
@@ -122,9 +123,16 @@ export default function World() {
 
   const barRef = useRef(null);
   const [barK, setBarK] = useState(1);
-  useEffect(() => { const bw = barRef.current?.offsetWidth; if (bw) setBarK(Math.min(1, (w / s - 12) / bw)); }, [w, s, user, data]);
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) return undefined;
+    const fit = () => setBarK(Math.min(1, (w / s - 12) / el.offsetWidth));
+    fit();
+    const ro = new ResizeObserver(fit); ro.observe(el);
+    return () => ro.disconnect();
+  }, [w, s, user, data]);
   if (!user || !data) return <div className="fixed inset-0 grid place-items-center bg-[#04121c] gold-text font-deco text-2xl" data-testid="game-loading">Loading the harbour…</div>;
-  const nearSpot = sceneFor(mode === "harbour" ? "harbour" : "water").spots.find((x) => x.id === near && !x.fish);
+  const nearSpot = sceneFor(mode === "harbour" ? "harbour" : user?.water || "millbrook").spots.find((x) => x.id === near && !x.fish);
   const canFish = mode === "water" && !!atSpot;
   const title = PAGES[page]?.[0] || page;
   const idle = ph === "idle" && !result && !fightEnc;

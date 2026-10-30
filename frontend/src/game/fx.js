@@ -4,6 +4,8 @@ export const fx = {
   mode: "harbour",
   me: { x: 400, y: 560 },
   dest: null,
+  path: [],
+  mapView: typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mapview"),
   keys: new Set(),
   near: null,
   atSpot: null,

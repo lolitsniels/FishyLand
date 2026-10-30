@@ -10,33 +10,30 @@ import { toast } from "sonner";
 import { api, errMsg, fmt } from "../../lib/api";
 import { useGame } from "../../context/GameContext";
 import { repairPerPoint } from "../../components/Durability";
-import { Panel, Gold, Pearls, PearlIcon } from "../../components/ui-bits";
+import { Gold, Pearls, PearlIcon } from "../../components/ui-bits";
 import { RodInfoDialog } from "../../components/RodInfoDialog";
 import { EnhanceBench, enhName } from "../../components/EnhanceBench";
-import { SizePips, BaitInfoDialog, useBaitValue } from "../../components/BaitInfo";
-import { Info } from "lucide-react";
-import { CageShop } from "../../components/CrabCages";
+import { BaitInfoDialog, useBaitValue } from "../../components/BaitInfo";
 import { t as tt } from "../../i18n";
-import { GameTabs, tierRarity } from "../../components/GameUI";
+import { tierRarity } from "../../components/GameUI";
+import { ShopFrame, ShopBanner, ShopItem, SideDeal } from "../../components/ShopFrame";
 
 const PERK_HEAD = { rod: "Luck", reel: "Vendor price", line: "XP" };
 const PERK_TITLE = { rod: "Bonus luck on every cast (rarer fish & variants): +1 per tier", reel: "Bonus gold when selling fish you land, +2% per tier", line: "Bonus XP on every catch, +2% per tier" };
 const perkText = (slot, tier, extra = 0) => { const n = (tier || 1) - 1 + extra; return n === 0 ? "-" : slot === "rod" ? `+${n} luck` : `+${n * 2}%`; };
 
 const TABS = [
-  ["rod", "Rods", "gear/_rod_t5.webp"], ["reel", "Reels", "gear/_reel_t5.webp"], ["line", "Lines", "gear/_line_t3.webp"], ["bait", "Bait", "gear/bait_worm.webp"], ["cages", "Crab Cages", "gear/bait_cricket.webp"], ["enhance", "Enhance", "craft"],
+  ["rod", "Rods", "gear/_rod_t5.webp"], ["reel", "Reels", "gear/_reel_t5.webp"], ["line", "Lines", "gear/_line_t3.webp"], ["bait", "Bait", "gear/bait_worm.webp"], ["enhance", "Enhance", "craft"],
 ];
 const INTRO = {
   rod: "Rods set your power and control in the fight and add +1 luck per tier. Gear is permanent and swaps freely from your tackle box; match rod, reel and line of the same tier for +5% power and half the wear.",
   reel: "Reels set how fast you recover line and add +2% vendor price per tier when you sell fish.",
   line: "Lines set how much tension you can take before it snaps and add +2% XP per tier.",
   bait: "Bait is used up one per cast. Better bait pulls rarer AND bigger fish, bites more often (fewer empty casts) and some species only take a specific bait. Click any bait for the full breakdown and what it earns you at your current water.",
-  cages: "Crab Cages work while you're away. Drop one at your current water from the Waters page, it catches something every 20-60 minutes for up to 8 hours, then come back and haul it up. Each water has 5 critters you can only catch in a cage.",
   enhance: "Fish up trash on empty casts, recycle it into Tackle Scrap from your Inventory, and hammer your rods, reels and lines from +1 to +10 here.",
 };
 
 
-const Stat = ({ k, children }) => <span className="shop-stat"><span>{k}</span><b className="num">{children}</b></span>;
 
 function GearAction({ g, slot, user, miles, buy, setInfo }) {
   const owned = user.owned_gear.includes(g.id);
@@ -55,56 +52,76 @@ function GearAction({ g, slot, user, miles, buy, setInfo }) {
   );
 }
 
-const GearName = ({ g, user }) => (
-  <>
-    <div className="font-medium flex flex-wrap items-center gap-x-1.5 gap-y-0.5 group-hover:text-[var(--gold)] underline decoration-dotted decoration-[#5a3220] underline-offset-2 min-w-0">
-      <span className="truncate">{enhName(g.name, user.enhance?.[g.id])}</span> <span className="text-[var(--muted)] text-[10px]">T{g.tier}</span>
-      {g.bound && <span className="tag tag-bound !text-[9.5px]" title={tt("Can't be sold on the Market, it stays with the angler who earned it")} data-testid={`untradable-${g.id}`}>{tt("Untradable")}</span>}
-      {g.legendary && <span className="tag rar-legendary !text-[9.5px]">{tt("Legendary")}</span>}
-    </div>
-    <div className="text-[11.5px] text-[var(--muted)] italic truncate">{g.desc}</div>
-  </>
-);
-
 const GearPrice = ({ g }) => <>{g.price ? <Gold n={g.price} /> : <span className="text-[var(--muted)]">-</span>}{g.pearls ? <> · <Pearls n={g.pearls} /></> : null}</>;
 
 function GearCard({ g, slot, statKeys, user, act }) {
-  const eq = user.gear[slot] === g.id;
+  const eq = user.gear[slot] === g.id, owned = user.owned_gear.includes(g.id);
   return (
-    <div className={`g-card rc-${g.legendary ? "legendary" : tierRarity(g.tier)}`} data-testid={`shop-item-${g.id}`}>
-      <span className="tier">T{g.tier}</span>
-      {eq ? <span className="badge">{tt("Equipped")}</span> : user.owned_gear.includes(g.id) ? <span className="badge !border-[#8fd0f0] !text-[#cff6ff]">{tt("Owned")}</span> : null}
-      <button type="button" className="art" onClick={() => act.setInfo(g)} data-testid={`rod-info-open-${g.id}`}><img src={`/art/gear/${g.id}.webp`} alt={g.name} loading="lazy" /></button>
-      <div className="min-w-0"><GearName g={g} user={user} /></div>
-      <div className="shop-card-stats">
-        {statKeys.map((k) => <Stat key={k} k={tt(k)}>×{g[k]}</Stat>)}
-        <Stat k={tt(PERK_HEAD[slot])}><span className="text-[#8fd0f0]" data-testid={`perk-${g.id}`}>{perkText(slot, g.tier, g.luck_bonus || 0)}</span></Stat>
-        <Stat k={tt("Repair")}>{repairPerPoint(g) ? `${repairPerPoint(g)}g/pt` : tt("free")}</Stat>
-      </div>
-      <div className="flex items-center justify-between gap-2 mt-auto"><span className="whitespace-nowrap"><GearPrice g={g} /></span><GearAction g={g} slot={slot} user={user} miles={act.ms[g.id] || []} buy={act.buy} setInfo={act.setInfo} /></div>
-    </div>
+    <ShopItem testid={`shop-item-${g.id}`} img={`/art/gear/${g.id}.webp`} rarity={g.legendary ? "legendary" : tierRarity(g.tier)} onArt={() => act.setInfo(g)}
+      name={enhName(g.name, user.enhance?.[g.id])} tag={`T${g.tier}`} badge={eq ? tt("Equipped") : owned ? tt("Owned") : null}
+      sub={<>{statKeys.map((k) => <span key={k}>{tt(k)} ×{g[k]}</span>)}<span className="text-[#8fd0f0]" data-testid={`perk-${g.id}`}>{perkText(slot, g.tier, g.luck_bonus || 0)}{slot === "rod" ? "" : ` ${tt(PERK_HEAD[slot]).toLowerCase()}`}</span></>}
+      price={<span className="whitespace-nowrap"><GearPrice g={g} /></span>}>
+      <GearAction g={g} slot={slot} user={user} miles={act.ms[g.id] || []} buy={act.buy} setInfo={act.setInfo} />
+    </ShopItem>
   );
 }
 
-function GearTable({ title, items, statKeys, slot }) {
-  const { user, setUser } = useGame();
+const useGearBuy = () => {
+  const { setUser } = useGame();
   const busy = useRef(false);
-  const [ms, setMs] = useState({});
-  const [info, setInfo] = useState(null);
-  useEffect(() => { if (slot === "rod") api.get("/shop/milestones").then((r) => setMs(r.data)).catch(() => {}); }, [slot, user.owned_gear.length]);
-  const buy = async (id) => {
+  return async (id) => {
     if (busy.current) return;
     busy.current = true;
     try { const r = await api.post("/shop/buy-gear", { gear_id: id }); setUser(r.data); toast.success(tt("Purchased and equipped")); } catch (e) { toast.error(errMsg(e)); }
     finally { busy.current = false; }
   };
+};
+// The next piece of tackle worth saving for in a slot: cheapest unowned item the angler can reach soon.
+const nextUp = (items, user, key) => [...items].sort((a, b) => a[key] - b[key]).find((g) => !user.owned_gear.includes(g.id) && !g.bound && g.price > 0 && (g.level || 1) <= user.level + 4);
+
+function GearTable({ items, statKeys, slot }) {
+  const { user } = useGame();
+  const [ms, setMs] = useState({});
+  const [info, setInfo] = useState(null);
+  useEffect(() => { if (slot === "rod") api.get("/shop/milestones").then((r) => setMs(r.data)).catch(() => {}); }, [slot, user.owned_gear.length]);
+  const buy = useGearBuy();
   const sorted = [...items].sort((a, b) => a[statKeys[0]] - b[statKeys[0]]);
   const act = { ms, buy, setInfo };
+  const pick = nextUp(items, user, statKeys[0]);
   return (
-    <Panel title={title} testId={`shop-${slot}`} bodyClass="!p-0">
-      <div className="g-grid p-3">{sorted.map((g) => <GearCard key={g.id} g={g} slot={slot} statKeys={statKeys} user={user} act={act} />)}</div>
+    <div data-testid={`shop-${slot}`}>
+      {pick && (
+        <ShopBanner testid="shop-feature" kicker={tt("Your next upgrade")} title={pick.name} bg={`/art/waters/${user.water}.jpg`} img={`/art/gear/${pick.id}.webp`}
+          sub={<>{statKeys.map((k) => `${tt(k)} ×${pick[k]}`).join(" · ")} · {perkText(slot, pick.tier, pick.luck_bonus || 0)}{slot === "rod" ? "" : ` ${tt(PERK_HEAD[slot]).toLowerCase()}`}</>}>
+          <span className="sf-price-lg"><GearPrice g={pick} /></span>
+          <GearAction g={pick} slot={slot} user={user} miles={ms[pick.id] || []} buy={buy} setInfo={setInfo} />
+        </ShopBanner>
+      )}
+      <div className="sf-grid">{sorted.map((g) => <GearCard key={g.id} g={g} slot={slot} statKeys={statKeys} user={user} act={act} />)}</div>
       {info && <RodInfoDialog g={info} miles={ms[info.id] || []} onClose={() => setInfo(null)} />}
-    </Panel>
+    </div>
+  );
+}
+
+function UpgradeSide() {
+  const { user, data } = useGame();
+  const buy = useGearBuy();
+  const picks = [["rod", data.rods.filter((g) => !g.event && !g.crate), "power"], ["reel", data.reels, "recovery"], ["line", data.lines, "tolerance"]]
+    .map(([slot, items, key]) => [slot, nextUp(items, user, key)]).filter(([, g]) => g);
+  return (
+    <>
+      <div className="sf-side-h">{tt("Next upgrades")}</div>
+      {picks.length === 0 && <div className="sf-item-sub p-2">{tt("You own the best tackle you can reach right now.")}</div>}
+      {picks.map(([slot, g]) => {
+        const locked = (g.level || 1) > user.level, poor = user.gold < g.price;
+        return (
+          <SideDeal key={slot} testid={`shop-side-${slot}`} img={`/art/gear/${g.id}.webp`} name={g.name} sub={<>{tt(slot)} · T{g.tier} · <Gold n={g.price} /></>}>
+            {locked ? <span className="text-[11px] text-[#f0a5a3]">{tt("Lv")} {g.level}</span> : <button className="btn btn-sm btn-gold" disabled={poor} onClick={() => buy(g.id)} data-testid={`shop-side-buy-${g.id}`}>{tt("Buy")}</button>}
+          </SideDeal>
+        );
+      })}
+      <p className="sf-item-sub mt-3 px-1">{tt("Match rod, reel and line of the same tier for +5% power and half the wear.")}</p>
+    </>
   );
 }
 
@@ -121,17 +138,8 @@ const BaitEach = ({ b, r, user }) => <>{<Gold n={r.each} />}{r.each !== b.price 
 const BaitQty = ({ b, qty, setQty }) => <input type="number" min={1} max={500} className="input !w-14 num" value={qty[b.id] ?? (b.pack ? 1 : 10)} onChange={(e) => setQty({ ...qty, [b.id]: e.target.value })} data-testid={`bait-qty-${b.id}`} />;
 const BaitBuy = ({ b, r, buyBait }) => r.locked ? <span className="text-[11px] text-[#f0a5a3]" data-testid={`bait-locked-${b.id}`}>{tt("Lv")} {b.level}</span>
   : <button className="btn btn-sm btn-gold whitespace-nowrap" disabled={r.cantAfford} onClick={() => buyBait(b)} data-testid={`buy-bait-${b.id}`}>{tt("Buy")} {fmt(r.gCost)}g{r.pCost ? <> +{r.pCost}<PearlIcon className="ml-0.5" /></> : null}</button>;
-const BaitName = ({ b, user, lookups, onClick }) => (
-  <button type="button" className="flex items-center gap-2 min-w-0 md:min-w-[190px] pr-2 text-left w-full group" onClick={onClick} data-testid={`bait-info-${b.id}`}>
-    <div className="min-w-0">
-      <div className="font-medium truncate flex items-center gap-1.5 group-hover:text-[var(--gold)]">{b.name}<Info size={11} className="text-[var(--muted)] shrink-0" /></div>
-      <div className="text-[11px] text-[var(--text-2)] num" data-testid={`bait-owned-${b.id}`}>{user.bait[b.id] || 0} {tt("owned")} · {b.waters ? b.waters.map((w) => lookups.waterByKey[w].name).join(", ") : tt("All waters")}</div>
-    </div>
-  </button>
-);
-
 function BaitTable() {
-  const { user, setUser, data, lookups } = useGame();
+  const { user, setUser, data } = useGame();
   const [qty, setQty] = useState({});
   const [info, setInfo] = useState(null);
   const value = useBaitValue([user.water, user.gear?.rod, user.bait_discount]);
@@ -145,25 +153,20 @@ function BaitTable() {
   };
   const baits = data.baits.filter((b) => b.price !== null).sort((a, b) => a.luck - b.luck);
   return (
-    <Panel icon="worm" title={tt("Bait")} right={<span className="text-[var(--muted)]">{tt("Click a bait to see what it earns at your water")}</span>} testId="shop-bait" bodyClass="!p-0">
-      <div className="g-grid p-3">
+    <div data-testid="shop-bait">
+      <div className="sf-grid">
         {baits.map((b) => { const r = baitRow(b, user, qty); return (
-          <div key={b.id} className={`g-card rc-${tierRarity(Math.ceil((b.luck || 0) / 3) + 1)}`} data-testid={`shop-bait-${b.id}`}>
-            <span className="badge">×{user.bait[b.id] || 0}</span>
-            <button type="button" className="art" onClick={() => setInfo(b)} data-testid={`bait-art-${b.id}`}><img src={`/art/gear/${b.id}.webp`} alt={b.name} loading="lazy" /></button>
-            <BaitName b={b} user={user} lookups={lookups} onClick={() => setInfo(b)} />
-            <div className="shop-card-stats">
-              <Stat k={tt("Luck")}><BaitLuck b={b} /></Stat><Stat k={tt("Bite")}>+{b.bite}%</Stat>
-              <span className="shop-stat"><span>{tt("Size")}</span><SizePips n={b.size || 0} testId={`bait-size-${b.id}`} /></span>
-              <Stat k={tt("Each")}><BaitEach b={b} r={r} user={user} /></Stat>
-            </div>
-            <div className="flex items-center justify-end gap-2 mt-auto"><BaitQty b={b} qty={qty} setQty={setQty} /><BaitBuy b={b} r={r} buyBait={buyBait} /></div>
-          </div>
+          <ShopItem key={b.id} testid={`shop-bait-${b.id}`} img={`/art/gear/${b.id}.webp`} rarity={tierRarity(Math.ceil((b.luck || 0) / 3) + 1)} onArt={() => setInfo(b)}
+            name={b.name} badge={`×${user.bait[b.id] || 0}`}
+            sub={<><span>{tt("Luck")} <BaitLuck b={b} /></span><span>{tt("Bite")} +{b.bite}%</span><button type="button" className="underline decoration-dotted" onClick={() => setInfo(b)} data-testid={`bait-info-${b.id}`}>{tt("details")}</button></>}
+            price={<span className="text-[12px] whitespace-nowrap"><BaitEach b={b} r={r} user={user} /></span>}>
+            <BaitQty b={b} qty={qty} setQty={setQty} /><BaitBuy b={b} r={r} buyBait={buyBait} />
+          </ShopItem>
         ); })}
       </div>
-      <p className="text-[11.5px] text-[var(--muted)] mt-2 px-3 pb-2">{tt("Live Bait can't be bought here, convert small fish from your keepnet, or buy from other anglers on the market. Crafted baits (out-luck their shop tier, no Pearls needed) are made at")} <Link to="/game/crafting" className="underline">{tt("Bait Crafting")}</Link>.</p>
+      <p className="text-[11.5px] text-[var(--muted)] mt-3">{tt("Live Bait can't be bought here, convert small fish from your keepnet, or buy from other anglers on the market. Crafted baits are made at")} <Link to="/game/crafting" className="underline">{tt("Bait Crafting")}</Link>.</p>
       {info && <BaitInfoDialog bait={info} value={value} onClose={() => setInfo(null)} />}
-    </Panel>
+    </div>
   );
 }
 
@@ -174,17 +177,16 @@ export default function Shop() {
   const setTab = (id) => setParams({ tab: id }, { replace: true });
   if (!data) return null;
   return (
-    <div className="space-y-3 fade-in" data-testid="shop-page">
-      <Panel icon="shop" title={tt("Harbour Tackle & Bait")} right={<span>{tt("Your purse:")} <Gold n={user.gold} /> · <Pearls n={user.pearls || 0} /></span>}>
-        <GameTabs tabs={TABS} value={tab} onChange={setTab} testid="shop-tab" />
-        <p className="text-[12.5px] text-[var(--text-2)] m-clamp" data-testid="shop-intro">{tt(INTRO[tab])}</p>
-      </Panel>
-      {tab === "rod" && <GearTable title={tt("Rods, power & control")} items={data.rods.filter((g) => !g.event && !g.crate)} statKeys={["power", "control"]} slot="rod" />}
-      {tab === "reel" && <GearTable title={tt("Reels, recovery")} items={data.reels} statKeys={["recovery"]} slot="reel" />}
-      {tab === "line" && <GearTable title={tt("Lines, tolerance")} items={data.lines} statKeys={["tolerance"]} slot="line" />}
-      {tab === "bait" && <BaitTable />}
-      {tab === "cages" && <CageShop />}
-      {tab === "enhance" && <EnhanceBench />}
+    <div className="fade-in" data-testid="shop-page">
+      <ShopFrame testid="shop" tabs={TABS.map(([id, label]) => [id, tt(label)])} value={tab} onChange={setTab} side={tab === "enhance" ? null : <UpgradeSide />}
+        wallet={{ gold: user.gold, pearls: user.pearls || 0 }} action={<Link to="/game/market" className="btn btn-sm" data-testid="shop-to-market">{tt("Player Market")}</Link>}>
+        <p className="text-[12.5px] text-[var(--text-2)] mb-3" data-testid="shop-intro">{tt(INTRO[tab])}</p>
+        {tab === "rod" && <GearTable items={data.rods.filter((g) => !g.event && !g.crate)} statKeys={["power", "control"]} slot="rod" />}
+        {tab === "reel" && <GearTable items={data.reels} statKeys={["recovery"]} slot="reel" />}
+        {tab === "line" && <GearTable items={data.lines} statKeys={["tolerance"]} slot="line" />}
+        {tab === "bait" && <BaitTable />}
+        {tab === "enhance" && <EnhanceBench />}
+      </ShopFrame>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { TILED } from "./maps";
 // Per-location layout: background art, walkable floor, animated water, signposts, fishing spots and weather.
 // The harbour is two screens wide: the original docks (shifted right by X0) plus a new west quarter.
 const X0 = 1264;
@@ -61,7 +62,7 @@ const WEATHER = {
   blackwater: "fireflies", frozen: "snow", sunken: "stars", ghostlight: "fireflies", temple: "leaves", cinder: "embers",
 };
 
-export const sceneFor = (key) => (key === "harbour" ? HARBOUR : { ...PIER, bg: `art/waters/${key}.jpg`, weather: WEATHER[key] || "petals" });
+export const sceneFor = (key) => (TILED[key] ? TILED[key] : key === "harbour" ? HARBOUR : { ...PIER, bg: `art/waters/${key}.jpg`, weather: WEATHER[key] || "petals" });
 
 export const inPoly = (x, y, p) => {
   let c = false;

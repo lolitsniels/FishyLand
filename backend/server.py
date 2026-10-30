@@ -4161,7 +4161,6 @@ import botwatch  # noqa: E402
 import platform_stats  # noqa: E402,F401
 import crates  # noqa: E402,F401
 import random_events  # noqa: E402
-import crab_cages  # noqa: E402,F401
 import moderation  # noqa: E402
 import testwater  # noqa: E402
 # sig_images (forum signatures) not used in Fishing Realm
