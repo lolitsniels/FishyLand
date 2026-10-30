@@ -180,7 +180,7 @@ html body .reel-btn.holding { border-image: url(/art/hud/btn_gold.webp) 80 140 f
 .wm-pin.here .wm-dot { border-color: #7ff3ff; box-shadow: 0 0 0 2px #08303f, 0 0 14px #7ff3ff; }
 
 .pcard-bars { padding-left: 16px; }
-.pcard-zap { position: absolute; left: 168px; top: 79px; filter: drop-shadow(0 0 4px rgba(255, 210, 63, .8)); z-index: 1; }
+.pcard-zap { position: absolute; left: -1px; top: -2px; filter: drop-shadow(0 0 4px rgba(255, 210, 63, .8)); z-index: 1; }
 .pcard-bar.energy { height: 11px; border: 1px solid rgba(255, 210, 63, .6); }
 .pcard-bar.energy i { background: linear-gradient(180deg, #ffe66b, #ffb31a 60%, #e88a00); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
 .pcard-bar.energy span { line-height: 9px; font-size: 8.5px; color: #2a1503; text-shadow: 0 1px 0 rgba(255, 255, 255, .5); }

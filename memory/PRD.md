@@ -59,7 +59,14 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   Gold/pearl images (/art/hud/gold.webp, pearl.webp) everywhere; tackle-box icon for Tackle Shop. Harbour-only pages blocked at waters (HARBOUR_ONLY in World.js);
   water bar = Travel Map, Fishdex, Tackle Box, Quests, My Angler. Toasts/popups themed. Map rules in /app/memory/MAP_DESIGN.md.
 
+- 2026-06 (iter 12): Crew island (CREW_ISLAND_MAP, mode "crew", presence loc crew:<id>), crew tabs contest/contract/hall/boss removed, "Sail to your crew island" button.
+  Founding a crew needs level 30 (CREW_MIN_LEVEL), joining any level. Travel map pins = round water thumbnails, no boat/glow. Leaping fish = species of the water, open water only.
+  Props never on bridges/piers (settle deck check; out-of-map counts as water). Map cache for fast re-entry. Image QA rules in MAP_DESIGN.md. Yellow energy bar + lightning icon.
+  Testing iteration_12: backend 5/5 (+1 skip), frontend all pass after 2 tester fixes.
+
 ## Backlog
+- P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
+- P1: Crew pond stocking (crew upgrade to add fish to the island pond)
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
 - P0: Living-map animations for the 12 waters (per-water props)
 - P1: Pearl Shop cosmetics (currently empty)

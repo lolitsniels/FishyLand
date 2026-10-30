@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 12, frontend and backend. Backend: wrote test_iter12_crews_island.py with 6 pytest cases; all 6 pass. They cover crew list and create, the level-10 gate, join, member list, crew_island presence isolation and leave. Frontend: Playwright at 1920x1080. All 7 requested features work after 2 small fixes. (1) Crews: a member (TestAngler2) sees the go-crew-island button on /game/crews and on crew detail. The crew-tab-contest, contract, hall and leviathan tabs are gone; Home, Members and Manage (leader only) remain. Non-members see the crew list, a Join button and create-crew-locked (level 6 < 10). Clicking go-crew-island sets data-mode=crew and the location chip reads 'TEST Reef Crew Island'. Spots: Crew Pond shows the 'no fish yet' toast; Crew Clubhouse opens /game/crews and stays in crew mode; Boat to Harbour sets mode=harbour. Visiting /game/shop on the island redirects with the harbour toast. (2) Travel Map: there is no .wm-boat, .wm-shimmer or .wm-clouds. All 13 .wm-dot pins are round (border-radius 50%) with images that load. Popover Travel to Willow and back to Millbrook works. (3) Chat: a sent message showed exactly once over 4 checks across 8s of polls. (4) /game/shop in water mode showed exactly 1 toast, then redirected. (5) Player card: the energy bar uses a yellow gradient and the gold and pearl images show with no checker pixels. The lightning icon was mispositioned; fixed. (6) Millbrook mapview: no lamps on the bridge ends or pier, and no props in the water. With temporary instrumentation (now removed) I saw 1 leaping fish in about 36s, at (1834,1503), over open river. (7) Harbour mapview: no lamps in the sea or on piers, the fountain plaza paths merge with no dark seams, and the SAIL wheel button is a full circle.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "World.js PlayerCard .pcard-zap", "issue": "FIXED by tester. The lightning icon used left:168px/top:79px while sitting inside the absolutely positioned .pcard-bars, so it rendered outside the card (bottom-right, below the wallet). It is now left:-1px/top:-2px in public/ui.css, next to the energy bar.", "selector": ".pcard-zap", "priority": "MEDIUM"},
+      {"component": "Crews.js crew detail", "issue": "FIXED by tester. The `allowed` tab list was built from the unfiltered TABS, so a user whose localStorage owo_crew_tab_<id> held 'hall', 'contest', 'contract' or 'leviathan' still saw the removed Hall, Contest or Boss panel. `allowed` now excludes the removed tabs; I confirmed the stale 'hall' value falls back to Home.", "selector": "[data-testid=crew-detail-page]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Crew HQ list (/game/crews)", "issues": ["The intro text still advertises the weekly crew order, crew bank and crew hall perks, which this round removed. Update the copy."]},
+      {"screen": "Crew detail header", "issues": ["The crew name uses a Times-like serif (font-serif) that does not match the Cinzel/ui-font used elsewhere."]},
+      {"screen": "Millbrook leaping fish", "issues": ["Fish leap rarely: only 1 in about 36s. The leap box [1300,900,900,800] is mostly grass and bridge, so many attempts fail and fall back to jumpAt=1. Consider tightening the box to the river polygon so leaps happen more often."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter12_crews_island.py", "/app/test_reports/pytest/iter12.xml"],
+  "action_items": [
+    "Update the Crew HQ intro copy to remove crew order, crew bank and hall perks.",
+    "Optional: tighten MILLBROOK_MAP.leap to the river so ambient leaps are more frequent.",
+    "Optional: ChatBox send() sets last.current = r.data.at. Messages from other players posted between the previous poll and your send (with an earlier timestamp) can then be skipped by the next poll. Prefer keeping last.current as the max poll timestamp and dedupe by id only."
+  ],
+  "critical_code_review_comments": [
+    "ChatBox.js:42 can skip other players' messages because last.current is moved forward by the sender's own POST response (race).",
+    "Crews.js still imports CrewOrder, CrewHall, CrewBoss and CrewChallenges even though their tabs are removed. That is dead code and extra bundle size.",
+    "CrewTabs and Crews.js each hard-code the removed-tab list; it should be one shared constant."
+  ],
+  "updated_files": ["/app/frontend/public/ui.css", "/app/frontend/src/tfl/pages/game/Crews.js", "/app/backend/tests/test_iter12_crews_island.py"],
+  "success_rate": {"backend": "100%", "frontend": "100% (after 2 tester fixes)"},
+  "seed_data_creation": "Created the crew 'TEST Reef Crew' [TRF] (id 6ae4eed7d9cb3a0e59bc4c01) with Niels as leader (5000 gold charged) and TestAngler2 as member, so the crew-island flow can be retested. To remove it: POST /api/crews/<id>/leave as TestAngler2, then as Niels (the crew is deleted when it is empty). The pytest file creates and removes its own 'TEST Pytest Crew'. TestAngler travelled Willow and then back to Millbrook (its water is millbrook again).",
+  "test_credentials": "TestAngler / Angler#2026, TestAngler2 / Angler#2026, Niels / Niels112233! (from /app/memory/test_credentials.md)",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest with -n 0. pytest.ini uses xdist, which breaks the module-scoped crew fixture and the in-memory presence check. Crew island: log in as TestAngler2, set sessionStorage fr_mode=harbour, open /game/crews and click go-crew-island. Spots are at x=1200, y=730 (clubhouse), 1230 (pond) and 1720 (boat). Set window.__fx.me={...,x,y}, wait 1.2s, then click spot-prompt. Leaping fish cannot be observed without temporarily pushing to fx in Scene.js."
+}
