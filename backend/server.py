@@ -3988,7 +3988,6 @@ async def repair_duplicate_gear():
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("username_lc", unique=True)
-    await db.crab_cages.create_index([("user_id", 1), ("water", 1)], unique=True)
     await db.offerwall_tx.create_index([("tx", 1), ("status", 1)], unique=True)
     # one-off migration: duplicate tackle used to be a bare count, now each copy keeps its own enhance + wear
     async for u in db.users.find({"spare_gear": {"$exists": True}}, {"spare_gear": 1}):

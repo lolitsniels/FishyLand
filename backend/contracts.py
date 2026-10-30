@@ -12,7 +12,6 @@ from contracts_data import PATRONS, RANKS, RANK_AT, RANK_REWARDS, COOK_FRAME, ra
 from game_data import SAME_SPECIES
 from server import (localize, send_system_message, premium_active, api, db, now, iso, oid, get_current_user, add_feed, public_user, check_achievements, quest_event, quest_period, level_from_xp, xp_for_level, settle_level_up,
                     fish_value, FISH_BY_WATER, WATER_BY_KEY, RARITY_ORDER)
-from cages_data import CAGE_FISH_BY_WATER
 
 BOARD_SIZE = 6
 BASE_SLOTS = 2

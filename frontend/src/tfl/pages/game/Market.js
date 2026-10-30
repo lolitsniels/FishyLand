@@ -102,7 +102,7 @@ export default function Market() {
   );
   return (
     <div className="fade-in" data-testid="market-page">
-      <ShopFrame testid="market-tabs" tabs={[["browse", tt("Buy")], ["sell", tt("Sell")], ["mine", tt("My listings")]]} value={tab} onChange={(t) => { if (t !== tab) setRows([]); setTab(t); }} side={side}
+      <ShopFrame testid="market-tabs" tabs={[["browse", tt("Buy")], ["sell", tt("Sell")], ["mine", tt("My listings")]]} value={tab} onChange={(t) => { if (t !== tab) setRows([]); setTab(t); }} side={tab === "sell" ? null : side}
         wallet={{ gold: user.gold }} action={<span className="sf-item-sub">{Math.round((user.market_fee ?? 0.05) * 100)}{tt("% fee to seller")}</span>}>
         {tab === "sell" ? <MarketSell /> : listView}
       </ShopFrame>

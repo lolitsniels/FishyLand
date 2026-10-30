@@ -13,7 +13,6 @@ from pydantic import BaseModel, Field
 from contracts import keepnet, contract_gold_mult
 from contracts_data import PATRONS
 from game_data import SAME_SPECIES
-from cages_data import CAGE_FISH_BY_WATER
 from server import (api, db, now, iso, oid, get_current_user, add_feed, public_user, check_achievements, level_from_xp, xp_for_level, fish_value, settle_level_up,
                     quest_period, send_system_message, FISH_BY_WATER, WATER_BY_KEY, WATERS, RARITY_ORDER)
 

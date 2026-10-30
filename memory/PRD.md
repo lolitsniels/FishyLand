@@ -40,7 +40,14 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   flickering lanterns, chimney smoke, 9 gliding seagulls. Tap-to-walk overshoot fixed (Pearl Shop auto-opens). Tension bar green centre / orange-red edges verified.
   Testing: iteration_7 — 8/10 then remaining issues fixed and self-verified.
 
+- 2026-06 (iter 8): Crab cages removed (shop tab, waters slot, cage species out of pools/contracts/crew orders; old ids kept in FISH_BY_ID).
+  New tiled map engine (game/tilemap.js + game/maps.js): painted ground textures (art/map/t_*.webp), cut-out objects (art/map/*.webp),
+  16px walk grid with object footprints, A* tap-to-walk, follow camera, diagonal sliding. Harbour 3600x2400 + Millbrook 3200x2400 (river, bridge, pond pier,
+  4 spots with cast targets). Other 11 waters still old single-image scenes (awaiting user approval). ShopFrame (tabs/banner/grid/side/wallet)
+  on Tackle Shop, Pearl Shop (coming-soon cosmetics), Market. ?mapview=1 shows whole map. Testing iteration 8 (forced summary): all flows pass; fixes applied after.
+
 ## Backlog
+- P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
 - P0: Living-map animations for the 12 waters (per-water props)
 - P1: Pearl Shop cosmetics (currently empty)
 - P2: Harbour hint pill overlaps Tournaments label on phones

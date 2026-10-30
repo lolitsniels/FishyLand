@@ -93,7 +93,7 @@ function makeFigure() {
         const h = HAND[parseLook(look).g];
         st.hand = [(h[0] - 0.5) * t.width * a.scale.x, -(1 - h[1]) * ANGLER_H];
         placeRod();
-      });
+      }).catch(() => {});
     },
     setRod(id) {
       if (id === st.rodId) return;
@@ -104,7 +104,7 @@ function makeFigure() {
         if (rod.destroyed || st.rodId !== id) return;
         rod.texture = t; rod.anchor.set(m[0] / t.width, m[1] / t.height);
         rod.scale.set(ROD_LEN / Math.hypot(m[2] - m[0], m[3] - m[1]));
-      });
+      }).catch(() => {});
     },
     setAngle(d) { placeRod(); rod.rotation = d - st.nat; },
     tip(d) { return { x: st.hand[0] + Math.cos(d) * ROD_LEN, y: st.hand[1] + a.y + Math.sin(d) * ROD_LEN }; },
@@ -343,7 +343,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
       const ring = new Graphics().roundRect(-28, -68, 56, 56, 12).fill({ color: 0x0a1420, alpha: 0.72 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.28 });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
-      Assets.load(`art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } });
+      Assets.load(`art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
       const lb = new Text({ text: sp.label, style: { fontFamily: "Cinzel", fontWeight: "700", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
       lb.anchor.set(0.5, 0); lb.y = -10;
       c.addChild(glow, ring, ic, lb);
@@ -525,9 +525,16 @@ function buildScene(app, tex, key, bgTex, mt) {
     fx.moving = moving;
     if (moving) {
       const n = Math.hypot(vx, vy), sp = Math.min(230 * dt, fx.dest ? Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) / 0.8 + 0.5 : 1e9);
-      const nx = me.x + (vx / n) * sp, ny = me.y + (vy / n) * sp * 0.8;
+      const ky = cfg.tiled ? 1 : 0.8, nx = me.x + (vx / n) * sp, ny = me.y + (vy / n) * sp * ky;
       const ox = me.x, oy = me.y;
-      if (canWalk(nx, ny)) { me.x = nx; me.y = ny; } else if (canWalk(nx, me.y)) me.x = nx; else if (canWalk(me.x, ny)) me.y = ny;
+      if (canWalk(nx, ny)) { me.x = nx; me.y = ny; } else if (canWalk(nx, me.y) && Math.abs(nx - me.x) > 0.3) me.x = nx; else if (canWalk(me.x, ny) && Math.abs(ny - me.y) > 0.3) me.y = ny;
+      else if (cfg.tiled) {
+        // slide along diagonal edges (bridges, coasts): try the heading turned 45 degrees either way
+        for (const t of [0.785, -0.785]) {
+          const c = Math.cos(t), si = Math.sin(t), dx = ((vx * c - vy * si) / n) * sp, dy = ((vx * si + vy * c) / n) * sp;
+          if (canWalk(me.x + dx, me.y + dy)) { me.x += dx; me.y += dy; break; }
+        }
+      }
       if (fx.dest && Math.hypot(me.x - ox, me.y - oy) < 0.5) { fx.path = []; const id = Math.hypot(fx.dest.x - me.x, fx.dest.y - me.y) < 40 ? fx.autoOpen : null; fx.dest = null; fx.autoOpen = null; if (id) fx.openSpot?.(id); }
       if (Math.abs(vx) > 0.2) fx.flip = vx < 0;
     }
@@ -589,7 +596,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       if (fx.phase === "lost") splash(fx.target.x, fx.target.y, 12, 0.7);
       if (fx.phase === "fight" && fx.speciesImg !== fishTexUrl) {
         fishTexUrl = fx.speciesImg;
-        Assets.load(fishTexUrl).then((t) => { if (!fish.destroyed) fish.texture = t; });
+        Assets.load(fishTexUrl).then((t) => { if (!fish.destroyed) fish.texture = t; }).catch(() => {});
       }
       lastPhase = fx.phase;
     }

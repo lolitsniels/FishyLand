@@ -110,7 +110,8 @@ export function buildMap(map, img) {
   for (const o of map.objects) {
     const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
     if (!fw) continue;
-    g.beginPath(); g.ellipse(o.x, o.y - (w * fh) / 2, (w * fw) / 2, (w * fh) / 2, 0, 0, 7); g.fill();
+    const rx = Math.max(16, (w * fw) / 2), ry = Math.max(14, (w * fh) / 2);
+    g.beginPath(); g.ellipse(o.x, o.y - ry, rx, ry, 0, 0, 7); g.fill();
   }
   for (const b of map.blocks || []) { pathPoly(g, b); g.fill(); }
   g.fillRect(0, 0, W, 40); g.fillRect(0, H - 40, W, 40); g.fillRect(0, 0, 40, H); g.fillRect(W - 40, 0, 40, H);
