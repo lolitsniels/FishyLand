@@ -1,0 +1,27 @@
+const en = {
+  tagline: "Cast into a sky-kingdom of legends",
+  login: "Login",
+  register: "Register",
+  guest: "Play as Guest",
+  enter: "Enter the Realm",
+  create: "Create Hero",
+  email: "Email",
+  password: "Password",
+  heroName: "Hero Name",
+  server: "S1 · Crystal Dawn",
+  fish: "FISH",
+  reel: "REEL",
+  waiting: "WAIT",
+  keepGreen: "Keep the needle in the green zone!",
+  hold: "HOLD Space / FISH to pull · RELEASE to ease",
+  bite: "BITE!",
+  snapped: "The line snapped!",
+  escaped: "The fish escaped!",
+  timeout: "The fish wriggled free in time…",
+  noStamina: "Out of stamina",
+  rotate: "Rotate your device to landscape",
+  rotateSub: "Fishing Realm is designed for landscape play.",
+  comingSoon: "Arriving soon",
+};
+
+export const t = (k) => en[k] ?? k;

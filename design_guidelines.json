@@ -1,0 +1,111 @@
+{
+  "project_name": "Fishing Realm",
+  "app_type": "game",
+  "archetype": "High Fantasy Browser MMO / League of Angels Style",
+  "theme": "Dark High-Fantasy (Dark-brown/black panels, metallic gold frames, glowing turquoise water, violet/magenta magic, excessive ornate gold embellishments)",
+  "instructions_to_main_agent": [
+    "This application is a 2.5D Browser Fishing MMORPG inspired by classic Asian web MMOs like League of Angels and Heaven's Fury.",
+    "The overall visual style MUST be lavish, over-the-top high fantasy: dark brown/black semi-translucent panels with ornate metallic gold borders, round gold-ringed buttons, huge gold gradient Battle Rating (BR) counters, red notification dots with white '!' badges, and vibrant particle glows.",
+    "The core viewport consists of a fixed 3/4 isometric perspective world canvas (PixiJS or HTML5 Canvas fallback) with a full React DOM HUD overlay on top.",
+    "Include a full Login/Register/Guest landing screen with character class selection (e.g., Celestial Angler, Leviathan Slayer, Arcane Fisher) before entering the game world.",
+    "In-game HUD Layout: Top-left portrait, Level, VIP badge, BR (Battle Rating) display, Stamina & Gold/Diamond currencies; Top-right event icon grid (2 rows) with red notification dots, Minimap, Channel switcher; Right Fishing Tracker & Leaderboard preview; Left rail Quests/Daily/Pass/Ranks; Bottom Chat Box with tabs (World/Guild/System), quick-slot consumables, and a large central gold FISH button with action sub-buttons.",
+    "Tension Fishing Minigame: Active interactive minigame bar featuring color zones (red | orange | yellow | green | yellow | orange | red), moving needle, line tension indicator, fish resistance animations, and 'Keep needle in the green zone!' callout.",
+    "Catch Reward Modal: Flashy reward popup with rarity frame styling (Common: Gray/Silver, Uncommon: Green, Rare: Blue, Epic: Purple, Legendary: Gold, Mythic: Iridescent Red/Magenta with particle aura).",
+    "Modals needed: Inventory & Bulk Sell, Fishdex (Collection album with stats & lore), Gear Shop & Rod/Lure Refine/Enhance system, VIP Privileges, Leaderboards, Quest Log.",
+    "Landscape-first design with a responsive 'Please rotate your device to landscape mode' overlay when opened in portrait on mobile.",
+    "Ensure all interactive elements and data fields include explicit `data-testid` attributes."
+  ],
+  "typography": {
+    "heading_font": "Cinzel, 'Cinzel Decorative', 'Trajan Pro', 'Cinzel Decorative', serif",
+    "body_font": "'Marcellus', 'Cinzel', 'Georgia', serif",
+    "numeric_display_font": "'Bebas Neue', 'Cinzel Decorative', sans-serif",
+    "text_styles": {
+      "gold_title": "text-yellow-400 font-serif tracking-wider uppercase font-bold text-shadow-gold",
+      "br_display": "font-black text-3xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-yellow-400 to-amber-600 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
+      "vip_badge": "bg-gradient-to-r from-red-700 via-amber-500 to-yellow-300 text-white font-black text-xs px-2 py-0.5 rounded border border-yellow-200 shadow-md",
+      "notification_dot": "absolute -top-1 -right-1 w-4 h-4 bg-red-600 border border-yellow-300 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-lg animate-pulse"
+    }
+  },
+  "colors": {
+    "palette": {
+      "panel_bg": "rgba(20, 14, 10, 0.88)",
+      "panel_bg_solid": "#16100c",
+      "gold_border_light": "#fef08a",
+      "gold_border_main": "#eab308",
+      "gold_border_dark": "#854d0e",
+      "water_turquoise": "#06b6d4",
+      "water_deep": "#083344",
+      "magic_violet": "#a855f7",
+      "magic_magenta": "#d946ef",
+      "text_main": "#fef3c7",
+      "text_muted": "#d1d5db",
+      "rarity_common": "#9ca3af",
+      "rarity_uncommon": "#22c55e",
+      "rarity_rare": "#3b82f6",
+      "rarity_epic": "#a855f7",
+      "rarity_legendary": "#eab308",
+      "rarity_mythic": "#f43f5e"
+    },
+    "gradients": {
+      "gold_frame": "linear-gradient(135deg, #fef08a 0%, #eab308 50%, #713f12 100%)",
+      "dark_panel": "linear-gradient(180deg, rgba(28, 20, 16, 0.95) 0%, rgba(12, 8, 6, 0.95) 100%)",
+      "hero_button": "linear-gradient(180deg, #fde047 0%, #ca8a04 60%, #854d0e 100%)",
+      "violet_glow": "radial-gradient(circle, rgba(217,70,239,0.3) 0%, rgba(0,0,0,0) 70%)"
+    }
+  },
+  "visual_enhancers": {
+    "ornate_borders": "border-2 border-yellow-500/80 shadow-[0_0_15px_rgba(234,179,8,0.25)] ring-1 ring-yellow-300/30",
+    "gold_rings": "rounded-full border-2 border-yellow-400 bg-gradient-to-b from-amber-700 to-amber-950 p-2 shadow-[0_0_10px_rgba(234,179,8,0.4)] hover:scale-105 transition-transform",
+    "glowing_text": "drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]",
+    "backdrop_blur": "backdrop-blur-md"
+  },
+  "layout_and_structure": {
+    "viewports": {
+      "landing_page": "Full-screen epic fantasy background artwork, floating particle effects, title logo, server select dropdown, account login / register tab switcher, Quick Guest Play CTA.",
+      "game_canvas": "Full viewport 2.5D isometric water environment with floating fishing spots, animated ripple particles, fish shadows under water, player avatar with glowing wings and fishing rod.",
+      "hud_overlay": "Absolute full-screen overlay (pointer-events-none on transparent zones, pointer-events-auto on interactive panels) with fixed position anchors for Top-Left Player Bar, Top-Right Grid, Left Quests, Right Tracker, Bottom Controls."
+    },
+    "hud_zones": {
+      "top_left": "Character Portrait with level ring, Name, VIP status tag, BR gauge, HP/Stamina bars, Gold and Diamond counters with '+' buy buttons.",
+      "top_right": "2 rows of 6 circular event icons (Daily Check-in, 7-Day Carnival, First Top-up, World Boss Fish, Wheel of Fortune, Mystery Shop, etc.), Minimap radar with fish density indicators, Channel Switcher (Ch. 1 - Hot).",
+      "left_rail": "Collapsible Quest & Event Tracker panel (Main Story, Daily Trials, Guild Orders) with auto-pathing/auto-fish buttons.",
+      "right_rail": "Active Spot Fish Species list, Current Catch Streak, Regional Leaderboard snippet.",
+      "bottom_center": "Huge circular Gold 'FISH / CAST' button with tension indicator ring, flanked by Lure Selector, Rod Skill 1, Rod Skill 2, and Auto-Fish Toggle.",
+      "bottom_left": "Compact Chat Box with tabs [World, Guild, System, Whisper] and quick emoji reactions."
+    }
+  },
+  "key_functionalities": [
+    "Authentication: Login, Register, and One-click Guest Play with character creation (Name, Avatar, Class).",
+    "2.5D World Viewport: Rendered sea/lake with water shader effect, player character with animated wings/aura, casting animation, fish shadows.",
+    "Tension Minigame: Real-time needle balance minigame. Tap/hold button to pull rod, raising tension needle into green safe band while avoiding red snapped-line territory.",
+    "Catch Reward Popup: Dramatic reveal with rays of light, rarity sound effect triggers, fish weight (kg), rarity tier tag, exp gained, and sell/keep options.",
+    "Inventory System: Grid layout with rarity color borders, item tooltips, filter tabs (Fish, Lures, Rods, Baits, Materials), and 'Batch Sell Fish' button.",
+    "Fishdex: Encyclopedia listing all collectible aquatic beasts across zones with progress percentage, lore, and completion stat bonuses.",
+    "Gear Shop & Refining: Upgrade Fishing Rod level, socket Lures, upgrade Wings for massive BR boosts.",
+    "Battle Rating (BR): Consolidated power score recalculated dynamically when equipping higher tier gear or catching Mythic fish."
+  ],
+  "image_urls": {
+    "landing_hero_bg": "https://images.unsplash.com/photo-1534447677768-be436bb09401?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "water_landscape_bg": "https://images.unsplash.com/photo-1584637147852-a68228569da7?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "player_avatar": "https://images.unsplash.com/photo-1740510293823-17c2717ec151?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "character_cosplay": "https://images.unsplash.com/photo-1577210944398-ad6d0ac22a5b?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "mythic_fish": "https://images.unsplash.com/photo-1550016681-60a1d9d23bf7?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "rare_lionfish": "https://images.unsplash.com/photo-1782811559103-bdc080354259?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "exotic_fish": "https://images.unsplash.com/photo-1550016728-6e898923de4c?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "testing_and_accessibility": {
+    "data_testid_convention": "All interactive elements must feature lower-kebab-case data-testid attributes (e.g., data-testid='cast-fish-button', data-testid='inventory-modal-toggle', data-testid='br-display-value', data-testid='tension-bar-needle').",
+    "contrast_standards": "Text over panels must maintain high contrast (light amber or white text on dark brown backgrounds with text shadows). Never use transparent backgrounds under text labels.",
+    "orientation_check": "Include landscape reminder prompt when screen width < screen height on mobile devices."
+  },
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Do NOT use generic modern flat UI designs — this app MUST feel like an over-the-top high fantasy web MMORPG.",
+    "Use lush dark brown panels with gold gradient borders (`border-amber-500/80 bg-stone-950/90 shadow-2xl shadow-yellow-900/40`).",
+    "Incorporate red notification dots with '!' on event buttons to capture the classic web game aesthetic.",
+    "Battle Rating (BR) must be prominently displayed with gold typography and glow effects.",
+    "Ensure all modal dialogs have explicit gold-framed headers with close ('X') buttons.",
+    "Add interactive audio-visual feedback (vibration/flashes on minigame, particle effects on legendary catch).",
+    "All code is in React JS (.js files).",
+    "Always include comprehensive data-testid attributes for testing."
+  ]
+}
