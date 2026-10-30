@@ -1,4 +1,4 @@
-import { Coins, Gem, Diamond, Zap, Shield, Swords } from "lucide-react";
+import { Coins, Zap, Shield, Swords } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGame } from "../../store";
 import { fmt } from "../../lib/api";
@@ -35,7 +35,6 @@ export default function PlayerPanel() {
       <div className="flex flex-col gap-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="font-cinzel font-bold text-sm text-amber-50 outline-text truncate max-w-[130px]" data-testid="player-name">{p.username}</span>
-          {!PORTAL && <span className="text-[10px] font-black px-1.5 py-[1px] rounded border border-yellow-200 bg-gradient-to-r from-red-700 via-amber-500 to-yellow-300 text-white outline-text" data-testid="vip-badge">VIP{p.vip_level}</span>}
         </div>
         <div className="flex items-baseline gap-1.5 -mt-1">
           <span className="font-cinzel text-[11px] font-black text-amber-300 outline-text">BR</span>
@@ -43,8 +42,6 @@ export default function PlayerPanel() {
         </div>
         <div className="flex flex-wrap gap-1">
           <Currency icon={Coins} value={p.gold} color="#ffd34d" testid="gold-value" label="Gold" />
-          <Currency icon={Gem} value={p.diamonds} color="#ff6bd6" testid="diamond-value" label="Diamonds" />
-          <Currency icon={Diamond} value={p.bound_diamonds} color="#7ff3ff" testid="bound-diamond-value" label="Bound Diamonds" />
         </div>
         <div className="flex items-center gap-1 w-[230px]">
           <Zap size={12} color="#7ff3ff" />

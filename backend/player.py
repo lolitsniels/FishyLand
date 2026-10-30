@@ -10,8 +10,8 @@ def new_player(username, email, password_hash, is_guest):
     now = time.time()
     return {
         "username": username, "username_lower": username.lower(), "email": email, "password_hash": password_hash,
-        "is_guest": is_guest, "role": "player", "level": 1, "xp": 0, "gold": 1000, "diamonds": 0,
-        "bound_diamonds": 100, "vip_points": 0, "vip_level": 0, "stamina": BASE_STAMINA, "stamina_at": now,
+        "is_guest": is_guest, "role": "player", "level": 1, "xp": 0, "gold": 1000,
+        "stamina": BASE_STAMINA, "stamina_at": now,
         "gear": {s: 1 for s in GEAR_SLOTS},
         "owned_gear": {s: {"1": {"enh": 0, "dur": gear_def(s, 1)["dur"]}} for s in GEAR_SLOTS},
         "items": {"glow_shrimp": 10, "stamina_potion": 2, "enhance_stone": 5},
@@ -77,8 +77,7 @@ async def player_state(u):
     return {
         "id": str(u["_id"]), "username": u["username"], "email": u.get("email"), "is_guest": u.get("is_guest", False),
         "role": u.get("role", "player"), "level": u["level"], "xp": u["xp"], "xp_need": xp_needed(u["level"]),
-        "gold": u["gold"], "diamonds": u["diamonds"], "bound_diamonds": u["bound_diamonds"],
-        "vip_level": u.get("vip_level", 0), "stamina": st, "stamina_max": mx, "stamina_next_sec": next_sec,
+        "gold": u["gold"], "stamina": st, "stamina_max": mx, "stamina_next_sec": next_sec,
         "br": br, "br_parts": parts, "gear": {s: gear_info(u, s) for s in GEAR_SLOTS},
         "owned_gear": u["owned_gear"], "items": u.get("items", {}), "equipped": u.get("equipped", {}),
         "fishdex_count": fd, "stats": u.get("stats", {}),

@@ -56,7 +56,7 @@ function FishButton({ cast }) {
 
 export const EXTRA_MENUS = [
   { id: "skills", img: "skills", label: "Skills", desc: "4 active fishing skills and passives bought with skill points.", phase: 5 },
-  { id: "auto", img: "auto", label: "Auto", title: "Auto Fishing", desc: "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", phase: 6 },
+  { id: "auto", img: "auto", label: "Auto", title: "Auto Fishing", desc: "Official auto-fishing (70% success, 60% rewards), unlocked for everyone at Lv 20.", phase: 6 },
   { id: "craft", img: "craft", label: "Craft", title: "Crafting", desc: "Craft gear and baits from fish and materials.", phase: 5 },
   { id: "market", img: "market", label: "Market", desc: "Player trading with 5% tax and price history.", phase: 7 },
   { id: "crew", img: "crew", label: "Crew", desc: "Friends, whispers and gifting.", phase: 4 },
@@ -78,7 +78,7 @@ export default function ActionBar({ cast, mobile }) {
         <Ring img="rod" label="Rod" size={46} dot={gearAlert} testid="menu-gear" onClick={() => open({ type: "gear" })} />
         <Ring img="bait" label="Bait" size={46} testid="menu-shop" onClick={() => open({ type: "shop" })} />
         <FishButton cast={cast} />
-        {!PORTAL && !mobile && <Ring img="auto" label="Auto" size={46} dim testid="menu-auto" onClick={soon("Auto Fishing", "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", 6)} />}
+        {!PORTAL && !mobile && <Ring img="auto" label="Auto" size={46} dim testid="menu-auto" onClick={soon("Auto Fishing", "Official auto-fishing (70% success, 60% rewards), unlocked for everyone at Lv 20.", 6)} />}
         <Ring img="fishdex" label="Fishdex" size={46} testid="menu-fishdex" onClick={() => open({ type: "fishdex" })} />
         {!PORTAL && !mobile && <>
         <Ring img="craft" label="Craft" size={46} dim testid="menu-craft" onClick={soon("Crafting", "Craft gear and baits from fish and materials.", 5)} />

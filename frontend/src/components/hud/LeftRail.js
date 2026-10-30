@@ -5,7 +5,7 @@ export const RAIL = [
   { id: "quests", label: "Quests", img: "quests", phase: 3, desc: "Main story chapters with the Angel of the Tides." },
   { id: "daily", label: "Daily", img: "daily", phase: 3, desc: "5 daily and 5 weekly quests with chest rewards." },
   { id: "events", label: "Events", img: "skills", phase: 7, desc: "Deep Sea Hunt, Big Catch weeks and tournaments." },
-  { id: "pass", label: "Pass", img: "pass", phase: 6, desc: "Fishing Pass season rewards." },
+  { id: "pass", label: "Angler Pass", img: "pass", phase: 6, desc: "Season pass: free track for everyone, premium track with cosmetic-only rewards." },
   { id: "ranks", label: "Ranks", img: "rankings", phase: 7, desc: "BR, Level, Biggest Fish and Guild rankings." },
 ];
 

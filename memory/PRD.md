@@ -46,3 +46,8 @@ Full build brief "FISHING REALM — Complete Build Brief" (2.5D high-fantasy bro
 - Square phone layout (aspect 0.8–1.25, e.g. Unihertz Titan 2): own HUD scale, collapsed events/chat, tighter action bar; rotate overlay only for clearly portrait screens
 - Mobile fix: canvas refits via ResizeObserver/visualViewport, HUD sized in px from visualViewport (not vw/vh), pinch-zoom disabled
 - Phone mode (min side <560px): bigger HUD scale, scene zoom on angler+water, compact action bar with More menu (all extra menus + settings)
+
+## 2026-06 Monetisation decision (owner): NO pay-to-win
+- Removed VIP levels, diamonds/bound diamonds, recharge packs, Treasure Pavilion gacha, Lucky Wheel, Mall, Angel Permit, Limited Offers, Investment, Spirit discount (UI, backend fields, DB fields unset)
+- Only monetisation: Angler Pass (50 tiers; free track for all, premium track = cosmetics only, never power). Auto-fishing free for all at Lv 20
+- Backlog phase 6 is now: Angler Pass only (payments provider still TBD; portal builds would need the portal's own purchase system)

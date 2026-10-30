@@ -15,8 +15,8 @@ function newSave() {
   const t = now();
   return {
     user: {
-      username: `Angler${Math.floor(1000 + Math.random() * 90000)}`, level: 1, xp: 0, gold: 1000, diamonds: 0, bound_diamonds: 100,
-      vip_level: 0, stamina: D.base_stamina, stamina_at: t, gear: { rod: 1, reel: 1, line: 1 },
+      username: `Angler${Math.floor(1000 + Math.random() * 90000)}`, level: 1, xp: 0, gold: 1000,
+      stamina: D.base_stamina, stamina_at: t, gear: { rod: 1, reel: 1, line: 1 },
       owned_gear: Object.fromEntries(SLOTS.map((s) => [s, { 1: { enh: 0, dur: gdef(s, 1).dur } }])),
       items: { glow_shrimp: 10, stamina_potion: 2, enhance_stone: 5 },
       equipped: { wings: "seraph_wings", pet: "tide_fox", title: "Novice Angler" },
@@ -49,7 +49,7 @@ function player() {
   const parts = { level: u.level * D.br.level, gear: SLOTS.reduce((a, s) => a + gearInfo(u, s).br_value, 0), wings: D.br.wings, pet: D.br.pet, fishdex: fd * D.br.fishdex };
   return {
     id: "local", username: u.username, email: null, is_guest: true, role: "player", level: u.level, xp: u.xp, xp_need: xpNeed(u.level),
-    gold: u.gold, diamonds: u.diamonds, bound_diamonds: u.bound_diamonds, vip_level: 0, stamina: st, stamina_max: mx,
+    gold: u.gold, stamina: st, stamina_max: mx,
     stamina_next_sec: st >= mx ? 0 : Math.floor(D.regen_sec - ((now() - u.stamina_at) % D.regen_sec)),
     br: Object.values(parts).reduce((a, b) => a + b, 0), br_parts: parts, gear: Object.fromEntries(SLOTS.map((s) => [s, gearInfo(u, s)])),
     owned_gear: u.owned_gear, items: u.items, equipped: u.equipped, fishdex_count: fd, stats: u.stats,

@@ -137,7 +137,7 @@ export default function Game() {
   }, []);
 
   useEffect(() => {
-    if (player) { fx.username = PORTAL ? player.username : `${player.username}  ·  VIP${player.vip_level}`; fx.title = player.equipped?.title || ""; }
+    if (player) { fx.username = player.username; fx.title = player.equipped?.title || ""; }
   }, [player]);
 
   useEffect(() => {
