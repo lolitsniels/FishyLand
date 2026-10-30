@@ -213,6 +213,44 @@ body {
 .scroll-gold::-webkit-scrollbar-thumb { background: #8a6417; border-radius: 6px; }
 .scroll-gold::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.4); }
 
-@media (orientation: portrait) and (max-width: 900px) {
+@media (max-aspect-ratio: 4/5) and (max-width: 900px) {
   .rotate-overlay { display: flex !important; }
 }
+
+/* Painted icon rings */
+.fr-ring.has-img { overflow: visible; }
+.ring-img {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%);
+  object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.75));
+  transition: transform 0.18s ease, filter 0.2s ease;
+}
+.group:hover .ring-img { transform: translate(-50%, -62%) scale(1.12) rotate(-4deg); filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 8px rgba(255, 215, 100, 0.6)); }
+
+/* Ornate modal frame */
+.fr-modal {
+  border-width: 3px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 196, 80, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(44, 28, 15, 0.97) 0%, rgba(16, 10, 6, 0.98) 100%);
+}
+.modal-banner { background-size: 100% 100%; background-repeat: no-repeat; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7)); }
+.fr-corner {
+  position: absolute; width: 34px; height: 34px; z-index: 2; pointer-events: none;
+  border: 3px solid #f0c04a; filter: drop-shadow(0 0 4px rgba(255, 200, 70, 0.6));
+}
+.fr-corner::after {
+  content: ""; position: absolute; width: 10px; height: 10px; border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #b6fbff, #13a7c0 60%, #06505e);
+  border: 1px solid #ffe38a; box-shadow: 0 0 8px #3ff0ff;
+}
+.fr-corner.tl { top: -6px; left: -6px; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.fr-corner.tr { top: -6px; right: -6px; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.fr-corner.bl { bottom: -6px; left: -6px; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.fr-corner.br { bottom: -6px; right: -6px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.fr-corner.tl::after { top: -7px; left: -7px; } .fr-corner.tr::after { top: -7px; right: -7px; }
+.fr-corner.bl::after { bottom: -7px; left: -7px; } .fr-corner.br::after { bottom: -7px; right: -7px; }
+
+/* Square phones (e.g. Unihertz Titan): tighter action bar */
+[data-layout="square"] [data-testid="action-bar"] .fr-ring { width: 40px !important; height: 40px !important; }
+[data-layout="square"] [data-testid="action-bar"] .ring-img { width: 44px !important; height: 44px !important; }

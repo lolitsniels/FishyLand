@@ -26,11 +26,14 @@ import { WatersPanel, SettingsPanel, AccountPanel, ComingSoon } from "../compone
 
 function useHudScale() {
   const calc = () => {
-    const compact = window.innerHeight < 520;
+    const w = window.innerWidth, h = window.innerHeight, ar = w / h;
+    const square = ar >= 0.8 && ar <= 1.25 && w < 1000;
+    if (square) return { scale: Math.max(0.5, Math.min(w / 780, h / 720)), compact: true, square };
+    const compact = h < 520;
     const sc = compact ? Math.min(window.innerWidth / 1100, window.innerHeight / 600)
       : PORTAL ? Math.min(1.15, window.innerWidth / 1000, window.innerHeight / 640)
       : Math.min(1.15, window.innerWidth / 1420, window.innerHeight / 790);
-    return { scale: Math.max(0.45, sc), compact };
+    return { scale: Math.max(0.45, sc), compact, square: false };
   };
   const [s, setS] = useState(calc);
   useEffect(() => { const r = () => setS(calc()); window.addEventListener("resize", r); return () => window.removeEventListener("resize", r); }, []);
@@ -72,19 +75,19 @@ function PauseOverlay() {
 
 function Hud() {
   const { cast, closeResult } = useFishing();
-  const { scale, compact } = useHudScale();
+  const { scale, compact, square } = useHudScale();
   const showFps = useGame((s) => s.settings.fps);
   return (
-    <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: `${100 / scale}vw`, height: `${100 / scale}vh`, transform: `scale(${scale})` }} data-testid="game-hud">
+    <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: `${100 / scale}vw`, height: `${100 / scale}vh`, transform: `scale(${scale})` }} data-testid="game-hud" data-layout={square ? "square" : compact ? "compact" : "full"}>
       <div className="absolute top-3 left-3 pointer-events-auto"><PlayerPanel /></div>
       <div className="absolute top-3 right-3 flex gap-3 items-start pointer-events-auto">
         {!PORTAL && <EventGrid compact={compact} />}
         <div className="flex flex-col gap-2"><Minimap />{!compact && <Tracker />}</div>
       </div>
       {!PORTAL && <div className={`absolute left-4 ${compact ? "top-[165px]" : "top-[200px]"} pointer-events-auto`}><LeftRail /></div>}
-      <div className="absolute bottom-3 left-3 pointer-events-auto"><ChatBox compact={compact} /></div>
+      <div className={`absolute left-3 pointer-events-auto ${square ? "bottom-[128px]" : "bottom-3"}`}><ChatBox compact={compact} /></div>
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto"><ActionBar cast={cast} /></div>
-      <div className="absolute bottom-[170px] left-1/2 -translate-x-1/2"><TensionBar /></div>
+      <div className={`absolute -translate-x-1/2 ${square ? "bottom-[175px] left-1/2" : "bottom-[200px] left-[60%]"}`}><TensionBar /></div>
       <div id="fps-meter" className={`absolute top-1 left-1/2 -translate-x-1/2 fr-chip px-2 text-[11px] font-cinzel ${showFps ? "" : "hidden"}`} data-testid="fps-meter" />
       <div className="pointer-events-auto"><CatchPopup onClose={closeResult} /></div>
       <div className="pointer-events-auto"><ModalHost /></div>

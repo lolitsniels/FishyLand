@@ -3,6 +3,7 @@ import { Coins } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "./Modal";
 import { useGame } from "../../store";
+import { itemImg } from "../fr";
 import { api, errMsg, fmt } from "../../lib/api";
 import { sfx } from "../../game/sfx";
 
@@ -23,6 +24,7 @@ export default function ShopPanel() {
       <div className="grid sm:grid-cols-2 gap-2">
         {Object.entries(data.items).filter(([, it]) => it.price > 0).map(([id, it]) => (
           <div key={id} className="fr-chip !rounded p-3 flex items-center gap-3" data-testid={`shop-item-${id}`}>
+            <img src={itemImg(id)} alt="" className="w-14 h-14 object-contain drop-shadow-[0_3px_3px_rgba(0,0,0,0.6)]" />
             <div className="flex-1">
               <div className="font-cinzel font-bold">{it.name} <span className="text-xs text-amber-300">(have {p.items[id] || 0})</span></div>
               <div className="text-[11px] text-amber-100/60">{it.desc}</div>

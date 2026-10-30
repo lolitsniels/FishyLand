@@ -1,7 +1,11 @@
-export const Ring = ({ icon: Icon, label, onClick, size = 46, dot, dim, testid, color = "#ffe08a", children }) => (
+export const itemImg = (id) => `art/items/${id}.png`;
+
+export const Ring = ({ icon: Icon, img, label, onClick, size = 46, dot, dim, testid, color = "#ffe08a", children }) => (
+
   <button type="button" onClick={onClick} data-testid={testid} className="flex flex-col items-center gap-1 group" title={label}>
-    <span className={`fr-ring ${dim ? "dim" : ""}`} style={{ width: size, height: size }}>
-      {Icon && <Icon size={size * 0.46} color={color} strokeWidth={2.2} style={{ filter: `drop-shadow(0 0 4px ${color})` }} />}
+    <span className={`fr-ring ${img ? "has-img" : ""} ${dim ? "dim" : ""}`} style={{ width: size, height: size }}>
+      {img && <img src={`art/ui/${img}.png`} alt="" draggable={false} className="ring-img" style={{ width: size * 1.08, height: size * 1.08 }} />}
+      {!img && Icon && <Icon size={size * 0.46} color={color} strokeWidth={2.2} style={{ filter: `drop-shadow(0 0 4px ${color})` }} />}
       {children}
       {dot && <span className="fr-dot">!</span>}
     </span>

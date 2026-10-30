@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Coins, FlaskConical, Sparkles, Gem, ScrollText } from "lucide-react";
+import { Coins } from "lucide-react";
+import { itemImg } from "../fr";
 import { toast } from "sonner";
 import Modal from "./Modal";
 import { useGame } from "../../store";
 import { api, errMsg, fmt } from "../../lib/api";
 import { sfx } from "../../game/sfx";
 
-const ITEM_ICON = { glow_shrimp: Sparkles, star_lure: Sparkles, stamina_potion: FlaskConical, enhance_stone: Gem, protection_scroll: ScrollText };
 
 export default function InventoryPanel() {
   const [tab, setTab] = useState("fish");
@@ -61,10 +61,9 @@ export default function InventoryPanel() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" data-testid="inventory-items-list">
           {Object.entries(p.items).filter(([, q]) => q > 0).map(([id, q]) => {
-            const Icon = ITEM_ICON[id] || Sparkles;
             return (
               <div key={id} className="fr-chip !rounded flex items-center gap-3 p-2" data-testid={`inventory-item-${id}`}>
-                <Icon size={22} color="#ffd34d" />
+                <img src={itemImg(id)} alt="" className="w-11 h-11 object-contain" />
                 <div className="flex-1"><div className="font-cinzel font-bold text-sm">{data.items[id].name} <span className="text-amber-300">x{q}</span></div><div className="text-[11px] text-amber-100/60">{data.items[id].desc}</div></div>
                 {id === "stamina_potion" && <button type="button" className="fr-btn px-3 py-1 text-xs" onClick={usePotion} data-testid="use-stamina-potion-btn">Use</button>}
               </div>

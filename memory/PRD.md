@@ -39,3 +39,8 @@ Full build brief "FISHING REALM — Complete Build Brief" (2.5D high-fantasy bro
 - Bundled fonts (no Google Fonts), procedural music + music toggle, 4-step tutorial, 800x600 HUD tuning, relative asset paths with <base href="%PUBLIC_URL%/">
 - Build: GD_GAME_ID=... bash /app/scripts/build_portal.sh -> /app/portal_builds/fishing-realm-portal.zip + thumbnails (512x512, 512x384, 200x120); listing text in /app/portal_builds/README.md
 - Web: hero-name profanity filter, lockout keyed per email
+
+## 2026-06 Art pass + layouts
+- Balanced painterly-stylized art (AFK Arena/Genshin-like): new Crystal Lagoon scene (pier bottom-left, open water right), angler, wings, pet, 10 fish, 17 painted menu icons (art/ui), 6 item icons (art/items), gold title banner; ornate modal frame with gem corners. Generator script: /app/scripts/balanced_art.py
+- Angler stands at the left on the pier, casts right into open water; camera keeps angler + fishing area in frame on any aspect
+- Square phone layout (aspect 0.8–1.25, e.g. Unihertz Titan 2): own HUD scale, collapsed events/chat, tighter action bar; rotate overlay only for clearly portrait screens

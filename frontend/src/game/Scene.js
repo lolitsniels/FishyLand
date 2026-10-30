@@ -6,12 +6,12 @@ import { useGame } from "../store";
 import { gameReady } from "../portal";
 
 const BG_W = 1264, BG_H = 848;
-const FEET = { x: 610, y: 722 };
-const ANGLER_H = 170;
+const FEET = { x: 470, y: 592 };
+const ANGLER_H = 185;
 const K = ANGLER_H / 250;
-const WATER_POLY = [180, 480, 330, 430, 540, 405, 600, 345, 920, 345, 960, 440, 1010, 480, 840, 520, 760, 560, 760, 610, 520, 628, 300, 640, 230, 600];
-const FALLS = [[224, 200, 70, 250], [104, 205, 28, 210], [458, 95, 18, 240], [714, 232, 40, 120], [962, 168, 120, 280], [898, 292, 30, 130]];
-const MIST = [[260, 455], [1020, 455], [912, 425], [735, 352], [120, 420]];
+const WATER_POLY = [0, 470, 200, 380, 340, 290, 560, 250, 900, 250, 940, 300, 1040, 350, 1080, 400, 1264, 470, 1264, 848, 640, 848, 640, 560, 560, 460, 300, 440, 150, 500, 0, 560];
+const FALLS = [[135, 50, 40, 150], [262, 215, 60, 105], [410, 95, 18, 110], [440, 215, 18, 85], [950, 222, 60, 110], [1115, 60, 45, 140]];
+const MIST = [[290, 320], [450, 300], [985, 335], [160, 190], [1135, 200]];
 const RARITY_GLOW = { legendary: 0xffd34d, mythic: 0xff3fa4, epic: 0xc06bff };
 
 function canvasTex(w, h, draw) {
@@ -104,7 +104,7 @@ function buildScene(app, tex) {
   const shadow = new Graphics().ellipse(FEET.x, FEET.y - 4, 70 * K, 16 * K).fill({ color: 0x0b1e33, alpha: 0.35 });
   actors.addChild(shadow);
   const wingGroup = new Container();
-  wingGroup.x = FEET.x - 12 * K; wingGroup.y = FEET.y - 198 * K;
+  wingGroup.x = FEET.x - 14 * K; wingGroup.y = FEET.y - ANGLER_H * 0.68;
   const wingGlow = new Sprite(tex.wings);
   const wings = new Sprite(tex.wings);
   for (const w of [wingGlow, wings]) { w.anchor.set(0.5, 0.55); w.scale.set(0.32 * K); wingGroup.addChild(w); }
@@ -116,7 +116,7 @@ function buildScene(app, tex) {
   angler.x = FEET.x; angler.y = FEET.y;
   actors.addChild(angler);
   const pet = new Sprite(tex.pet);
-  pet.anchor.set(0.5); pet.scale.set((105 * K) / tex.pet.width); pet.x = FEET.x - 125 * K; pet.y = FEET.y - 60 * K;
+  pet.anchor.set(0.5); pet.scale.set((105 * K) / tex.pet.width); pet.x = FEET.x - 95 * K; pet.y = FEET.y - 40 * K;
   actors.addChild(pet);
   const rod = new Graphics();
   const line = new Graphics();
@@ -137,7 +137,7 @@ function buildScene(app, tex) {
   for (let i = 0; i < 70; i++) {
     const s = new Sprite(star);
     s.anchor.set(0.5); s.blendMode = "add";
-    s.x = 220 + Math.random() * 760; s.y = 360 + Math.random() * 260; s._p = Math.random() * 10; s._s = 1 + Math.random() * 3;
+    s.x = 660 + Math.random() * 580; s.y = 300 + Math.random() * 520; s._p = Math.random() * 10; s._s = 1 + Math.random() * 3;
     s.scale.set(0.25 + Math.random() * 0.5);
     fxLayer.addChild(s); sparkles.push(s);
   }
@@ -222,7 +222,7 @@ function buildScene(app, tex) {
     const sw = app.renderer.width / app.renderer.resolution, sh = app.renderer.height / app.renderer.resolution;
     const sc = Math.max(sw / BG_W, sh / BG_H);
     world.scale.set(sc);
-    world._bx = (sw - BG_W * sc) / 2;
+    world._bx = Math.min(0, Math.max(sw - BG_W * sc, sw / 2 - 690 * sc)); // keep angler + fishing water in frame
     world._by = Math.min(0, Math.max(sh - BG_H * sc, sh * 0.78 - FEET.y * sc));
     world.x = world._bx; world.y = world._by;
   };
@@ -251,8 +251,8 @@ function buildScene(app, tex) {
     const flap = Math.sin(time * 2.6);
     wings.scale.set(0.32 * K * (1 + flap * 0.05), 0.32 * K * (1 - flap * 0.03));
     wingGlow.alpha = 0.25 + 0.15 * Math.sin(time * 3.1);
-    wingGroup.y = FEET.y - 198 * K + flap * 2;
-    pet.y = FEET.y - 70 * K + Math.sin(time * 2) * 5;
+    wingGroup.y = FEET.y - ANGLER_H * 0.68 + flap * 2;
+    pet.y = FEET.y - 45 * K + Math.sin(time * 2) * 5;
     pet.scale.x = Math.abs(pet.scale.x) * (Math.sin(time * 0.5) > 0.9 ? -1 : 1);
     nameplate.text = fx.username; titleplate.text = fx.title ? `« ${fx.title} »` : "";
 
@@ -275,7 +275,7 @@ function buildScene(app, tex) {
     angler.rotation = fighting ? (fx.pos - 0.5) * 0.06 : ph === "cast" ? Math.sin(Math.min(1, (time - castFrom) * 2.5) * Math.PI) * -0.05 : 0;
 
     // rod: butt -> tip, bending toward bobber with tension
-    const butt = { x: FEET.x + 52 * K, y: FEET.y - 172 * K + (angler.y - FEET.y) };
+    const butt = { x: FEET.x + 18 * K, y: FEET.y - ANGLER_H * 0.64 + (angler.y - FEET.y) };
     const baseTip = { x: butt.x + 75, y: butt.y - 150 };
     const bend = fighting ? 0.18 + tension * 0.35 : ph === "wait" || ph === "bite" ? 0.1 : 0;
     tip.x = baseTip.x + (fx.target.x - baseTip.x) * bend * 0.5;
@@ -356,7 +356,7 @@ function buildScene(app, tex) {
     if (jumpAt <= 0 && !ambient && tex.ambient) {
       const s = new Sprite(tex.ambient);
       s.anchor.set(0.5); s.scale.set(34 / tex.ambient.width); s.alpha = 0.9;
-      const x = 300 + Math.random() * 560, y = 430 + Math.random() * 150;
+      const x = 700 + Math.random() * 420, y = 400 + Math.random() * 340;
       ambient = { s, x, y, t: 0, dir: Math.random() > 0.5 ? 1 : -1 };
       if (ambient.dir < 0) s.scale.x *= -1;
       fxLayer.addChild(s);
