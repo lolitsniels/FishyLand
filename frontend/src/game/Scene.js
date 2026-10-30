@@ -307,7 +307,7 @@ function buildScene(app, tex, key, bgTex, mt) {
     waterTile = new TilingSprite({ texture: mt.img_tex[cfg.water_tex || "water"], width: BG_W, height: BG_H });
     waterTile.tileScale.set(0.38);
     base.addChild(dispSprite, waterTile);
-    waterTile.filters = [new DisplacementFilter({ sprite: dispSprite, scale: 14 })];
+    waterTile.filters = [new DisplacementFilter({ sprite: dispSprite, scale: 9 })];
     tm.chunks.forEach((c) => { const sp = new Sprite(c.tex); sp.x = c.x; sp.y = c.y; base.addChild(sp); });
   } else {
     base.addChild(new Sprite(bgTex));
@@ -541,7 +541,8 @@ function buildScene(app, tex, key, bgTex, mt) {
     clouds.forEach((c) => { c.x += c._s * dt; if (c.x > BG_W + 200) c.x = -200; });
     weather(dt, time);
     life(dt, time);
-    if (waterTile) { waterTile.tilePosition.x += dt * 6; waterTile.tilePosition.y += dt * 3; }
+    // the water art stays put (corals, rocks); only the refraction ripple drifts over it
+    if (waterTile) { dispSprite.x = Math.sin(time * 0.5) * 26; dispSprite.y = Math.cos(time * 0.4) * 20; }
     objViews.forEach((v) => { if (v.def.bob) { v.s.y = v.o.y + Math.sin(time * 1.1 + v.o.x) * v.def.bob; v.s.rotation = Math.sin(time * 0.8 + v.o.x) * 0.004 * v.def.bob; } });
 
     // walking (click/tap destination or WASD/arrow keys)

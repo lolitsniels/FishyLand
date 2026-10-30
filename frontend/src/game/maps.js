@@ -77,7 +77,7 @@ export const MILLBROOK_MAP = {
     { k: "oak", x: 200, y: 350 }, { k: "oak", x: 230, y: 1700 }, { k: "oak", x: 1500, y: 1900 }, { k: "oak", x: 2900, y: 700 }, { k: "oak", x: 2950, y: 1500 }, { k: "oak", x: 1750, y: 420 },
     { k: "pine", x: 140, y: 800 }, { k: "pine", x: 1300, y: 2250 }, { k: "pine", x: 3050, y: 1100 }, { k: "pine", x: 2700, y: 300 }, { k: "pine", x: 1900, y: 2200 },
     { k: "rocks", x: 2650, y: 1000, w: 170 }, { k: "rocks", x: 380, y: 540, w: 150 }, { k: "rocks", x: 1200, y: 1650, w: 140 },
-    { k: "bush", x: 900, y: 1300 }, { k: "bush", x: 2150, y: 800 }, { k: "bush", x: 2600, y: 1300 }, { k: "bush", x: 300, y: 1450 },
+    { k: "bush", x: 900, y: 1380 }, { k: "bush", x: 2150, y: 800 }, { k: "bush", x: 2600, y: 1300 }, { k: "bush", x: 300, y: 1450 },
     { k: "lantern", x: 1110, y: 1300 }, { k: "lantern", x: 1910, y: 850 }, { k: "lantern", x: 600, y: 1450 },
   ],
   spots: [

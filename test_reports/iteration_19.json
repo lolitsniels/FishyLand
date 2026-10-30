@@ -1,0 +1,52 @@
+{
+  "summary": "Iteration 19 tested settings (music, sound, kg/lb, cm/in), peer movement (onLand and smoothness), building sprites (see-through holes and checkerboard), map audits, modal corners, SEO and favicon, and ran the duel no-reward regression. Almost everything passes. One sprite still has the checkerboard: charter_boat (used on the sunken and harrow maps). The pennant string on the Crew HQ (guild_hall) now has a white filled wedge. One minor bug in the inch formatter.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "CORS (all /api)", "issue": "Preflight reflects any Origin (https://evil.com) and sends allow-credentials: true. Auth uses a Bearer token in localStorage, so the risk is low. Still, allow only explicit origins."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "tfl/lib/api.js ln() inches", "issue": "For lengths just under a whole foot, ft/in formatting rounds the leftover inches up to 12. Example: 121.5 cm -> '3 ft 12 in' instead of '4 ft 0 in'. Fix: total = Math.round(c / 2.54); ft = Math.floor(total / 12); in = total % 12.", "selector": "[data-testid=catch-length]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Biome maps sunken (2 boats) and harrow (1 boat): charter_boat.webp", "issues": ["A grey/white 'transparent mockup' checkerboard is still baked in as opaque pixels. It shows on the bow rail panel (about x 650-900, y 230-300 of the sprite) and in the flybridge tower/windshield area. solid_buildings.py only treats pixels with saturation < 16 and mean > 150 as checkerboard. These darker grey squares (~100-170) are kept, so the checker stays."]},
+      {"screen": "Harbour Crew HQ (guild_hall.webp)", "issues": ["The area between the flag and the A-B-C-D pennant string is now filled solid white, which makes a white sail-like wedge under the pennants. The sil & ~bgish fill closed this open-air gap. It should be transparent, or the pennants recut."]},
+      {"screen": "Millbrook map audit", "issues": ["mapcheck reports onPath: bush@900,1300 (a bush placed on the path). Minor."]}
+    ]
+  },
+  "passed": [
+    "Landing: document.title 'FishyLand · Free Online Fishing MMO in Your Browser'. The meta description mentions the free online fishing MMO. og:image /art/og.jpg returns 200. JSON-LD @type VideoGame is present.",
+    "favicon.ico (48x48), favicon-32.png, fav-192.png and apple-touch-icon.png (180) all return 200. fav-192 shows the Harbourmaster (captain with white beard, gold ring).",
+    "Settings modal: menu-more -> more-settings opens settings-modal. All 8 set-* buttons toggle aria-pressed. Choices persist after reload (fr_settings music/sound false; owo_prefs weight_unit lb, length_unit in). Esc closes the modal.",
+    "Music Off pauses the HTMLAudio track (millbrook.mp3 paused=true) and On resumes it (paused=false).",
+    "Inventory in lb: 14 cards show weights in lb and none in kg.",
+    "Catch popup in lb/in: catch-length '6.2 in', catch-weight '0.110 lb', tape end '6\"'. In kg/cm: '30 cm', '0.352 kg', tape end '30'. Keep, Fishdex and Sell buttons are present. Sell closes the popup.",
+    "Peers: harbour 1550,2080 -> 2800,1665 and millbrook 800,1230 -> 2150,1100 stay onLand=true for every sample (44 and 97 samples). Replaying a route with 600ms posts gave no stalls (no 100ms sample without movement). The millbrook trace advanced steadily.",
+    "Sprite audit: tavern (Anchor Cafe) windows are solid. Its only enclosed transparent regions are the open-air deck ends between the light poles, which is fine. house, guild_hall glass, swamp_shack, coast_hut, stilt_hut and the other biome huts have no holes and no checkerboard. The fountain hole (inside the water arc) and the ship rail holes are real open air.",
+    "Map audits: harbour has no dropped or onPath objects (only 3 rocks auto-moved). saltmarsh, blackwater, coral, greyfell, sunken, harrow, willow, frozen, ghostlight, temple and cinder are all clean.",
+    "Tackle Shop modal: all 4 corner brackets meet the frame cleanly, with no notch or gap.",
+    "Duel regression test_iter18_duel_no_rewards.py: 3/3 passed (duel catch gives no xp/gold/inventory/journal; duel score counts; winner gets no gold; normal catch after the duel is regular).",
+    "Auth: password_hash starts with $2b$12$ and login lockout logic exists (429 after repeated failures)."
+  ],
+  "test_report_links": ["/app/backend/tests/test_iter18_duel_no_rewards.py", "/app/test_reports/pytest/iter19_duel.xml", "/app/tests/sprite_audit.py", "/app/tests/sprite_render.py", "/app/tests/checker_crops.py"],
+  "action_items": [
+    "Re-cut charter_boat.webp to remove the baked grey/white checkerboard (bow rail panel and tower area). For example, detect alternating grey blocks of any brightness, or use the raw source.",
+    "Make the white wedge between the Crew HQ flag and the pennant string transparent again (guild_hall.webp).",
+    "Fix ln() inch rounding so it never shows '12 in' (round total inches first).",
+    "Optional: move the millbrook bush at 900,1300 off the path. Restrict CORS origins."
+  ],
+  "critical_code_review_comments": [
+    "solid_buildings.py: bgish = sat<16 & mean>150 leaves large enclosed bg regions (>0.6%) transparent and misses darker checker squares, so charter_boat keeps its checker.",
+    "Scene.js peers: the path is recomputed from the current position on every new target. Movement uses dt clamped to 0.05, so peers slow down at low FPS (headless runs at 2 fps). This is expected in real browsers.",
+    "GameSettings.js: length falls back to lengthUnit() (lb implies in), which is fine. Defaults follow the locale: en-US guests start on lb/in."
+  ],
+  "updated_files": ["/app/tests/sprite_audit.py", "/app/tests/sprite_render.py", "/app/tests/checker_crops.py"],
+  "success_rate": {"backend": "100%", "frontend": "90%"},
+  "seed_data_creation": "Caught 2 fish as TestAngler (both sold). One duel was played between TestAngler and TestAngler2 by the regression test, and both left afterwards.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Headless Chromium runs at about 2 FPS, so peer movement looks slow; check onLand and continuity rather than speed. For the sprite checks, run python3 /app/tests/sprite_audit.py (enclosed holes plus grey/checker stats) and /app/tests/checker_crops.py (crops on magenta). For catch popups, use the iter16 approach: fr_mode=water, __fx.me=1506,1047, Space, route /api/fish/land success=true. To set units, set owo_prefs weight_unit/length_unit or use the settings modal."
+}

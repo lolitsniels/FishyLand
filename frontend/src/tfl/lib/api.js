@@ -90,7 +90,10 @@ export const lengthUnit = () => {
 export const ln = (cm) => {
   if (cm == null || Number.isNaN(Number(cm))) return "-";
   const c = Number(cm);
-  if (lengthUnit() === "in") return c >= 91.44 ? `${Math.floor(c / 30.48)} ft ${Math.round((c % 30.48) / 2.54)} in` : `${(c / 2.54).toFixed(1)} in`;
+  if (lengthUnit() === "in") {
+    const tin = Math.round(c / 2.54);
+    return tin >= 36 ? `${Math.floor(tin / 12)} ft ${tin % 12} in` : `${(c / 2.54).toFixed(1)} in`;
+  }
   return c >= 100 ? `${(c / 100).toFixed(2)} m` : `${Math.round(c * 10) / 10} cm`;
 };
 export const wtRange = (a, b) => (weightUnit() === "lb" ? `${Math.round(a * 2.20462 * 10) / 10}–${Math.round(b * 2.20462 * 10) / 10} lb` : `${a}–${b} kg`);

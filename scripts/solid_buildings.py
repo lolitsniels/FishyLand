@@ -33,9 +33,18 @@ def solid(k):
     lab, n = ndimage.label(sil & bgish & ~fg)
     sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
     small = [i + 1 for i, s in enumerate(sizes) if s < 0.006 * lab.size]  # little panes, not open-air gaps
+    plain = k in ("guild_hall", "charter_boat")  # white-painted art: small holes are white paint, not glass
+    small = [i + 1 for i, s in enumerate(sizes) if s < (0.0012 if plain else 0.006) * lab.size]
     glass = np.isin(lab, small)
+    if k == "guild_hall":  # white backdrop wedge between the flag pole and the pennant string
+        top = np.zeros_like(fg); top[: int(0.2 * fg.shape[0])] = True
+        lb, nb = ndimage.label(bgish & top)
+        sz = ndimage.sum(np.ones_like(lb), lb, range(1, nb + 1))
+        wedge = np.isin(lb, [i + 1 for i, s in enumerate(sz) if s > 1500])
+        fg &= ~wedge; keep &= ~wedge; glass &= ~wedge
     out = rgb.copy()
-    out[glass] = GLASS
+    if not plain:
+        out[glass] = GLASS
     alpha = np.where(keep | glass, 255, 0).astype(np.uint8)
     alpha = ndimage.binary_opening(alpha > 0, structure=np.ones((3, 3))).astype(np.uint8) * 255
     im = Image.fromarray(np.dstack([out.astype(np.uint8), alpha]), "RGBA")

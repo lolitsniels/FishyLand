@@ -88,3 +88,14 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 ## Backlog
 - P1: Playgama/Bridge SDK integration; a music track for the duel pier
 - P2: crew pond fishing; Pearl Shop cosmetics; species-specific fish art on the catch card
+
+## Rounds 17-19 (Jun 2026)
+- Duel Pier casting fixed; duel catches give nothing (no fish/xp/gold/Fishdex, no win gold), only score while the clock runs (duel_live.in_duel)
+- Peers follow walk-grid paths (no water walking), presence every 600ms, smooth bob (per-peer seed)
+- Rod grip: front fist overlay (art/chars/hand_*.webp) drawn over rod
+- Landing: mascot behind sign-up frame, logo above shots, painted wallpaper (art/hud/home_bg.webp), relaxed-arm picker art (art/chars/idle_*.webp), logo checker removed
+- Buildings re-cut solid with /app/scripts/solid_buildings.py (raw sources in /app/memory/raw/m_*.jpg; cleaned edits for guild_hall, house, fountain, swamp_shack, charter_boat)
+- panel.webp seams blended (no corner gaps); in-game Settings (music, sound, kg/lb, cm/in) in More menu
+- Favicon set (Harbourmaster), SEO title/description/og:image (art/og.jpg), VideoGame JSON-LD
+- Water texture no longer scrolls (corals stay still); only the ripple displacement drifts
+
