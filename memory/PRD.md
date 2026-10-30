@@ -1,4 +1,4 @@
-# The Fishing Lands 2.5D — PRD
+# Fishing Realms (2.5D) — PRD
 
 ## Original problem statement
 Started as "Fishing Realm" (2.5D fantasy browser fishing MMO, PixiJS). The user then uploaded the source of their live text MMO
@@ -34,7 +34,16 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   New signposts: Crafting, Achievements, Fountain of Fame (leaderboards), Anchor Tavern (contracts), Old Salt's Almanac. Camera scrolls with the angler.
 - Testing: iteration_4 (menus) 88% → remaining issues fixed and self-verified; iteration_3 — backend 12/12, frontend all flows pass (testing agent fixed i18n init + reCAPTCHA no-key)
 
+- 2026-06 (iter 7): Renamed to Fishing Realms (UI, index.html, backend strings, news). Menus restyled to smoky black glass + thin gold trim (index.css bottom block).
+  Landing catch bar no longer slides (one catch crossfades every 4s). Modal scroll fixed on phones (grid-rows minmax). Mobile action bar auto-fits.
+  Living harbour (Scene.js makeLife + scenes.js HARBOUR.life): fountain jets + basin rings, bobbing Sea Serpent & distant boats, water rings at posts,
+  flickering lanterns, chimney smoke, 9 gliding seagulls. Tap-to-walk overshoot fixed (Pearl Shop auto-opens). Tension bar green centre / orange-red edges verified.
+  Testing: iteration_7 — 8/10 then remaining issues fixed and self-verified.
+
 ## Backlog
+- P0: Living-map animations for the 12 waters (per-water props)
+- P1: Pearl Shop cosmetics (currently empty)
+- P2: Harbour hint pill overlaps Tournaments label on phones
 - P0: Widen the 12 waters the same way (outpaint each scene, extend piers/shores, new fishing spots)
 - P1: Unique art for 416 species (currently 10 shared stand-in images, hue-shifted); achievement badges, boss and avatar art (currently fallbacks)
 - P1: Chat bubbles / emotes between players in the harbour; show peers' cosmetics

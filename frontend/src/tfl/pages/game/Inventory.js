@@ -54,7 +54,7 @@ function Loadout({ user, lookups, onInfo, onBait }) {
   return (
     <div className="g-hero !min-h-0 p-3 flex flex-wrap items-end justify-center gap-3 sm:gap-5" style={{ backgroundImage: `url(/art/waters/${user.water}_thumb.jpg)` }} data-testid="loadout-bar">
       <div className="g-portrait g-face !w-[86px] !h-[86px] hidden sm:block"><img src={lookFace(user.avatar)} alt="" /></div>
-      {slots.map(([k, g]) => <Slot key={k} cap={tt(k)} id={g?.id} name={g ? enhName(g.name, user.enhance?.[g.id]) : ""} rarity={g?.legendary ? "legendary" : tierRarity(g?.tier)} onClick={() => g && onInfo(g)} testid={`loadout-${k}`}><Durability id={g?.id} /></Slot>)}
+      {slots.map(([k, g]) => <Slot key={k} cap={tt(k)} id={g?.id} name={g ? enhName(g.name, user.enhance?.[g.id]) : ""} rarity={g?.legendary ? "legendary" : tierRarity(g?.tier)} onClick={() => g && onInfo(g)} testid={`loadout-${k}`}><Durability id={g?.id} className="flex-col !gap-0.5" /></Slot>)}
       <Slot cap={tt("bait")} id={bait?.id} name={bait ? `${bait.name} ×${user.bait[bait.id] || 0}` : ""} rarity={tierRarity(Math.ceil((bait?.luck || 0) / 3) + 1)} onClick={onBait} testid="loadout-bait" />
     </div>
   );

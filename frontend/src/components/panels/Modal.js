@@ -19,7 +19,7 @@ export default function Modal({ title, children, width = 720, testid, onClose })
       <div className="fr-panel fr-modal rise flex flex-col w-full h-full sm:h-auto max-h-full sm:max-h-[90vh] mt-0 sm:mt-6 !rounded-none sm:!rounded-[6px]" style={{ maxWidth: width }}>
         {["tl", "tr", "bl", "br"].map((c) => <span key={c} className={`fr-corner ${c}`} />)}
         <div className="fr-modal-head relative flex items-center justify-center px-12 pt-1 pb-2">
-          <div className="modal-banner relative mt-1 sm:-mt-7 px-14 py-3 min-w-[220px] sm:min-w-[260px] text-center" style={{ backgroundImage: "url(art/ui/banner.png)" }}>
+          <div className="modal-banner relative mt-1 px-14 py-3 min-w-[220px] sm:min-w-[260px] text-center" style={{ backgroundImage: "url(art/ui/banner.png)" }}>
             <h2 className="relative gold-text font-deco text-lg md:text-xl font-black tracking-wide whitespace-nowrap">{title}</h2>
           </div>
           <button type="button" onClick={close} data-testid="modal-close-btn"

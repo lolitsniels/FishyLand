@@ -23,7 +23,7 @@ VARIANTS = [
 
 WATERS = [
     {"key": "millbrook", "name": "Millbrook Pond", "type": "Freshwater pond", "level": 1, "fee": 0, "image": "/art/water_millbrook.jpg",
-     "desc": "A quiet village pond ringed with reeds. Every angler in The Fishing Lands started here.", "salt": False},
+     "desc": "A quiet village pond ringed with reeds. Every angler in Fishing Realms started here.", "salt": False},
     {"key": "willow", "name": "Willow River", "type": "Lowland river", "level": 3, "fee": 150, "image": "/art/water_willow.jpg",
      "desc": "Slow bends and gravel runs beneath old willows. Trout and pike hunt the shallows.", "salt": False},
     {"key": "greyfell", "name": "Greyfell Lake", "type": "Deep cold lake", "level": 7, "fee": 800, "image": "/art/water_greyfell.jpg",
@@ -348,7 +348,7 @@ _FISH = {
     ("Sightless Muskellunge", "R", 8.0, 30.0, "runner", 2.2, "Hunts by sound alone, never misses.", False),
     ("Ghostlight Wraithfish", "E", 5.0, 15.0, "jumper", 3.2, "Glows cold white and vanishes when netted.", False),
     ("Cathedral Sturgeon", "E", 60.0, 150.0, "diver", 2.8, "Sleeps beneath the tallest stone pillar.", False),
-    ("The Pale Ancient", "L", 200.0, 400.0, "sluggish", 2.5, "The oldest living thing in The Fishing Lands.", False),
+    ("The Pale Ancient", "L", 200.0, 400.0, "sluggish", 2.5, "The oldest living thing in Fishing Realms.", False),
     ("Lightless Leviathan", "L", 150.0, 350.0, "diver", 2.6, "A catfish the divers refuse to speak about.", False),
 ],
 }

@@ -32,7 +32,7 @@ def receiver_email():
 
 
 def checkout_url(boost_id: str, nonce: str, hours: int, price: float, site: str, buyer_email: str = None, name: str = "booster") -> str:
-    q = {"cmd": "_xclick", "business": os.environ["PAYPAL_EMAIL"], "item_name": f"The Fishing Lands: {name} server-wide booster, {hours} hours", "item_number": boost_id,
+    q = {"cmd": "_xclick", "business": os.environ["PAYPAL_EMAIL"], "item_name": f"Fishing Realms: {name} server-wide booster, {hours} hours", "item_number": boost_id,
          "amount": f"{price:.2f}", "currency_code": CURRENCY, "custom": f"{boost_id}:{nonce}", "no_shipping": "1", "no_note": "1", "rm": "2",
          "notify_url": f"{site}/api/paypal/ipn", "return": f"{site}/game/support?paid=1", "cancel_return": f"{site}/game/support"}
     if buyer_email: q["email"] = buyer_email

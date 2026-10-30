@@ -176,7 +176,7 @@ async def renew_premium(oid, nonce, subject):
     if not o: logger.info("premium order %s: payment %s already counted or not a renewal", oid, txn); return
     p = PASSES.get(o["plan"], PASSES["pass_month"])
     until = await _extend(o["buyer_id"], p["days"])
-    await send_system_message(o["buyer_id"], o["buyer"], f"Your {p['name']} renewed, it now runs until {until[:10]}. Thank you for supporting The Fishing Lands!")
+    await send_system_message(o["buyer_id"], o["buyer"], f"Your {p['name']} renewed, it now runs until {until[:10]}. Thank you for supporting Fishing Realms!")
     if len(o["txns"]) * p["days"] >= LOYAL_DAYS:
         r = await db.users.update_one({"_id": ObjectId(o["buyer_id"]), "owned_frames": {"$ne": LOYAL_FRAME}}, {"$addToSet": {"owned_frames": LOYAL_FRAME}})
         if r.modified_count:

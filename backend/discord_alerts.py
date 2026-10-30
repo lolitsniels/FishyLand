@@ -34,7 +34,7 @@ async def post_boss(boss, water_name, end_iso, art_path):
             "thumbnail": {"url": f"{site()}{art_path}"},
             "fields": [{"name": "Reward", "value": f"{boss['gold']:,} gold · {boss['xp']:,} XP", "inline": True},
                        {"name": "Water", "value": water_name, "inline": True}],
-            "footer": {"text": "The Fishing Lands"},
+            "footer": {"text": "Fishing Realms"},
         }],
     }
     try:
@@ -59,7 +59,7 @@ async def post_news(title, body, image=None):
     link = f"{site()}/game"
     text = _plain(body)
     if len(text) > 3800: text = text[:3800].rsplit("\n", 1)[0] + "\n…"
-    embed = {"title": title, "url": link, "description": f"{text}\n\n**[Read it in game]({link})**", "color": 0xF27B35, "footer": {"text": "The Fishing Lands · Harbour Notices"}}
+    embed = {"title": title, "url": link, "description": f"{text}\n\n**[Read it in game]({link})**", "color": 0xF27B35, "footer": {"text": "Fishing Realms · Harbour Notices"}}
     if image: embed["image"] = {"url": image if image.startswith("http") else f"{site()}{image}"}
     try:
         async with httpx.AsyncClient(timeout=10) as c:

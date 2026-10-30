@@ -109,7 +109,7 @@ async def schedule(kind="xp"):
     _bust()
     who, k = buyer_name(started), KINDS[kind]
     await add_feed("boost", started["buyer"] if not started.get("anonymous") else "Harbourmaster",
-                   f"{k['name']}: {k['perks']}. Live for {started['hours']} hours. Thank {who} for supporting The Fishing Lands!", "legendary")
+                   f"{k['name']}: {k['perks']}. Live for {started['hours']} hours. Thank {who} for supporting Fishing Realms!", "legendary")
     await db.chat.insert_one({"channel": "global", "username": "Harbourmaster", "level": 0, "at": t,
                               "text": f"The {k['name']} is lit! {k['perks']} for the next {started['hours']} hours, courtesy of {who}. Tight lines!"})
     return started
@@ -305,7 +305,7 @@ async def fulfil(subject, event_id):
     k = KINDS[kind_of(b)]
     ahead = await db.boosts.count_documents({**_kq(kind_of(b)), "status": {"$in": ["active", "queued"]}, "_id": {"$ne": b["_id"]}})
     when = "It starts right now." if ahead == 0 else f"There {'is' if ahead == 1 else 'are'} {ahead} {k['name']} booster{'s' if ahead > 1 else ''} ahead of yours in the queue. It starts automatically when they finish."
-    await send_system_message(b["buyer_id"], b["buyer"], f"Thank you for supporting The Fishing Lands! Your {b['hours']}-hour {k['name']} ({k['perks']}) is paid for. {when} Every angler on the server will know it was {'an anonymous supporter' if b.get('anonymous') else 'you'}, and a supporter's heart now sits beside your name in chat and on your profile.")
+    await send_system_message(b["buyer_id"], b["buyer"], f"Thank you for supporting Fishing Realms! Your {b['hours']}-hour {k['name']} ({k['perks']}) is paid for. {when} Every angler on the server will know it was {'an anonymous supporter' if b.get('anonymous') else 'you'}, and a supporter's heart now sits beside your name in chat and on your profile.")
     await mark_supporter(b["buyer_id"])
     await schedule(kind_of(b))
 

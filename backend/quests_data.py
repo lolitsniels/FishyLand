@@ -1,4 +1,4 @@
-"""Story quest chain + daily/weekly quest templates for The Fishing Lands."""
+"""Story quest chain + daily/weekly quest templates for Fishing Realms."""
 
 
 def _q(id_, name, level, story, desc, event, target, reward, flt=None, measure=None, title=None):

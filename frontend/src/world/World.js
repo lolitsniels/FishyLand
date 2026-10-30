@@ -120,6 +120,9 @@ export default function World() {
     return () => { clearInterval(iv); window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); window.removeEventListener("blur", blur); };
   }, [nav, cast]);
 
+  const barRef = useRef(null);
+  const [barK, setBarK] = useState(1);
+  useEffect(() => { const bw = barRef.current?.offsetWidth; if (bw) setBarK(Math.min(1, (w / s - 12) / bw)); }, [w, s, user, data]);
   if (!user || !data) return <div className="fixed inset-0 grid place-items-center bg-[#04121c] gold-text font-deco text-2xl" data-testid="game-loading">Loading the harbour…</div>;
   const nearSpot = sceneFor(mode === "harbour" ? "harbour" : "water").spots.find((x) => x.id === near && !x.fish);
   const canFish = mode === "water" && !!atSpot;
@@ -147,7 +150,7 @@ export default function World() {
         {mode === "water" && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1" data-testid="action-bar">
+        <div ref={barRef} className="absolute bottom-2 left-1/2 pointer-events-auto fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1" style={{ transform: `translateX(-50%) scale(${barK})`, transformOrigin: "50% 100%" }} data-testid="action-bar">
           {BAR_L.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <button type="button" data-testid="cast-fish-button" disabled={mode === "water" && (!canFish || !idle)}
             onPointerDown={(e) => { e.preventDefault(); onFish(); }}

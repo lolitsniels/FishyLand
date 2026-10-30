@@ -214,6 +214,7 @@ export default function Landing() {
       <div className="fixed inset-0 bg-gradient-to-b from-[#04121c]/55 via-[#04121c]/25 to-[#04121c]/95" aria-hidden="true" />
       <div className="fixed inset-0 lp2-rays pointer-events-none" aria-hidden="true" />
       <Motes />
+      <CatchTicker catches={catches} />
       <header className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3" data-testid="lp-topbar">
         <div className="flex gap-4 text-xs font-cinzel font-bold" data-testid="lp-top-stats">
           {stats && <><span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" /><b data-testid="lp-online">{fmt(stats.online)}</b> online</span>
