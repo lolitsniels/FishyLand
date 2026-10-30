@@ -28,7 +28,11 @@ def _oid(v: str) -> ObjectId:
 
 
 async def _save(u: dict, fields: List[str]):
-    await db.users.update_one({"_id": u["_id"]}, {"$set": {f: u[f] for f in fields}})
+    rev = u.get("rev")
+    res = await db.users.update_one({"_id": u["_id"], "rev": rev}, {"$set": {**{f: u[f] for f in fields}, "rev": (rev or 0) + 1}})
+    if res.matched_count == 0:
+        raise HTTPException(409, "Another action was in progress - please try again")
+    u["rev"] = (rev or 0) + 1
 
 
 @router.get("/game/data")
@@ -216,7 +220,7 @@ async def land(body: LandIn, u: dict = Depends(get_current_user)):
 @router.get("/inventory/fish")
 async def list_fish(u: dict = Depends(get_current_user)):
     docs = await db.fish_inventory.find({"user_id": str(u["_id"])}).sort("caught_at", -1).to_list(500)
-    return [{**{k: v for k, v in d.items() if k != "_id"}, "id": str(d["_id"]), "img": SPECIES_BY_ID[d["species_id"]]["img"]} for d in docs]
+    return [{**{k: v for k, v in d.items() if k != "_id"}, "id": str(d["_id"]), "img": SPECIES_BY_ID[d["species_id"]]["icon"]} for d in docs]
 
 
 class SellIn(BaseModel):

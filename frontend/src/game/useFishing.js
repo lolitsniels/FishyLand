@@ -17,7 +17,16 @@ export function useFishing() {
 
   const later = (fn, ms) => timers.current.push(setTimeout(fn, ms));
 
-  const finish = useCallback(async (enc, holds) => {
+  const finish = useCallback(async (enc, holds, clientOutcome) => {
+    if (!holds.length) {
+      const st = s.getState();
+      phase("lost");
+      sfx("snap");
+      st.setLostMsg(t(clientOutcome === "snapped" ? "snapped" : "escaped"));
+      st.pushSystem("You never reeled — the fish got away.", "lost");
+      later(() => { st.setLostMsg(null); phase("idle"); }, 1600);
+      return;
+    }
     phase("resolving");
     try {
       const { data } = await api.post("/fish/land", { encounter_id: enc.encounter_id, holds });
@@ -63,7 +72,7 @@ export function useFishing() {
       fx.pos = sim.pos; fx.fill = sim.fill; fx.zone = sim.zone; fx.red = sim.red; fx.tick = sim.tick; fx.trick = sim.tf;
       if (sim.outcome) {
         if (start !== null) holds.push([start, sim.tick]);
-        finish(enc, holds);
+        finish(enc, holds, sim.outcome);
         return;
       }
       raf.current = requestAnimationFrame(loop);

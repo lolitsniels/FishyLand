@@ -45,7 +45,7 @@ const Toggle = ({ label, k, testid }) => {
 
 export function SettingsPanel() {
   const nav = useNavigate();
-  const logout = async () => { await api.post("/auth/logout").catch(() => {}); tokens.clear(); useGame.getState().setPlayer(null); nav("/"); };
+  const logout = async () => { await api.post("/auth/logout").catch(() => {}); tokens.clear(); useGame.setState({ player: null, modal: null, result: null, system: [], phase: "idle" }); nav("/"); };
   return (
     <Modal title="Settings" width={420} testid="settings-modal">
       <div className="flex flex-col gap-2">

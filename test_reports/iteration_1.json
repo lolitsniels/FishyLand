@@ -1,0 +1,48 @@
+{
+  "summary": "First test run of Fishing Realm Phase 1+2. Backend: 13/14 pytest cases pass, plus scripts/e2e_fishing.py run against the public URL (3 of 3 fish landed; the server outcome matched the controller prediction every time; empty-holds and too-fast fights rejected; encounter reuse returned 400; sell, enhance and repair worked). Anti-cheat, auth, guest claim, shop, potion, gear enhance/repair, Lv5 lock, sell and fishdex all work. One backend failure: brute-force lockout does not trigger behind the ingress. UI: landing, guest play, register, logout and re-login (progress persists after reload), owner login, wrong-password auth-error, HUD values, coming-soon modals (event icons, rails, dim menus), cast flow (waiting-message -> tension-minigame with needle, catch meter and timer; stamina 100 -> 99), inventory sell selected/all, stamina potion (+30, goes past max), gear tabs/enhance (BR 4960 -> 4996)/repair (button disabled after repair), buy-rod-2 locked at Lv 5, shop buy and quick-slot bait, fishdex (10 entries, progress 2/10, detail panel), guest claim then login, landscape events fan and portrait rotate-overlay all work. Bugs found: a fight lost with no input is reported as a server 'fight rejected' error, and the open modal is kept across logout/login.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/auth/login", "issue": "Brute-force lockout never triggers in the preview/prod environment. The lockout key is request.client.host + email, and request.client.host is the ingress pod IP, which changes between requests (10.81.4.212 and 10.81.4.213 were both seen). Attempts get split across several login_attempts docs, so a 6th wrong password still returns 401 instead of 429. Fix: take the client IP from the first entry of the X-Forwarded-For header (already done for ip_log), or lock per email.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "CORS (server.py)", "issue": "CORS_ORIGINS='*' with allow_credentials=True makes Starlette echo any Origin (tested with https://evil.com) together with Access-Control-Allow-Credentials: true. Cookies are httpOnly and SameSite=None, so any site can make credentialed requests. Use an explicit list of origins."},
+      {"endpoint": "POST /api/fish/land", "issue": "If the player loses a fight without pressing anything (AFK, or a quick Space tap to cast), the client sends holds=[] and the server returns 400 'No reel input - fight rejected'. The UI shows this as an error toast and a chat line instead of the normal escaped/snapped fight-lost-message. Either have the client skip /land and show the loss locally when there are no holds, or have the server accept an empty-input loss when the simulated outcome is not 'landed'."},
+      {"endpoint": "cast/land/sell/buy (game.py)", "issue": "Every endpoint does read-modify-write on the whole user doc with $set and no atomic guards. Parallel requests can bypass the cast cooldown or the stamina check, or overwrite gold/items (e.g. a buy racing a sell). Use conditional updates ($inc with a filter such as gold >= cost)."},
+      {"endpoint": "POST /api/auth/refresh", "issue": "Issues new tokens without checking user.banned."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Store/logout", "issue": "The open modal (e.g. the Settings modal used to log out) is not cleared on logout. After logging back in without a page reload, the Settings modal is already open, and the user's first click on the settings button closes it instead.", "selector": "[data-testid='settings-modal']", "priority": "MEDIUM"},
+      {"component": "useFishing finish()", "issue": "A loss with no input shows the error toast 'No reel input - fight rejected' instead of fight-lost-message (same root cause as the backend minor issue).", "selector": "[data-testid='fight-lost-message']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Landing at 844x390 (mobile landscape)", "issues": ["The logo is clipped at the top of the viewport and the Play as Guest button is below the fold. Make the auth card more compact or scale the logo down at short heights."]},
+      {"screen": "Inventory modal", "issues": ["Fish card art loads slowly because each fish PNG is about 370KB; the cards were empty in the first screenshot. Use smaller WebP thumbnails."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_fishing_realm.py", "/app/backend/tests/land_fish_helper.py", "/app/test_reports/pytest/pytest_results.xml", "/app/scripts/e2e_fishing.py"],
+  "action_items": [
+    "Fix the login lockout key: use the X-Forwarded-For client IP (or email only) so 5 failures lock the account",
+    "Handle fights lost with no input gracefully (show fight-lost-message, not the 'fight rejected' error)",
+    "Clear the modal state (openModal/modal) on logout",
+    "Set explicit CORS origins instead of '*' with credentials",
+    "Optional: atomic Mongo updates for gold/stamina/cooldown; check banned in /auth/refresh; compact landing layout for mobile landscape; fish thumbnails"
+  ],
+  "critical_code_review_comments": [
+    "auth.py login: the lockout identifier uses request.client.host, which is the proxy IP behind the ingress",
+    "auth.py login: locked_until is refreshed on every failed attempt (including the first), so the 15-minute window keeps sliding. Acceptable, but count is never reset after expiry unless a login succeeds, so after the first lock expires a single new failure locks again",
+    "game.py: concurrent requests can race because writes are $set of the whole stale user doc",
+    "player.add_xp level-up bonus uses the stored stamina rather than current_stamina (regeneration not counted)",
+    "Anti-cheat timing tolerance of 1.0s plus sim replay looks solid; reuse and expiry are enforced atomically via find_one_and_update"
+  ],
+  "updated_files": ["/app/backend/tests/test_fishing_realm.py", "/app/backend/tests/land_fish_helper.py"],
+  "success_rate": {"backend": "93% (13/14)", "frontend": "~90% (all requested flows work; 2 UX bugs)"},
+  "test_credentials": "owner@fishingrealm.com / RealmOwner#2026 (works; bcrypt $2b$ verified). UI test account: test_ui91441@example.com / uitest123",
+  "seed_data_creation": "Created several guest accounts, TEST/test_* registered and claimed accounts, and landed fish for test_ui91441@example.com via land_fish_helper.py",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "pytest.ini forces -n 2 xdist. Run: cd /app/backend && python -m pytest tests/test_fishing_realm.py. To seed fish for UI tests: python tests/land_fish_helper.py <email> <pw> <n>. Headless WebGL is slow, so you cannot win fights in the browser; land fish through the helper. Not covered: the frontend/backend sim parity check (E1 reported 300/300), and a full in-browser catch-popup flow.",
+  "rca of the issue": "Lockout: login_attempts showed identifiers '10.81.4.212:email' (count 4) and '10.81.4.213:email' (count 2) for one client making 6 attempts, because the ingress IP is used as the client host. Fight rejected: useFishing.startFight only records holds while fx.hold is true during the fight; with no input, holds=[] is posted, and game.land rejects empty holds before simulating. Modal: the store's modal state is not reset in logout, and Game renders it again on remount."
+}

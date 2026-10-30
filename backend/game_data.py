@@ -27,7 +27,7 @@ WATERS = [
 def _f(id, name, rarity, wmin, wmax, value, strength, erratic, behavior, bait, lore):
     return {"id": id, "name": name, "rarity": rarity, "water": "crystal_lagoon", "weight": [wmin, wmax],
             "value": value, "strength": strength, "erratic": erratic, "behavior": behavior,
-            "bait": bait, "lore": lore, "img": f"/art/fish/{id}.png"}
+            "bait": bait, "lore": lore, "img": f"/art/fish/{id}.png", "icon": f"/art/fish/icons/{id}.webp"}
 
 
 SPECIES = [

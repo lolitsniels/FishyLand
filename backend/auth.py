@@ -87,6 +87,11 @@ async def _username_free(name: str) -> bool:
     return await db.users.find_one({"username_lower": name.lower()}) is None
 
 
+def _client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "")
+    return fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "unknown")
+
+
 @router.post("/register")
 async def register(body: RegisterIn, response: Response):
     email = body.email.lower()
@@ -117,7 +122,7 @@ async def guest(response: Response):
 @router.post("/login")
 async def login(body: LoginIn, request: Request, response: Response):
     email = body.email.strip().lower()
-    ident = f"{request.client.host if request.client else 'x'}:{email}"
+    ident = f"{_client_ip(request)}:{email}"
     att = await db.login_attempts.find_one({"identifier": ident})
     now = datetime.now(timezone.utc)
     if att and att.get("count", 0) >= 5 and att.get("locked_until") and att["locked_until"].replace(tzinfo=timezone.utc) > now:
@@ -130,7 +135,7 @@ async def login(body: LoginIn, request: Request, response: Response):
     if user.get("banned"):
         raise HTTPException(403, "Account banned")
     await db.login_attempts.delete_one({"identifier": ident})
-    ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "").split(",")[0].strip()
+    ip = _client_ip(request)
     await db.users.update_one({"_id": user["_id"]}, {"$set": {"last_login": now.isoformat()}, "$push": {"ip_log": {"$each": [ip], "$slice": -10}}})
     return {**_issue(response, str(user["_id"])), "player": await player_state(user)}
 
@@ -163,8 +168,9 @@ async def refresh(request: Request, response: Response):
         raise HTTPException(401, "Invalid refresh token")
     if payload.get("type") != "refresh":
         raise HTTPException(401, "Invalid token type")
-    if not await db.users.find_one({"_id": ObjectId(payload["sub"])}):
-        raise HTTPException(401, "User not found")
+    u = await db.users.find_one({"_id": ObjectId(payload["sub"])})
+    if not u or u.get("banned"):
+        raise HTTPException(401, "User not found or banned")
     return _issue(response, payload["sub"])
 
 

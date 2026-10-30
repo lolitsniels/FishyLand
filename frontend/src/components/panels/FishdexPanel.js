@@ -23,7 +23,7 @@ export default function FishdexPanel() {
             return (
               <button type="button" key={s.id} onClick={() => setPick(s.id)} data-testid={`fishdex-entry-${s.id}`}
                 className={`rar-${s.rarity} ${d ? "rar-frame" : "border border-amber-900"} rounded bg-black/50 p-1.5 flex flex-col items-center transition-transform hover:-translate-y-0.5 ${pick === s.id ? "ring-2 ring-white" : ""}`}>
-                <img src={s.img} alt="" className="h-14 w-full object-contain" style={d ? {} : { filter: "brightness(0) opacity(0.6)" }} />
+                <img src={s.icon} alt="" className="h-14 w-full object-contain" loading="lazy" style={d ? {} : { filter: "brightness(0) opacity(0.6)" }} />
                 <span className="text-[10px] truncate w-full">{d ? s.name : "???"}</span>
                 <span className="text-[9px] uppercase rar-text font-cinzel font-bold">{s.rarity}</span>
               </button>
