@@ -332,7 +332,7 @@ function buildScene(app, tex, key, bgTex) {
   // Camera: harbour follows the angler, waters keep angler + open water in frame.
   const cam = { sc: 1, sw: 1, sh: 1, x: null, y: null };
   const layout = () => {
-    const sw = app.renderer.width / app.renderer.resolution, sh = app.renderer.height / app.renderer.resolution;
+    const sw = app.screen.width, sh = app.screen.height;
     const small = Math.min(sw, sh) < 560;
     const zoom = mode === "harbour" ? Math.min(sw / 900, sh / 560) : Math.min(sw / 760, sh / 470);
     cam.sc = Math.max(sw / BG_W, sh / BG_H, small ? zoom : 0, mode === "harbour" ? sw / 1400 : 0);
@@ -352,6 +352,7 @@ function buildScene(app, tex, key, bgTex) {
 
   let time = 0;
   const tick = (tk) => {
+    if (app.screen.width !== cam.sw || app.screen.height !== cam.sh) layout();
     const dt = Math.min(0.05, tk.deltaMS / 1000);
     time += dt;
     applyQuality(useGame.getState().settings.low);

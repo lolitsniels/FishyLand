@@ -261,3 +261,5 @@ body {
 .lp2-input:focus { border-color: #f3c24d; box-shadow: 0 0 0 3px rgba(243, 194, 77, 0.18); }
 .fr-panel.absolute { position: absolute; }
 .fr-panel.fixed { position: fixed; }
+
+[data-testid="game-canvas"] > canvas { width: 100% !important; height: 100% !important; display: block; }
