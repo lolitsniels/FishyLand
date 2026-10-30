@@ -1,6 +1,7 @@
 import { Map, ChevronDown } from "lucide-react";
 import { useGame } from "../../store";
 import { Bar } from "../fr";
+import { PORTAL } from "../../portal";
 
 export function Minimap() {
   const open = useGame((s) => s.openModal);
@@ -11,15 +12,15 @@ export function Minimap() {
         <button type="button" className="text-amber-200" onClick={() => open({ type: "waters" })} data-testid="open-waters-btn"><Map size={14} /></button>
       </div>
       <div className="relative h-[86px] rounded overflow-hidden border border-amber-700/70">
-        <img src="/art/crystal_lagoon.jpg" alt="" className="w-full h-full object-cover" />
+        <img src="art/crystal_lagoon.jpg" alt="" className="w-full h-full object-cover" />
         <span className="absolute left-[47%] top-[78%] w-2.5 h-2.5 rounded-full bg-amber-300 border border-white shadow-[0_0_8px_#ffd34d]" />
         <span className="absolute left-[55%] top-[55%] w-1.5 h-1.5 rounded-full bg-cyan-300 animate-ping" />
       </div>
       <div className="flex items-center justify-between mt-1.5 text-[11px]">
-        <button type="button" className="fr-chip px-2 py-0.5 flex items-center gap-1 font-cinzel font-bold text-emerald-300" data-testid="channel-selector"
+        {PORTAL ? <span className="fr-chip px-2 py-0.5 font-cinzel font-bold text-emerald-300">Lv.{useGame.getState().player?.level} Waters</span> : <button type="button" className="fr-chip px-2 py-0.5 flex items-center gap-1 font-cinzel font-bold text-emerald-300" data-testid="channel-selector"
           onClick={() => open({ type: "soon", title: "Channels", desc: "Multiple channels per water with up to 60 anglers each.", phase: 4 })}>
           Channel 1 <ChevronDown size={11} />
-        </button>
+        </button>}
         <span className="text-amber-100/80 font-cinzel">X 600 · Y 748</span>
       </div>
     </div>

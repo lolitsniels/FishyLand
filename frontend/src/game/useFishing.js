@@ -6,6 +6,7 @@ import { fx, setPhase as setFxPhase } from "./fx";
 import { FightSim } from "./sim";
 import { sfx } from "./sfx";
 import { t } from "../i18n";
+import { showInterstitial } from "../portal";
 
 const TICK_MS = 1000 / 30;
 const phase = (p) => { setFxPhase(p); useGame.getState().setPhase(p); };
@@ -45,7 +46,7 @@ export function useFishing() {
         sfx("snap");
         st.setLostMsg(t(data.outcome));
         st.pushSystem(t(data.outcome), "lost");
-        later(() => { st.setLostMsg(null); phase("idle"); }, 1600);
+        later(() => { st.setLostMsg(null); phase("idle"); showInterstitial(); }, 1600);
       }
     } catch (e) {
       toast.error(errMsg(e));
@@ -58,11 +59,14 @@ export function useFishing() {
     const sim = new FightSim(enc.params);
     const holds = [];
     let start = null;
-    const t0 = performance.now();
+    let t0 = performance.now(), last = t0;
     fx.limit = enc.params.limit_ticks;
     phase("fight");
     const loop = () => {
-      const target = Math.floor((performance.now() - t0) / TICK_MS);
+      const nowMs = performance.now();
+      if (nowMs - last > 250 || s.getState().paused) t0 += nowMs - last; // freeze the fight while paused / tab hidden
+      last = nowMs;
+      const target = Math.floor((nowMs - t0) / TICK_MS);
       while (sim.tick < target && !sim.outcome) {
         const h = fx.hold;
         if (h && start === null) start = sim.tick;
@@ -82,7 +86,7 @@ export function useFishing() {
 
   const cast = useCallback(async () => {
     const st = s.getState();
-    if (st.phase !== "idle" || st.modal || st.result) return;
+    if (st.phase !== "idle" || st.modal || st.result || st.paused || st.needTap) return;
     if (st.player.stamina < 1) { toast.error(t("noStamina")); return; }
     phase("cast");
     sfx("cast");
@@ -107,7 +111,7 @@ export function useFishing() {
     later(() => startFight(enc), Math.max(700, enc.bite_delay_ms) + enc.fight_delay_ms);
   }, [s, startFight]);
 
-  const closeResult = useCallback(() => { s.getState().setResult(null); phase("idle"); }, [s]);
+  const closeResult = useCallback(() => { s.getState().setResult(null); phase("idle"); showInterstitial(); }, [s]);
 
   useEffect(() => {
     const down = (e) => {

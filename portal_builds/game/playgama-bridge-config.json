@@ -1,0 +1,14 @@
+{
+  "$schema": "https://bridge.playgama.com/v1/stable/schema.json",
+  "platforms": {
+    "game_distribution": {
+      "gameId": "REPLACE_WITH_GAMEDISTRIBUTION_GAME_ID"
+    }
+  },
+  "advertisement": {
+    "interstitial": {
+      "preloadOnStart": true,
+      "minimumDelayBetweenInterstitial": 120
+    }
+  }
+}

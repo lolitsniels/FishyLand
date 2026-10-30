@@ -46,6 +46,48 @@ const SOUNDS = {
 };
 
 export function sfx(name) {
-  if (!useGame.getState().settings.sound) return;
+  if (!useGame.getState().settings.sound || useGame.getState().paused) return;
   try { SOUNDS[name]?.(); } catch (e) { /* audio blocked */ }
+}
+
+// Procedural looping fantasy soundtrack (self-contained, no external files).
+const PROG = [[261.63, 329.63, 392.0], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 246.94, 293.66]];
+let musicGain = null, musicTimer = null, beat = 0;
+
+function scheduleBar() {
+  const a = ac(), t = a.currentTime + 0.05, chord = PROG[beat % PROG.length];
+  chord.forEach((f) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = "sine"; o.frequency.value = f / 2;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.05, t + 0.6); g.gain.linearRampToValueAtTime(0.0001, t + 3.9);
+    o.connect(g).connect(musicGain); o.start(t); o.stop(t + 4);
+  });
+  [0, 1, 2, 1, 2, 0, 2, 1].forEach((n, i) => {
+    const o = a.createOscillator(), g = a.createGain(), st = t + i * 0.5;
+    o.type = "triangle"; o.frequency.value = chord[n] * 2;
+    g.gain.setValueAtTime(0.045, st); g.gain.exponentialRampToValueAtTime(0.0001, st + 0.45);
+    o.connect(g).connect(musicGain); o.start(st); o.stop(st + 0.5);
+  });
+  beat++;
+}
+
+export function startMusic() {
+  try {
+    const a = ac();
+    if (a.state === "suspended") a.resume();
+    if (musicTimer) return;
+    musicGain = a.createGain();
+    musicGain.connect(a.destination);
+    applyAudio();
+    scheduleBar();
+    musicTimer = setInterval(scheduleBar, 4000);
+  } catch (e) { /* audio blocked */ }
+}
+
+export function applyAudio() {
+  const st = useGame.getState();
+  if (musicGain) musicGain.gain.value = st.settings.music ? 1 : 0;
+  if (!ctx) return;
+  if (st.paused) ctx.suspend().catch(() => {});
+  else if (musicTimer) ctx.resume().catch(() => {});
 }

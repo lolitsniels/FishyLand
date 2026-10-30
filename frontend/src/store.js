@@ -1,8 +1,9 @@
 import { create } from "zustand";
+import { kv } from "./portal";
 
-const loadSettings = () => {
-  try { return { sound: true, low: false, fps: false, ...JSON.parse(localStorage.getItem("fr_settings") || "{}") }; }
-  catch { return { sound: true, low: false, fps: false }; }
+export const loadSettings = () => {
+  try { return { sound: true, music: true, low: false, fps: false, ...JSON.parse(kv.get("fr_settings") || "{}") }; }
+  catch { return { sound: true, music: true, low: false, fps: false }; }
 };
 
 let lineId = 0;
@@ -18,6 +19,8 @@ export const useGame = create((set, get) => ({
   system: [],
   world: [],
   settings: loadSettings(),
+  paused: false,
+  needTap: false,
   setPlayer: (player) => set({ player }),
   patchPlayer: (p) => set({ player: { ...get().player, ...p } }),
   setData: (data) => set({ data }),
@@ -32,7 +35,7 @@ export const useGame = create((set, get) => ({
     set({ system: [...get().system.slice(-60), { id: ++lineId, text, kind, at: new Date() }] }),
   setSetting: (k, v) => {
     const settings = { ...get().settings, [k]: v };
-    localStorage.setItem("fr_settings", JSON.stringify(settings));
+    kv.set("fr_settings", JSON.stringify(settings));
     set({ settings });
   },
 }));

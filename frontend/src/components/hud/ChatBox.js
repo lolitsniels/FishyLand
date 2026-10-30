@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Smile, Settings } from "lucide-react";
 import { useGame } from "../../store";
 import { api } from "../../lib/api";
+import { PORTAL } from "../../portal";
 
-const TABS = ["General", "World", "Guild", "System"];
+const TABS = PORTAL ? ["System"] : ["General", "World", "Guild", "System"];
 const KIND_COLOR = { legendary: "#ffcc33", mythic: "#ff3f8e", epic: "#c06bff", rare: "#47a3ff", uncommon: "#3ee27a", lost: "#ff8a8a", level: "#f0abfc", drop: "#7ff3ff" };
 
 export default function ChatBox({ compact }) {
@@ -16,6 +17,7 @@ export default function ChatBox({ compact }) {
   const end = useRef(null);
 
   useEffect(() => {
+    if (PORTAL) return;
     const load = () => api.get("/world/feed").then((r) => setWorld(r.data)).catch(() => {});
     load();
     const i = setInterval(load, 12000);
@@ -51,11 +53,11 @@ export default function ChatBox({ compact }) {
             ))}
             <div ref={end} />
           </div>
-          <div className="flex items-center gap-1 p-1 border-t border-amber-700/60">
+          {!PORTAL && <div className="flex items-center gap-1 p-1 border-t border-amber-700/60">
             <input disabled className="fr-input !py-1 !text-[11px] flex-1 opacity-60" placeholder="Chat unlocks in Phase 4" data-testid="chat-input" />
             <Smile size={15} className="text-amber-300/60" />
             <button type="button" onClick={() => openModal({ type: "settings" })} data-testid="chat-settings-btn"><Settings size={15} className="text-amber-300" /></button>
-          </div>
+          </div>}
         </>
       )}
     </div>

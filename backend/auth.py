@@ -87,6 +87,14 @@ async def _username_free(name: str) -> bool:
     return await db.users.find_one({"username_lower": name.lower()}) is None
 
 
+BLOCKED_WORDS = ["fuck", "shit", "bitch", "cunt", "nigg", "fag", "rape", "nazi", "hitler", "porn", "sex", "dick", "pussy", "whore", "slut", "asshole", "retard"]
+
+
+def _name_ok(name: str) -> bool:
+    n = name.lower().replace("0", "o").replace("1", "i").replace("3", "e").replace("4", "a").replace("5", "s").replace("_", "")
+    return not any(w in n for w in BLOCKED_WORDS)
+
+
 def _client_ip(request: Request) -> str:
     fwd = request.headers.get("x-forwarded-for", "")
     return fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "unknown")
@@ -97,6 +105,8 @@ async def register(body: RegisterIn, response: Response):
     email = body.email.lower()
     if await db.users.find_one({"email": email}):
         raise HTTPException(400, "Email already registered")
+    if not _name_ok(body.username):
+        raise HTTPException(400, "Please choose a different hero name")
     if not await _username_free(body.username):
         raise HTTPException(400, "Name already taken")
     doc = new_player(body.username, email, hash_password(body.password), False)

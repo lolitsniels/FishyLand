@@ -1,4 +1,4 @@
-import { Backpack, Sparkles, Wrench, ShoppingBag, Bot, BookOpen, Hammer, Store, Users, Shield, Trophy, FlaskConical } from "lucide-react";
+import { Settings, Backpack, Sparkles, Wrench, ShoppingBag, Bot, BookOpen, Hammer, Store, Users, Shield, Trophy, FlaskConical } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "../fr";
@@ -7,6 +7,7 @@ import { fx } from "../../game/fx";
 import { api, errMsg } from "../../lib/api";
 import { t } from "../../i18n";
 import { sfx } from "../../game/sfx";
+import { PORTAL } from "../../portal";
 
 const BAIT_COLORS = { worm: "#d9a066", glow_shrimp: "#7ff3ff", star_lure: "#ffd34d" };
 
@@ -67,17 +68,20 @@ export default function ActionBar({ cast }) {
       <QuickSlots />
       <div className="fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1">
         <Ring icon={Backpack} label="Inventory" size={40} testid="menu-inventory" onClick={() => open({ type: "inventory" })} />
-        <Ring icon={Sparkles} label="Skills" size={40} dim testid="menu-skills" onClick={soon("Skills", "4 active fishing skills and passives bought with skill points.", 5)} />
+        {!PORTAL && <Ring icon={Sparkles} label="Skills" size={40} dim testid="menu-skills" onClick={soon("Skills", "4 active fishing skills and passives bought with skill points.", 5)} />}
         <Ring icon={Wrench} label="Rod" size={40} dot={gearAlert} testid="menu-gear" onClick={() => open({ type: "gear" })} />
         <Ring icon={ShoppingBag} label="Bait" size={40} testid="menu-shop" onClick={() => open({ type: "shop" })} />
         <FishButton cast={cast} />
-        <Ring icon={Bot} label="Auto" size={40} dim testid="menu-auto" onClick={soon("Auto Fishing", "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", 6)} />
+        {!PORTAL && <Ring icon={Bot} label="Auto" size={40} dim testid="menu-auto" onClick={soon("Auto Fishing", "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", 6)} />}
         <Ring icon={BookOpen} label="Fishdex" size={40} testid="menu-fishdex" onClick={() => open({ type: "fishdex" })} />
+        {!PORTAL && <>
         <Ring icon={Hammer} label="Craft" size={40} dim testid="menu-craft" onClick={soon("Crafting", "Craft gear and baits from fish and materials.", 5)} />
         <Ring icon={Store} label="Market" size={40} dim testid="menu-market" onClick={soon("Market", "Player trading with 5% tax and price history.", 7)} />
         <Ring icon={Users} label="Crew" size={40} dim testid="menu-crew" onClick={soon("Crew", "Friends, whispers and gifting.", 4)} />
         <Ring icon={Shield} label="Guild" size={40} dim testid="menu-guild" onClick={soon("Guild", "Guilds up to 50 with guild boss and shop.", 7)} />
         <Ring icon={Trophy} label="Rankings" size={40} dim testid="menu-rankings" onClick={soon("Rankings", "BR, Level, Biggest Fish and Guild rankings.", 7)} />
+        </>}
+        {PORTAL && <Ring icon={Settings} label="Settings" size={40} testid="menu-settings" onClick={() => open({ type: "settings" })} />}
       </div>
     </div>
   );

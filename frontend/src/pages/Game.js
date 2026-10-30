@@ -7,6 +7,9 @@ import { fx } from "../game/fx";
 import { useGame } from "../store";
 import { api, tokens } from "../lib/api";
 import { t } from "../i18n";
+import { PORTAL, onPause } from "../portal";
+import { startMusic, applyAudio } from "../game/sfx";
+import Tutorial from "../components/hud/Tutorial";
 import PlayerPanel from "../components/hud/PlayerPanel";
 import EventGrid from "../components/hud/EventGrid";
 import { Minimap, Tracker } from "../components/hud/Minimap";
@@ -24,7 +27,9 @@ import { WatersPanel, SettingsPanel, AccountPanel, ComingSoon } from "../compone
 function useHudScale() {
   const calc = () => {
     const compact = window.innerHeight < 520;
-    const sc = compact ? Math.min(window.innerWidth / 1100, window.innerHeight / 600) : Math.min(1.15, window.innerWidth / 1420, window.innerHeight / 790);
+    const sc = compact ? Math.min(window.innerWidth / 1100, window.innerHeight / 600)
+      : PORTAL ? Math.min(1.15, window.innerWidth / 1100, window.innerHeight / 680)
+      : Math.min(1.15, window.innerWidth / 1420, window.innerHeight / 790);
     return { scale: Math.max(0.45, sc), compact };
   };
   const [s, setS] = useState(calc);
@@ -43,12 +48,27 @@ function ModalHost() {
 
 const RotateOverlay = () => (
   <div className="rotate-overlay hidden fixed inset-0 z-[100] bg-[#04121c] flex-col items-center justify-center gap-4 text-center p-8" data-testid="rotate-overlay">
-    <img src="/art/logo.png" alt="" className="w-56" />
+    <img src="art/logo.png" alt="" className="w-56" />
     <Smartphone size={48} className="text-amber-300 rotate-90 animate-pulse" />
     <div className="gold-text font-deco text-xl font-black">{t("rotate")}</div>
     <div className="text-sm text-amber-100/70">{t("rotateSub")}</div>
   </div>
 );
+
+function PauseOverlay() {
+  const paused = useGame((s) => s.paused);
+  const needTap = useGame((s) => s.needTap);
+  if (!paused && !needTap) return null;
+  const resume = () => { if (!paused) { useGame.setState({ needTap: false }); applyAudio(); } };
+  return (
+    <div className="absolute inset-0 z-[90] grid place-items-center bg-black/70 pointer-events-auto" onPointerDown={resume} data-testid="pause-overlay">
+      <div className="flex flex-col items-center gap-3">
+        <div className="gold-text font-deco text-3xl font-black">Paused</div>
+        {!paused && <button type="button" className="fr-btn px-8 py-2 text-lg" data-testid="resume-btn">Tap to Continue</button>}
+      </div>
+    </div>
+  );
+}
 
 function Hud() {
   const { cast, closeResult } = useFishing();
@@ -58,16 +78,18 @@ function Hud() {
     <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: `${100 / scale}vw`, height: `${100 / scale}vh`, transform: `scale(${scale})` }} data-testid="game-hud">
       <div className="absolute top-3 left-3 pointer-events-auto"><PlayerPanel /></div>
       <div className="absolute top-3 right-3 flex gap-3 items-start pointer-events-auto">
-        <EventGrid compact={compact} />
+        {!PORTAL && <EventGrid compact={compact} />}
         <div className="flex flex-col gap-2"><Minimap />{!compact && <Tracker />}</div>
       </div>
-      <div className={`absolute left-4 ${compact ? "top-[165px]" : "top-[200px]"} pointer-events-auto`}><LeftRail /></div>
+      {!PORTAL && <div className={`absolute left-4 ${compact ? "top-[165px]" : "top-[200px]"} pointer-events-auto`}><LeftRail /></div>}
       <div className="absolute bottom-3 left-3 pointer-events-auto"><ChatBox compact={compact} /></div>
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto"><ActionBar cast={cast} /></div>
       <div className="absolute bottom-[170px] left-1/2 -translate-x-1/2"><TensionBar /></div>
       <div id="fps-meter" className={`absolute top-1 left-1/2 -translate-x-1/2 fr-chip px-2 text-[11px] font-cinzel ${showFps ? "" : "hidden"}`} data-testid="fps-meter" />
       <div className="pointer-events-auto"><CatchPopup onClose={closeResult} /></div>
       <div className="pointer-events-auto"><ModalHost /></div>
+      <Tutorial />
+      <PauseOverlay />
     </div>
   );
 }
@@ -86,7 +108,24 @@ export default function Game() {
   }, [nav, setData, setPlayer]);
 
   useEffect(() => {
-    if (player) { fx.username = `${player.username}  ·  VIP${player.vip_level}`; fx.title = player.equipped?.title || ""; }
+    let hadAd = false;
+    const off = onPause((reasons) => {
+      const paused = reasons.size > 0;
+      if (reasons.has("ad")) hadAd = true;
+      const st = { paused };
+      if (!paused && hadAd) { st.needTap = true; hadAd = false; }
+      fx.hold = false;
+      useGame.setState(st);
+      applyAudio();
+    });
+    const first = () => startMusic();
+    window.addEventListener("pointerdown", first, { once: true });
+    window.addEventListener("keydown", first, { once: true });
+    return () => { off(); window.removeEventListener("pointerdown", first); window.removeEventListener("keydown", first); };
+  }, []);
+
+  useEffect(() => {
+    if (player) { fx.username = PORTAL ? player.username : `${player.username}  ·  VIP${player.vip_level}`; fx.title = player.equipped?.title || ""; }
   }, [player]);
 
   useEffect(() => {
@@ -98,7 +137,7 @@ export default function Game() {
   if (!player || !data) {
     return (
       <div className="fixed inset-0 grid place-items-center bg-[#04121c]" data-testid="game-loading">
-        <div className="flex flex-col items-center gap-3"><img src="/art/logo.png" alt="" className="w-64 float-y" /><div className="font-cinzel text-amber-200 animate-pulse">Summoning the Realm…</div></div>
+        <div className="flex flex-col items-center gap-3"><img src="art/logo.png" alt="" className="w-64 float-y" /><div className="font-cinzel text-amber-200 animate-pulse">Summoning the Realm…</div></div>
       </div>
     );
   }

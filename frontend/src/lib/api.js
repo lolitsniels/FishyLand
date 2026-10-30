@@ -1,21 +1,23 @@
 import axios from "axios";
+import { PORTAL } from "../portal";
+import { localApi } from "../game/localApi";
 
-export const api = axios.create({ baseURL: `${process.env.REACT_APP_BACKEND_URL}/api` });
+const remote = axios.create({ baseURL: `${process.env.REACT_APP_BACKEND_URL}/api` });
 
 export const tokens = {
   set: (a, r) => { localStorage.setItem("fr_at", a); if (r) localStorage.setItem("fr_rt", r); },
   clear: () => { localStorage.removeItem("fr_at"); localStorage.removeItem("fr_rt"); },
-  has: () => !!localStorage.getItem("fr_at"),
+  has: () => PORTAL || !!localStorage.getItem("fr_at"),
 };
 
-api.interceptors.request.use((cfg) => {
+remote.interceptors.request.use((cfg) => {
   const t = localStorage.getItem("fr_at");
   if (t) cfg.headers.Authorization = `Bearer ${t}`;
   return cfg;
 });
 
 let refreshing = null;
-api.interceptors.response.use(
+remote.interceptors.response.use(
   (r) => r,
   async (err) => {
     const cfg = err.config;
@@ -26,7 +28,7 @@ api.interceptors.response.use(
         refreshing = refreshing || axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/refresh`, { refresh_token: rt });
         const { data } = await refreshing;
         tokens.set(data.access_token, data.refresh_token);
-        return api(cfg);
+        return remote(cfg);
       } catch {
         tokens.clear();
         window.location.href = "/";
@@ -37,6 +39,8 @@ api.interceptors.response.use(
     return Promise.reject(err);
   }
 );
+
+export const api = PORTAL ? localApi : remote;
 
 export function errMsg(e) {
   const detail = e?.response?.data?.detail;

@@ -6,6 +6,8 @@ import Modal from "./Modal";
 import { useGame } from "../../store";
 import { api, errMsg, tokens } from "../../lib/api";
 import { t } from "../../i18n";
+import { PORTAL } from "../../portal";
+import { applyAudio } from "../../game/sfx";
 
 export function WatersPanel() {
   const data = useGame((s) => s.data);
@@ -23,7 +25,7 @@ export function WatersPanel() {
                 <div className="text-[11px] text-amber-100/60">Unlock Lv {w.unlock} · Rec. BR {w.rec_br.toLocaleString()}</div>
               </div>
               {current ? <span className="text-emerald-300 text-xs flex items-center gap-1"><Check size={13} />Here</span>
-                : <span className="text-amber-100/60 text-xs flex items-center gap-1"><Lock size={12} />{p.level < w.unlock ? `Lv ${w.unlock}` : "Phase 3"}</span>}
+                : <span className="text-amber-100/60 text-xs flex items-center gap-1"><Lock size={12} />{`Lv ${w.unlock}`}</span>}
             </div>
           );
         })}
@@ -34,7 +36,8 @@ export function WatersPanel() {
 
 const Toggle = ({ label, k, testid }) => {
   const v = useGame((s) => s.settings[k]);
-  const set = useGame((s) => s.setSetting);
+  const setS = useGame((s) => s.setSetting);
+  const set = (key, val) => { setS(key, val); applyAudio(); };
   return (
     <label className="flex items-center justify-between fr-chip !rounded px-3 py-2 cursor-pointer">
       <span className="font-cinzel text-sm">{label}</span>
@@ -50,10 +53,12 @@ export function SettingsPanel() {
     <Modal title="Settings" width={420} testid="settings-modal">
       <div className="flex flex-col gap-2">
         <Toggle label="Sound effects" k="sound" testid="setting-sound" />
+        <Toggle label="Music" k="music" testid="setting-music" />
         <Toggle label="Low graphics (no bloom / rays)" k="low" testid="setting-low-graphics" />
         <Toggle label="Show FPS" k="fps" testid="setting-show-fps" />
-        <button type="button" className="fr-btn fr-btn-dark py-2 mt-2" onClick={() => useGame.getState().openModal({ type: "account" })} data-testid="open-account-btn">Account</button>
-        <button type="button" className="fr-btn py-2" onClick={logout} data-testid="logout-btn">Log Out</button>
+        <button type="button" className="fr-btn fr-btn-teal py-2 mt-2" onClick={() => useGame.setState({ modal: null, tutorialOpen: true })} data-testid="open-tutorial-btn">How to Play</button>
+        {!PORTAL && <button type="button" className="fr-btn fr-btn-dark py-2" onClick={() => useGame.getState().openModal({ type: "account" })} data-testid="open-account-btn">Account</button>}
+        {!PORTAL && <button type="button" className="fr-btn py-2" onClick={logout} data-testid="logout-btn">Log Out</button>}
       </div>
     </Modal>
   );

@@ -43,12 +43,12 @@ export default function Landing() {
 
   return (
     <div className="fixed inset-0 overflow-hidden" data-testid="landing-page">
-      <img src="/art/landing.jpg" alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
+      <img src="art/landing.jpg" alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_55%,rgba(4,10,20,0.82)_0%,rgba(4,10,20,0.4)_45%,transparent_75%)]" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
       <Motes />
       <div className="relative h-full flex flex-col justify-center pl-[6vw] pr-4 py-3 gap-2 max-w-[560px] overflow-y-auto [@media(max-height:500px)]:justify-start [@media(max-height:500px)]:gap-1 [@media(max-height:500px)]:[&_.fr-input]:!py-1.5 [@media(max-height:500px)]:[&_.fr-btn]:!py-1.5">
-        <img src="/art/logo.png" alt="Fishing Realm" className="w-[min(380px,38vw)] max-h-[24vh] object-contain object-left drop-shadow-[0_0_30px_rgba(255,200,60,0.5)] rise" data-testid="landing-logo" />
+        <img src="art/logo.png" alt="Fishing Realm" className="w-[min(380px,38vw)] max-h-[24vh] object-contain object-left drop-shadow-[0_0_30px_rgba(255,200,60,0.5)] rise" data-testid="landing-logo" />
         <div className="font-cinzel text-amber-100 outline-text tracking-widest text-sm md:text-base -mt-2 rise" style={{ animationDelay: "0.1s" }}>{t("tagline")}</div>
         <div className="fr-panel p-5 [@media(max-height:500px)]:p-3 w-full max-w-[400px] rise" style={{ animationDelay: "0.2s" }} data-testid="auth-panel">
           <div className="flex items-center justify-between mb-3">

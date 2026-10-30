@@ -3,6 +3,7 @@ import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite
 import { AdvancedBloomFilter, GodrayFilter, GlowFilter } from "pixi-filters";
 import { fx } from "./fx";
 import { useGame } from "../store";
+import { gameReady } from "../portal";
 
 const BG_W = 1264, BG_H = 848;
 const FEET = { x: 610, y: 722 };
@@ -389,18 +390,20 @@ export default function Scene() {
   const host = useRef(null);
   useEffect(() => {
     const app = new Application();
-    let alive = true;
-    const onVis = () => (document.hidden ? app.ticker?.stop() : app.ticker?.start());
+    let alive = true, unsub = null;
+    const onVis = () => (document.hidden || useGame.getState().paused ? app.ticker?.stop() : app.ticker?.start());
     const ready = (async () => {
       await app.init({ resizeTo: host.current, backgroundColor: 0x062436, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
       if (!alive) return;
       host.current.appendChild(app.canvas);
       const data = useGame.getState().data;
       const [bg, angler, wings, pet, ambient] = await Promise.all(
-        ["/art/crystal_lagoon.jpg", "/art/angler.png", "/art/wings.png", "/art/pet.png", "/art/fish/glimmer_minnow.png"].map((u) => Assets.load(u))
+        ["art/crystal_lagoon.jpg", "art/angler.png", "art/wings.png", "art/pet.png", "art/fish/glimmer_minnow.png"].map((u) => Assets.load(u))
       );
       if (!alive) return;
       buildScene(app, { bg, angler, wings, pet, ambient });
+      gameReady();
+      unsub = useGame.subscribe((s, prev) => { if (s.paused !== prev.paused) s.paused ? app.ticker.stop() : app.ticker.start(); });
       data?.species.forEach((s) => Assets.load(s.img));
       let frames = 0, last = performance.now(), samples = [];
       app.ticker.add(() => {
@@ -426,6 +429,7 @@ export default function Scene() {
     })();
     return () => {
       alive = false;
+      unsub?.();
       document.removeEventListener("visibilitychange", onVis);
       ready.finally(() => { try { app.destroy(true, { children: true }); } catch (e) { /* already gone */ } });
     };
