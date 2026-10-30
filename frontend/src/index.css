@@ -61,7 +61,7 @@
   --ink: #fdf1cf;
 }
 
-html, body, #root { height: 100%; }
+html, body, #root { height: 100%; overscroll-behavior: none; touch-action: manipulation; }
 body {
   margin: 0;
   font-family: "Marcellus", Georgia, serif;

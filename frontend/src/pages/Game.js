@@ -26,17 +26,21 @@ import { WatersPanel, SettingsPanel, AccountPanel, ComingSoon } from "../compone
 
 function useHudScale() {
   const calc = () => {
-    const w = window.innerWidth, h = window.innerHeight, ar = w / h;
+    const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight, ar = w / h;
     const square = ar >= 0.8 && ar <= 1.25 && w < 1000;
-    if (square) return { scale: Math.max(0.5, Math.min(w / 780, h / 720)), compact: true, square };
+    if (square) return { scale: Math.max(0.5, Math.min(w / 780, h / 720)), compact: true, square, vw: w, vh: h };
     const compact = h < 520;
-    const sc = compact ? Math.min(window.innerWidth / 1100, window.innerHeight / 600)
-      : PORTAL ? Math.min(1.15, window.innerWidth / 1000, window.innerHeight / 640)
-      : Math.min(1.15, window.innerWidth / 1420, window.innerHeight / 790);
-    return { scale: Math.max(0.45, sc), compact, square: false };
+    const sc = compact ? Math.min(w / 1100, h / 600)
+      : PORTAL ? Math.min(1.15, w / 1000, h / 640)
+      : Math.min(1.15, w / 1420, h / 790);
+    return { scale: Math.max(0.45, sc), compact, square: false, vw: w, vh: h };
   };
   const [s, setS] = useState(calc);
-  useEffect(() => { const r = () => setS(calc()); window.addEventListener("resize", r); return () => window.removeEventListener("resize", r); }, []);
+  useEffect(() => {
+    const r = () => setS(calc());
+    window.addEventListener("resize", r); window.visualViewport?.addEventListener("resize", r); window.addEventListener("orientationchange", r);
+    return () => { window.removeEventListener("resize", r); window.visualViewport?.removeEventListener("resize", r); window.removeEventListener("orientationchange", r); };
+  }, []);
   return s;
 }
 
@@ -75,10 +79,10 @@ function PauseOverlay() {
 
 function Hud() {
   const { cast, closeResult } = useFishing();
-  const { scale, compact, square } = useHudScale();
+  const { scale, compact, square, vw, vh } = useHudScale();
   const showFps = useGame((s) => s.settings.fps);
   return (
-    <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: `${100 / scale}vw`, height: `${100 / scale}vh`, transform: `scale(${scale})` }} data-testid="game-hud" data-layout={square ? "square" : compact ? "compact" : "full"}>
+    <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: vw / scale, height: vh / scale, transform: `scale(${scale})` }} data-testid="game-hud" data-layout={square ? "square" : compact ? "compact" : "full"}>
       <div className="absolute top-3 left-3 pointer-events-auto"><PlayerPanel /></div>
       <div className="absolute top-3 right-3 flex gap-3 items-start pointer-events-auto">
         {!PORTAL && <EventGrid compact={compact} />}

@@ -390,12 +390,17 @@ export default function Scene() {
   const host = useRef(null);
   useEffect(() => {
     const app = new Application();
-    let alive = true, unsub = null;
+    let alive = true, unsub = null, ro = null, offFit = null;
     const onVis = () => (document.hidden || useGame.getState().paused ? app.ticker?.stop() : app.ticker?.start());
     const ready = (async () => {
-      await app.init({ resizeTo: host.current, backgroundColor: 0x062436, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
+      await app.init({ width: host.current.clientWidth || window.innerWidth, height: host.current.clientHeight || window.innerHeight, backgroundColor: 0x062436, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
       if (!alive) return;
       host.current.appendChild(app.canvas);
+      const fit = () => { const el = host.current; if (el && el.clientWidth && el.clientHeight) app.renderer.resize(el.clientWidth, el.clientHeight); };
+      ro = new ResizeObserver(fit); ro.observe(host.current);
+      window.visualViewport?.addEventListener("resize", fit);
+      window.addEventListener("orientationchange", fit);
+      offFit = () => { ro.disconnect(); window.visualViewport?.removeEventListener("resize", fit); window.removeEventListener("orientationchange", fit); };
       const data = useGame.getState().data;
       const [bg, angler, wings, pet, ambient] = await Promise.all(
         ["art/crystal_lagoon.jpg", "art/angler.png", "art/wings.png", "art/pet.png", "art/fish/glimmer_minnow.png"].map((u) => Assets.load(u))
@@ -430,6 +435,7 @@ export default function Scene() {
     return () => {
       alive = false;
       unsub?.();
+      offFit?.();
       document.removeEventListener("visibilitychange", onVis);
       ready.finally(() => { try { app.destroy(true, { children: true }); } catch (e) { /* already gone */ } });
     };
