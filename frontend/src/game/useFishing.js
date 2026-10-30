@@ -90,7 +90,7 @@ export function useFishing() {
     if (st.player.stamina < 1) { toast.error(t("noStamina")); return; }
     phase("cast");
     sfx("cast");
-    fx.target = { x: 720 + Math.random() * 340, y: 470 + Math.random() * 190 };
+    fx.target = { x: 690 + Math.random() * 260, y: 470 + Math.random() * 170 };
     let enc;
     try {
       ({ data: enc } = await api.post("/fish/cast", { bait: st.bait }));

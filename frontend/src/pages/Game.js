@@ -10,6 +10,7 @@ import { t } from "../i18n";
 import { PORTAL, onPause } from "../portal";
 import { startMusic, applyAudio } from "../game/sfx";
 import Tutorial from "../components/hud/Tutorial";
+import MorePanel from "../components/panels/MorePanel";
 import PlayerPanel from "../components/hud/PlayerPanel";
 import EventGrid from "../components/hud/EventGrid";
 import { Minimap, Tracker } from "../components/hud/Minimap";
@@ -28,6 +29,8 @@ function useHudScale() {
   const calc = () => {
     const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight, ar = w / h;
     const square = ar >= 0.8 && ar <= 1.25 && w < 1000;
+    const mobile = Math.min(w, h) < 560;
+    if (mobile) return { scale: Math.max(0.55, Math.min(w / 660, h / 520)), compact: true, square, mobile, vw: w, vh: h };
     if (square) return { scale: Math.max(0.5, Math.min(w / 780, h / 720)), compact: true, square, vw: w, vh: h };
     const compact = h < 520;
     const sc = compact ? Math.min(w / 1100, h / 600)
@@ -47,7 +50,7 @@ function useHudScale() {
 function ModalHost() {
   const m = useGame((s) => s.modal);
   if (!m) return null;
-  const map = { inventory: InventoryPanel, gear: GearPanel, shop: ShopPanel, fishdex: FishdexPanel, waters: WatersPanel, settings: SettingsPanel, account: AccountPanel };
+  const map = { more: MorePanel, inventory: InventoryPanel, gear: GearPanel, shop: ShopPanel, fishdex: FishdexPanel, waters: WatersPanel, settings: SettingsPanel, account: AccountPanel };
   if (m.type === "soon") return <ComingSoon {...m} />;
   const C = map[m.type];
   return C ? <C /> : null;
@@ -79,19 +82,20 @@ function PauseOverlay() {
 
 function Hud() {
   const { cast, closeResult } = useFishing();
-  const { scale, compact, square, vw, vh } = useHudScale();
+  const { scale, compact, square, mobile, vw, vh } = useHudScale();
+  const narrow = vw / scale < 900;
   const showFps = useGame((s) => s.settings.fps);
   return (
-    <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: vw / scale, height: vh / scale, transform: `scale(${scale})` }} data-testid="game-hud" data-layout={square ? "square" : compact ? "compact" : "full"}>
+    <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: vw / scale, height: vh / scale, transform: `scale(${scale})` }} data-testid="game-hud" data-layout={mobile ? "mobile" : square ? "square" : compact ? "compact" : "full"}>
       <div className="absolute top-3 left-3 pointer-events-auto"><PlayerPanel /></div>
       <div className="absolute top-3 right-3 flex gap-3 items-start pointer-events-auto">
         {!PORTAL && <EventGrid compact={compact} />}
         <div className="flex flex-col gap-2"><Minimap />{!compact && <Tracker />}</div>
       </div>
-      {!PORTAL && <div className={`absolute left-4 ${compact ? "top-[165px]" : "top-[200px]"} pointer-events-auto`}><LeftRail /></div>}
-      <div className={`absolute left-3 pointer-events-auto ${square ? "bottom-[128px]" : "bottom-3"}`}><ChatBox compact={compact} /></div>
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto"><ActionBar cast={cast} /></div>
-      <div className={`absolute -translate-x-1/2 ${square ? "bottom-[175px] left-1/2" : "bottom-[200px] left-[60%]"}`}><TensionBar /></div>
+      {!PORTAL && !mobile && <div className={`absolute left-4 ${compact ? "top-[165px]" : "top-[200px]"} pointer-events-auto`}><LeftRail /></div>}
+      <div className={`absolute left-3 pointer-events-auto ${narrow ? "bottom-[128px]" : "bottom-3"}`}><ChatBox compact={compact} /></div>
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto"><ActionBar cast={cast} mobile={mobile} /></div>
+      <div className={`absolute -translate-x-1/2 ${narrow ? "bottom-[175px] left-1/2" : "bottom-[200px] left-[60%]"}`}><TensionBar /></div>
       <div id="fps-meter" className={`absolute top-1 left-1/2 -translate-x-1/2 fr-chip px-2 text-[11px] font-cinzel ${showFps ? "" : "hidden"}`} data-testid="fps-meter" />
       <div className="pointer-events-auto"><CatchPopup onClose={closeResult} /></div>
       <div className="pointer-events-auto"><ModalHost /></div>

@@ -54,7 +54,17 @@ function FishButton({ cast }) {
   );
 }
 
-export default function ActionBar({ cast }) {
+export const EXTRA_MENUS = [
+  { id: "skills", img: "skills", label: "Skills", desc: "4 active fishing skills and passives bought with skill points.", phase: 5 },
+  { id: "auto", img: "auto", label: "Auto", title: "Auto Fishing", desc: "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", phase: 6 },
+  { id: "craft", img: "craft", label: "Craft", title: "Crafting", desc: "Craft gear and baits from fish and materials.", phase: 5 },
+  { id: "market", img: "market", label: "Market", desc: "Player trading with 5% tax and price history.", phase: 7 },
+  { id: "crew", img: "crew", label: "Crew", desc: "Friends, whispers and gifting.", phase: 4 },
+  { id: "guild", img: "guild", label: "Guild", desc: "Guilds up to 50 with guild boss and shop.", phase: 7 },
+  { id: "rankings", img: "rankings", label: "Rankings", desc: "BR, Level, Biggest Fish and Guild rankings.", phase: 7 },
+];
+
+export default function ActionBar({ cast, mobile }) {
   const open = useGame((s) => s.openModal);
   const p = useGame((s) => s.player);
   const soon = (title, desc, phase) => () => open({ type: "soon", title, desc, phase });
@@ -64,19 +74,20 @@ export default function ActionBar({ cast }) {
       <QuickSlots />
       <div className="fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1">
         <Ring img="inventory" label="Inventory" size={46} testid="menu-inventory" onClick={() => open({ type: "inventory" })} />
-        {!PORTAL && <Ring img="skills" label="Skills" size={46} dim testid="menu-skills" onClick={soon("Skills", "4 active fishing skills and passives bought with skill points.", 5)} />}
+        {!PORTAL && !mobile && <Ring img="skills" label="Skills" size={46} dim testid="menu-skills" onClick={soon("Skills", "4 active fishing skills and passives bought with skill points.", 5)} />}
         <Ring img="rod" label="Rod" size={46} dot={gearAlert} testid="menu-gear" onClick={() => open({ type: "gear" })} />
         <Ring img="bait" label="Bait" size={46} testid="menu-shop" onClick={() => open({ type: "shop" })} />
         <FishButton cast={cast} />
-        {!PORTAL && <Ring img="auto" label="Auto" size={46} dim testid="menu-auto" onClick={soon("Auto Fishing", "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", 6)} />}
+        {!PORTAL && !mobile && <Ring img="auto" label="Auto" size={46} dim testid="menu-auto" onClick={soon("Auto Fishing", "Official auto-fishing (70% success, 60% rewards). Free 1h/day, unlimited at VIP 3 or Lv 40.", 6)} />}
         <Ring img="fishdex" label="Fishdex" size={46} testid="menu-fishdex" onClick={() => open({ type: "fishdex" })} />
-        {!PORTAL && <>
+        {!PORTAL && !mobile && <>
         <Ring img="craft" label="Craft" size={46} dim testid="menu-craft" onClick={soon("Crafting", "Craft gear and baits from fish and materials.", 5)} />
         <Ring img="market" label="Market" size={46} dim testid="menu-market" onClick={soon("Market", "Player trading with 5% tax and price history.", 7)} />
         <Ring img="crew" label="Crew" size={46} dim testid="menu-crew" onClick={soon("Crew", "Friends, whispers and gifting.", 4)} />
         <Ring img="guild" label="Guild" size={46} dim testid="menu-guild" onClick={soon("Guild", "Guilds up to 50 with guild boss and shop.", 7)} />
         <Ring img="rankings" label="Rankings" size={46} dim testid="menu-rankings" onClick={soon("Rankings", "BR, Level, Biggest Fish and Guild rankings.", 7)} />
         </>}
+        {!PORTAL && mobile && <Ring img="settings" label="More" size={46} testid="menu-more" onClick={() => open({ type: "more" })} />}
         {PORTAL && <Ring img="settings" label="Settings" size={46} testid="menu-settings" onClick={() => open({ type: "settings" })} />}
       </div>
     </div>

@@ -220,10 +220,11 @@ function buildScene(app, tex) {
 
   const layout = () => {
     const sw = app.renderer.width / app.renderer.resolution, sh = app.renderer.height / app.renderer.resolution;
-    const sc = Math.max(sw / BG_W, sh / BG_H);
+    const small = Math.min(sw, sh) < 560; // phones: zoom in on the angler + fishing water
+    const sc = Math.max(sw / BG_W, sh / BG_H, small ? Math.min(sw / 760, sh / 470) : 0);
     world.scale.set(sc);
     world._bx = Math.min(0, Math.max(sw - BG_W * sc, sw / 2 - 690 * sc)); // keep angler + fishing water in frame
-    world._by = Math.min(0, Math.max(sh - BG_H * sc, sh * 0.78 - FEET.y * sc));
+    world._by = Math.min(0, Math.max(sh - BG_H * sc, sh * (small ? 0.72 : 0.78) - FEET.y * sc));
     world.x = world._bx; world.y = world._by;
   };
   layout();

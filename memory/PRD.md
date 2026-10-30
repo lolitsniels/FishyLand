@@ -45,3 +45,4 @@ Full build brief "FISHING REALM — Complete Build Brief" (2.5D high-fantasy bro
 - Angler stands at the left on the pier, casts right into open water; camera keeps angler + fishing area in frame on any aspect
 - Square phone layout (aspect 0.8–1.25, e.g. Unihertz Titan 2): own HUD scale, collapsed events/chat, tighter action bar; rotate overlay only for clearly portrait screens
 - Mobile fix: canvas refits via ResizeObserver/visualViewport, HUD sized in px from visualViewport (not vw/vh), pinch-zoom disabled
+- Phone mode (min side <560px): bigger HUD scale, scene zoom on angler+water, compact action bar with More menu (all extra menus + settings)

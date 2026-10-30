@@ -1,7 +1,7 @@
 import { Ring } from "../fr";
 import { useGame } from "../../store";
 
-const RAIL = [
+export const RAIL = [
   { id: "quests", label: "Quests", img: "quests", phase: 3, desc: "Main story chapters with the Angel of the Tides." },
   { id: "daily", label: "Daily", img: "daily", phase: 3, desc: "5 daily and 5 weekly quests with chest rewards." },
   { id: "events", label: "Events", img: "skills", phase: 7, desc: "Deep Sea Hunt, Big Catch weeks and tournaments." },
