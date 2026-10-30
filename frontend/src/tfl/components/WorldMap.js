@@ -26,7 +26,7 @@ function Boat() {
   return <img ref={ref} src="/art/hud/boat.webp" alt="" className="wm-boat" />;
 }
 
-export function WorldMap({ waters, user, mode, onTravel }) {
+export function WorldMap({ waters, user, mode, onTravel, expedition }) {
   const [sel, setSel] = useState(null);
   const info = (w) => {
     const unlocked = w.premium ? !!user.premium && user.level >= w.level : user.unlocked_waters.includes(w.key);
@@ -46,6 +46,7 @@ export function WorldMap({ waters, user, mode, onTravel }) {
           <button key={key} type="button" className={`wm-pin ${st.unlocked ? "" : "locked"} ${here ? "here" : ""} ${sel === key ? "on" : ""}`} style={{ left: `${PINS[key][0]}%`, top: `${PINS[key][1]}%` }}
             onClick={(e) => { e.stopPropagation(); setSel(key); }} data-testid={`map-pin-${key}`}>
             <img src="/art/hud/pin.webp" alt="" />
+            {expedition === key && <span className="wm-exp" data-testid={`map-expedition-${key}`}>Expedition</span>}
             <span className="wm-label">{name}{!st.unlocked && <Lock size={10} className="inline ml-1 -mt-0.5" />}</span>
           </button>
         );

@@ -2,22 +2,22 @@ import { Texture, Sprite } from "pixi.js";
 
 // Object catalogue: art file, default width, footprint [w, h] as fraction of width, extras (glow/smoke/jet offsets as fractions of sprite size).
 export const OBJ = {
-  tackle_shop: { w: 400, fp: [0.9, 0.62], smoke: [0.5, 0.04] },
-  tavern: { w: 430, fp: [0.9, 0.62] },
-  guild_hall: { w: 500, fp: [0.92, 0.62] },
-  pearl_shop: { w: 380, fp: [0.9, 0.62] },
-  market_stall: { w: 330, fp: [0.9, 0.5] },
-  bait_hut: { w: 370, fp: [0.86, 0.5] },
-  house: { w: 300, fp: [0.88, 0.62], smoke: [0.73, 0.1] },
-  quest_board: { w: 150, fp: [0.8, 0.12] },
-  fountain: { w: 270, fp: [0.94, 0.5], jet: [0.47, 0.24, 0.5, 0.6] },
-  lantern: { w: 56, fp: [0.5, 0.12], glow: [0.22, 0.31] },
+  tackle_shop: { rect: true, w: 400, fp: [0.9, 0.62], smoke: [0.66, 0.04] },
+  tavern: { rect: true, w: 430, fp: [0.9, 0.62] },
+  guild_hall: { rect: true, w: 500, fp: [0.92, 0.62] },
+  pearl_shop: { rect: true, w: 380, fp: [0.9, 0.62] },
+  market_stall: { rect: true, w: 330, fp: [0.9, 0.5] },
+  bait_hut: { rect: true, w: 370, fp: [0.86, 0.5] },
+  house: { rect: true, w: 300, fp: [0.88, 0.62] },
+  quest_board: { w: 150, fp: [0.9, 0.16], rect: true },
+  fountain: { w: 270, fp: [0.94, 0.5], rect: true, jet: [0.66, 0.2, 0.62, 0.72] },
+  lantern: { w: 60, fp: [0.5, 0.12], glow: [0.5, 0.13] },
   oak: { w: 300, fp: [0.22, 0.08] },
   willow: { w: 300, fp: [0.24, 0.08] },
   pine: { w: 120, fp: [0.3, 0.1] },
   bush: { w: 130, fp: [0.8, 0.3] },
   rocks: { w: 180, fp: [0.86, 0.36] },
-  barrels: { w: 130, fp: [0.9, 0.36] },
+  barrels: { w: 130, fp: [0.9, 0.42], rect: true },
   reeds: { w: 150, fp: [0, 0], wet: true },
   rowboat: { w: 230, fp: [0, 0], bob: 1.2, wet: true },
   ship: { w: 820, fp: [0, 0], bob: 2, wet: true },
@@ -91,7 +91,7 @@ export function buildMap(map, img) {
     ctx.fillStyle = pattern(ctx, img.planks, TEX_K.planks); ctx.fill();
     ctx.shadowColor = "transparent"; ctx.lineWidth = 6; ctx.strokeStyle = "#3a2412"; ctx.stroke();
     ctx.fillStyle = "#4a2e16";
-    for (const [px, py] of d.posts || []) { ctx.beginPath(); ctx.arc(px, py, 13, 0, 7); ctx.fill(); ctx.strokeStyle = "#2a180a"; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = "#6b4523"; ctx.beginPath(); ctx.arc(px - 3, py - 3, 6, 0, 7); ctx.fill(); ctx.fillStyle = "#4a2e16"; }
+    for (const [px, py] of d.posts || []) ctx.drawImage(img.post, px - 22, py - 40, 44, 65);
     ctx.restore();
   }
 
@@ -102,8 +102,11 @@ export function buildMap(map, img) {
     ctx.fillStyle = pattern(ctx, img.planks, TEX_K.planks); ctx.fillRect(-20, -hw, L + 40, b.w);
     ctx.shadowColor = "transparent";
     ctx.fillStyle = "#3a2412"; ctx.fillRect(-20, -hw - 6, L + 40, 8); ctx.fillRect(-20, hw - 2, L + 40, 8);
-    for (let x = -10; x <= L + 30; x += 70) for (const y of [-hw - 2, hw + 2]) { ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fillStyle = "#5a3a1c"; ctx.fill(); ctx.strokeStyle = "#2a180a"; ctx.lineWidth = 3; ctx.stroke(); }
     ctx.restore();
+    for (let d = -10; d <= L + 30; d += 80) for (const side of [-1, 1]) {
+      const px = ax + Math.cos(ang) * d - Math.sin(ang) * side * (hw + 2), py = ay + Math.sin(ang) * d + Math.cos(ang) * side * (hw + 2);
+      ctx.drawImage(img.post, px - 16, py - 34, 32, 47);
+    }
   }
 
   // walk grid: land minus water, plus docks/bridges, minus object footprints and the map rim
@@ -126,7 +129,8 @@ export function buildMap(map, img) {
     const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
     if (!fw) continue;
     const rx = Math.max(16, (w * fw) / 2), ry = Math.max(14, (w * fh) / 2);
-    g.beginPath(); g.ellipse(o.x, o.y - ry, rx, ry, 0, 0, 7); g.fill();
+    if (def.rect) g.fillRect(o.x - rx, o.y - 2 * ry, 2 * rx, 2 * ry + 6);
+    else { g.beginPath(); g.ellipse(o.x, o.y - ry, rx, ry, 0, 0, 7); g.fill(); }
   }
   for (const b of map.blocks || []) { pathPoly(g, b); g.fill(); }
   g.fillRect(0, 0, W, 40); g.fillRect(0, H - 40, W, 40); g.fillRect(0, 0, 40, H); g.fillRect(W - 40, 0, 40, H);

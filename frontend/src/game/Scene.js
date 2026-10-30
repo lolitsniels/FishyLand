@@ -111,6 +111,23 @@ function makeFigure() {
   };
 }
 
+// Chat speech bubble above an angler's head.
+function makeBubble() {
+  const c = new Container(), bg = new Graphics();
+  const t = new Text({ text: "", style: { fontFamily: "Noto Sans", fontWeight: "700", fontSize: 14, fill: 0x2a1a08, wordWrap: true, wordWrapWidth: 220, align: "center" } });
+  t.anchor.set(0.5, 1); c.addChild(bg, t); c.visible = false; c._txt = "";
+  c.show = (txt) => {
+    if (!txt) { c.visible = false; return; }
+    c.visible = true;
+    if (txt === c._txt) return;
+    c._txt = txt; t.text = txt.length > 90 ? `${txt.slice(0, 88)}…` : txt; t.y = -12;
+    const w = t.width + 22, h = t.height + 12;
+    bg.clear().roundRect(-w / 2, -h - 6, w, h, 10).fill({ color: 0xfff6dc, alpha: 0.96 }).stroke({ width: 2, color: 0xb98a35 })
+      .poly([-7, -7, 7, -7, 0, 2]).fill({ color: 0xfff6dc });
+  };
+  return c;
+}
+
 // Another online angler: their character + rod + nameplate, eased toward the last reported position.
 function makePeer(p) {
   const c = new Container();
@@ -118,11 +135,12 @@ function makePeer(p) {
   f.setLook(p.look); f.setRod(p.rod);
   const name = new Text({ text: `${p.username}  Lv.${p.level}`, style: { ...NAME_STYLE, fontSize: 13, fill: 0xcff6ff } });
   name.anchor.set(0.5, 1); name.y = -ANGLER_H - 6;
-  const status = new Text({ text: "", style: { fontFamily: "Cinzel", fontSize: 11, fill: 0xffd35a, stroke: { color: 0x1a0d03, width: 3 } } });
+  const status = new Text({ text: "", style: { fontFamily: "Noto Sans", fontWeight: "700", fontSize: 11, fill: 0xffd35a, stroke: { color: 0x1a0d03, width: 3 } } });
   status.anchor.set(0.5, 1); status.y = -ANGLER_H - 24;
-  c.addChild(f.c, name, status);
+  const bubble = makeBubble(); bubble.y = -ANGLER_H - 30;
+  c.addChild(f.c, name, status, bubble);
   c.x = p.x; c.y = p.y;
-  return { c, fig: f.c, f, name, status, tx: p.x, ty: p.y, seen: 0 };
+  return { c, fig: f.c, f, name, status, bubble, uname: p.username, tx: p.x, ty: p.y, seen: 0 };
 }
 
 // Ambient particles per location: snow, embers, fireflies, petals, gulls…
@@ -344,7 +362,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       const ring = new Graphics().roundRect(-28, -68, 56, 56, 12).fill({ color: 0x0a1420, alpha: 0.72 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.28 });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
       Assets.load(`art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
-      const lb = new Text({ text: sp.label, style: { fontFamily: "Cinzel", fontWeight: "700", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
+      const lb = new Text({ text: sp.label, style: { fontFamily: "Noto Sans", fontWeight: "800", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
       lb.anchor.set(0.5, 0); lb.y = -10;
       c.addChild(glow, ring, ic, lb);
     }
@@ -373,9 +391,10 @@ function buildScene(app, tex, key, bgTex, mt) {
   actors.addChild(line);
   const nameplate = new Text({ text: "", style: NAME_STYLE });
   nameplate.anchor.set(0.5, 1); nameplate.x = FEET.x; nameplate.y = FEET.y - ANGLER_H - 8;
-  const titleplate = new Text({ text: "", style: { fontFamily: "Cinzel", fontSize: 11, fill: 0x7ff3ff, stroke: { color: 0x02121c, width: 3 } } });
+  const myBubble = makeBubble();
+  const titleplate = new Text({ text: "", style: { fontFamily: "Noto Sans", fontWeight: "700", fontSize: 11, fill: 0x7ff3ff, stroke: { color: 0x02121c, width: 3 } } });
   titleplate.anchor.set(0.5, 1); titleplate.x = FEET.x; titleplate.y = FEET.y - ANGLER_H - 26;
-  plates.addChild(nameplate, titleplate);
+  plates.addChild(nameplate, titleplate, myBubble);
   actors.addChild(plates);
   const peers = new Map();
 
@@ -582,6 +601,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       v.fig.scale.set(v.flip ? -pd : pd, pd);
       v.fig.y = walking ? -Math.abs(Math.sin(time * 11 + v.c.x)) * 5 : 0;
       v.name.scale.set(pd); v.name.y = -ANGLER_H * pd - 6; v.status.y = -ANGLER_H * pd - 22;
+      { const b = fx.bubbles?.[v.uname]; v.bubble.show(b && b.until > Date.now() ? b.text : ""); v.bubble.y = -ANGLER_H * pd - 26; }
       v.status.text = v.phase === "fight" ? "Reeling in!" : ["cast", "wait", "bite"].includes(v.phase) ? "Fishing…" : v.phase === "landed" ? "Caught one!" : "";
       v.f.setAngle(rodAngle(mode, v.phase, walking, time + v.c.x));
       v.c.zIndex = v.c.y;
@@ -589,6 +609,7 @@ function buildScene(app, tex, key, bgTex, mt) {
 
     // actors
     hero.setLook(fx.look); hero.setRod(fx.rod || "rod_cane");
+    { const b = fx.bubbles?.[fx.username]; myBubble.show(b && b.until > Date.now() ? b.text : ""); myBubble.x = nameplate.x; myBubble.y = nameplate.y - 24; }
     nameplate.text = fx.username; titleplate.text = fx.title ? `« ${fx.title} »` : "";
 
     if (fx.phase !== lastPhase) {
@@ -731,7 +752,7 @@ function buildScene(app, tex, key, bgTex, mt) {
   };
 }
 
-const TEX_KEYS = ["grass", "sand", "dirt", "planks", "cobble", "water", "river"];
+const TEX_KEYS = ["grass", "sand", "dirt", "planks", "cobble", "water", "river", "post"];
 async function loadMapArt(cfg) {
   const kinds = [...new Set(cfg.objects.map((o) => o.k))];
   const [tx, ob] = await Promise.all([

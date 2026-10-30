@@ -27,7 +27,7 @@ const HARBOUR = {
   spots: [
     { id: "shop", label: "Tackle Shop", img: "bait", x: X0 + 170, y: 505 },
     { id: "market", label: "Market", img: "market", x: X0 + 360, y: 470 },
-    { id: "crews", label: "Guild Hall", img: "crew", x: X0 + 600, y: 468 },
+    { id: "crews", label: "Crew HQ", img: "crew", x: X0 + 600, y: 468 },
     { id: "quests", label: "Quest Board", img: "quests", x: X0 + 748, y: 492 },
     { id: "boat", label: "Sea Serpent · Travel", img: "map", x: X0 + 985, y: 520 },
     { id: "pearl-shop", label: "Pearl Shop", img: "pass", x: X0 + 200, y: 625 },

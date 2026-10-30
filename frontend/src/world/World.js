@@ -13,11 +13,13 @@ import { Ring, Bar } from "../components/fr";
 import { useFight } from "./useFight";
 import { startMusic } from "../game/sfx";
 import CatchCard from "./CatchCard";
+import { ChatBox } from "./ChatBox";
+import { QuickTackle } from "./QuickTackle";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
   inventory: ["Tackle Box", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "bait"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
-  quests: ["Quests", "quests"], contracts: ["Contracts", "daily"], market: ["Market", "market"], crews: ["Guild Hall", "crew"], tournaments: ["Tournaments", "rankings"],
+  quests: ["Quests", "quests"], contracts: ["Contracts", "daily"], market: ["Market", "market"], crews: ["Crew HQ", "crew"], tournaments: ["Tournaments", "rankings"],
   duel: ["Duel Pier", "guild"], leaderboards: ["Leaderboards", "rankings"], achievements: ["Achievements", "daily"], crafting: ["Bait Crafting", "craft"],
   messages: ["Messages", "pass"], almanac: ["Almanac", "fishdex"], wiki: ["Wiki", "skills"], "pearl-shop": ["Pearl Shop", "pass"], admin: ["Admin", "settings"],
 };
@@ -32,22 +34,21 @@ function useScale() {
   return v;
 }
 
+const compact = (n = 0) => (n >= 1e6 ? `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : n >= 1e4 ? `${Math.floor(n / 1e3)}K` : (n || 0).toLocaleString());
+
 function TopBar({ u, place, here }) {
   return (
     <div className="pcard pointer-events-auto" data-testid="player-panel">
       <div className="pcard-face"><img src={lookFace(u.avatar)} alt="" data-testid="player-portrait" /></div>
-      <span className="pcard-lv" data-testid="player-level">Lv.{u.level}</span>
+      <span className="pcard-lv" data-testid="player-level">{u.level}</span>
       <div className="pcard-name" data-testid="player-name">{u.username}</div>
       <div className="pcard-place" data-testid="location-chip">{place} · <Users size={10} className="inline -mt-0.5" /> <span data-testid="here-count">{here}</span></div>
-      <div className="pcard-under">
-        <div className="pcard-chips">
-          <span data-testid="gold-value"><Coins size={12} color="#ffd34d" />{(u.gold ?? 0).toLocaleString()}</span>
-          <span title="Pearls are earned in game and only buy cosmetics" data-testid="pearls-value"><Gem size={12} color="#bff4ff" />{(u.pearls ?? 0).toLocaleString()}</span>
-          <span data-testid="energy-value"><Zap size={11} color="#7ff3ff" />{Math.floor(u.energy)}/{u.max_energy}</span>
-        </div>
-        <Bar value={u.energy} max={u.max_energy} testid="energy-bar" />
-        <Bar value={u.xp_into_level ?? 0} max={u.xp_next || 1} color="linear-gradient(90deg,#b44dff,#ff8af0)" testid="xp-bar" />
+      <div className="pcard-bars" title={`Energy ${Math.floor(u.energy)}/${u.max_energy}`}>
+        <div className="pcard-bar"><i style={{ width: `${Math.min(100, (u.energy / u.max_energy) * 100)}%` }} data-testid="energy-bar" /><span data-testid="energy-value">{Math.floor(u.energy)}/{u.max_energy}</span></div>
+        <div className="pcard-bar xp"><i style={{ width: `${Math.min(100, ((u.xp_into_level ?? 0) / (u.xp_next || 1)) * 100)}%` }} data-testid="xp-bar" /></div>
       </div>
+      <Coins size={15} color="#ffd34d" className="pcard-ic gold" /><b className="pcard-v gold" data-testid="gold-value">{compact(u.gold)}</b>
+      <Gem size={14} color="#bff4ff" className="pcard-ic pearl" /><b className="pcard-v pearl" title="Pearls are earned in game and only buy cosmetics" data-testid="pearls-value">{compact(u.pearls)}</b>
     </div>
   );
 }
@@ -162,12 +163,15 @@ export default function World() {
         {mode === "water" && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
+        <ChatBox />
+        <QuickTackle />
         <div ref={barRef} className="absolute bottom-2 left-1/2 pointer-events-auto fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1" style={{ transform: `translateX(-50%) scale(${barK})`, transformOrigin: "50% 100%" }} data-testid="action-bar">
           {BAR_L.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <button type="button" data-testid="cast-fish-button" disabled={mode === "water" && (!canFish || !idle)}
             onPointerDown={(e) => { e.preventDefault(); onFish(); }}
-            className={`fish-btn w-[92px] h-[92px] -mt-6 grid place-items-center ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
-            <span className={`font-deco font-black text-[#3a1c02] ${fishLabel.length > 5 ? "text-[11px] leading-tight text-center" : "text-lg"}`}>{fishLabel}</span>
+            style={{ backgroundImage: `url(/art/hud/${mode === "harbour" ? "sail" : "fishbtn"}.webp)` }}
+            className={`fish-btn fish-btn-img w-[96px] h-[96px] -mt-7 grid place-items-center ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
+            <span className="fish-btn-label">{fishLabel}</span>
           </button>
           {BAR_R.map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <Ring img="settings" label="More" size={w < 600 ? 36 : 46} testid="menu-more" onClick={() => setMore(true)} />

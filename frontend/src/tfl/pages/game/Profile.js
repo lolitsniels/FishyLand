@@ -19,7 +19,6 @@ import { BossPlaque } from "../../components/Boss";
 import AvatarModal from "../../components/CosmeticsModal";
 import { Pearls, AdminBadge, ModBadge, SupporterBadge, PremiumBadge } from "../../components/ui-bits";
 import { ProfileTackle } from "../../components/RodSkin";
-import Guestbook from "../../components/Guestbook";
 import { t as tt } from "../../i18n";
 import { lookFace } from "../../../game/look";
 import { LookEditor } from "../../../world/LookEditor";
@@ -156,7 +155,6 @@ export default function Profile() {
           </div>
         )}
       </Panel>
-      <Guestbook username={p.username} isMine={mine} />
     </div>
   );
 }

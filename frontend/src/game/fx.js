@@ -5,6 +5,7 @@ export const fx = {
   me: { x: 400, y: 560 },
   dest: null,
   path: [],
+  bubbles: {},
   mapView: typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mapview"),
   keys: new Set(),
   near: null,

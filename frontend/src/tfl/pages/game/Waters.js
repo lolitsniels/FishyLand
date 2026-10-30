@@ -57,47 +57,8 @@ export default function Waters() {
   };
   return (
     <div className="space-y-3 fade-in" data-testid="waters-page">
-      {data && <WorldMap waters={data.waters} user={user} mode={sessionStorage.getItem("fr_mode") || "harbour"} onTravel={travel} />}
-      <Panel icon="waters" title={tt("Waters of the world")} right={`${user.unlocked_waters.length} / ${data?.waters.length} unlocked`}>
-        <p className="text-[12.5px] text-[var(--text-2)] m-clamp">{tt("Each water holds its own pool of species. Passage is paid once; after that you may travel freely. Level requirements reflect how hard the local fish fight. Weather shifts every three hours; dawn and dusk bring the most bites, night brings the strangest fish, and tides matter on salt water.")}</p>
-      </Panel>
-      <ExpeditionPanel ev={ev} waterKey={user.water} />
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {data?.waters.map((w) => {
-          const unlocked = w.premium ? !!user.premium && user.level >= w.level : user.unlocked_waters.includes(w.key);
-          const here = user.water === w.key;
-          const pool = data.fish.filter((f) => f.water === w.key && !f.secret);
-          const canUnlock = w.premium ? !!user.premium && user.level >= w.level : user.level >= w.level && user.gold >= w.fee;
-          return (
-            <section key={w.key} className={`panel g-map-card overflow-hidden ${here ? "panel-gold" : ""}`} data-testid={`water-card-${w.key}`}>
-              <div className="relative overflow-hidden">
-              <div className="art" style={{ backgroundImage: `url(/art/waters/${w.key}_thumb.jpg)`, filter: unlocked ? "none" : "grayscale(.75) brightness(.55)" }} />
-                {!unlocked && <div className="absolute inset-0 grid place-items-center z-[1]"><div className="g-stat flex items-center gap-1.5 !bg-black/70 font-cinzel font-bold text-[#ffe9a3]"><Lock size={14} /> {tt("Lv")} {w.level}</div></div>}
-                {here && <div className="absolute top-2 left-2 z-[2] fr-chip px-2 text-[10.5px] font-cinzel font-bold text-[#ffe9a3]">{tt("You are here")}</div>}
-                {ev?.active?.water === w.key && <div className="absolute bottom-12 left-2 z-[2] text-[10.5px] uppercase tracking-widest bg-[rgba(10,9,8,.85)] text-[var(--energy)] px-2 py-0.5 rounded-full border border-[var(--energy)]" data-testid={`expedition-badge-${w.key}`}>{tt("Expedition active")}</div>}
-                <div className="absolute top-2 right-2 z-[2]"><WaterMood w={w} /></div>
-                {progress?.[w.key]?.complete && <div className="absolute top-9 right-2 z-[2] fr-chip px-2 text-[10.5px] font-cinzel text-[var(--gold)]" data-testid={`water-complete-${w.key}`}>{tt("Complete")}</div>}
-                <div className="title"><div className="font-deco gold-text text-[17px] leading-tight">{w.name}</div><div className="text-[11px] text-[#cff6ff] font-cinzel">{w.type}</div></div>
-              </div>
-              <div className="p-3">
-                <p className="text-[12.5px] text-[var(--text-2)]">{w.desc}</p>
-                <div className="mt-1.5"><ConditionLine c={cond[w.key]} /></div>
-                <div className="flex items-center gap-2 mt-2 text-[11px]">
-                  <span className="text-[var(--muted)]">{pool.length} {tt("species:")}</span>
-                  {["common", "uncommon", "rare", "epic", "legendary", "mythic"].map((r) => <span key={r} className={`num rar-${r}`}>{pool.filter((f) => f.rarity === r).length}</span>)}
-                </div>
-                {unlocked && progress?.[w.key] && <div className="mt-2 pt-2 border-t border-[var(--border)]"><WaterProgress p={progress[w.key]} compact stamp={false} testId={`water-progress-${w.key}`} /></div>}
-                <div className="flex items-center justify-between mt-3">
-                  <span className="text-[12px] text-[var(--text-2)]">{w.premium ? <span className="inline-flex items-center gap-1 text-[#f08a45]"><PassIcon size={12} /> {unlocked ? tt("Angler Pass water, open to you") : user.premium ? <>{tt("Angler Pass water · requires Lv")} {w.level}</> : <>{tt("Angler Pass water · Lv")} {w.level} {!NO_IAP && <> · <Link to="/game/support" className="underline">{tt("get an Angler Pass")}</Link></>}</>}</span> : unlocked ? tt("Passage paid") : w.fee === 0 ? tt("Free") : <>{tt("Passage")} <span className="num text-[#ffcfa8]">{fmt(w.fee)}g</span> {tt("· requires Lv")} {w.level}</>}</span>
-                  {here ? <Link to="/game/fish" className="btn btn-sm btn-gold" data-testid={`fish-here-${w.key}-button`}>{tt("Fish here")}</Link>
-                    : <button className={`btn btn-sm ${unlocked || canUnlock ? "btn-gold" : ""}`} disabled={!unlocked && !canUnlock} onClick={() => travel(w.key)} data-testid={`travel-${w.key}-button`}>{unlocked ? tt("Travel") : w.premium ? (user.premium ? tt("Locked") : tt("Angler Pass only")) : canUnlock ? tt("Pay passage & travel") : tt("Locked")}</button>}
-                </div>
-              </div>
-            </section>
-          );
-        })}
-        {user.test_water && <TestWaterCard />}
-      </div>
+      <div className="wm-banner" data-testid="expedition-banner"><ExpeditionPanel ev={ev} waterKey={user.water} /></div>
+      {data && <WorldMap waters={data.waters} user={user} mode={sessionStorage.getItem("fr_mode") || "harbour"} onTravel={travel} expedition={ev?.active?.water} />}
     </div>
   );
 }

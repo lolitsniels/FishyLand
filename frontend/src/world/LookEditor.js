@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -19,7 +20,7 @@ export function LookEditor() {
   };
   return (
     <>
-      <button type="button" className="btn btn-sm btn-gold absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap z-[2]" onClick={() => { setLook(user.avatar); setOpen(true); }} data-testid="change-look-button">Change look</button>
+      <button type="button" title="Change look" aria-label="Change look" className="look-edit-btn absolute -right-1 bottom-1 z-[2]" onClick={() => { setLook(user.avatar); setOpen(true); }} data-testid="change-look-button"><Pencil size={15} /></button>
       {open && createPortal(
         <div className="fixed inset-0 z-[80] grid place-items-center bg-black/60 p-3" onClick={(e) => e.target === e.currentTarget && setOpen(false)} data-testid="look-dialog">
           <div className="fr-panel fr-modal p-5 w-full max-w-[420px] rise">
