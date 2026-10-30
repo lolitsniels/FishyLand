@@ -76,3 +76,15 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - P1: Chat bubbles / emotes between players in the harbour; show peers' cosmetics
 - P1: Portal (Playgama/GameDistribution) build re-wire to the new App (PortalApp removed during port)
 - P2: Guilds, Bosses, Leaderboards with dedicated 2.5D locations; presence via shared store for multi-worker
+
+
+## Round 15-16 (June 2026)
+- All 15 maps now tiled: new willow, greyfell, saltmarsh, harrow, coral, blackwater, frozen, sunken, ghostlight, temple and cinder maps, each with its own biome art (maps.js / tilemap.js). QA audit: /game?mapview=1&mapcheck=1&map=<key>.
+- Map loading: loading veil, LRU map cache (4 maps), idle HTTP prefetch of map art, harbour prebuilt, retry when an asset fails.
+- Per-map music (public/audio/*.mp3, ElevenLabs music via fal on the Universal Key). duel_pier has no track of its own yet and plays harrow, because the Universal Key balance ran out.
+- New catch popup (CatchCard.js): underwater scene, measuring tape with length, rarity stars, exp, and View in Fishdex / Keep / Sell buttons.
+- Realistic fish length: backend/fish_size.py (W = a*L^3 by body shape). All existing catches were backfilled.
+
+## Backlog
+- P1: Playgama/Bridge SDK integration; a music track for the duel pier
+- P2: crew pond fishing; Pearl Shop cosmetics; species-specific fish art on the catch card

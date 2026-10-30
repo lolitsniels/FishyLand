@@ -1,17 +1,21 @@
 """Real-world style length from weight: W(g) = a * L(cm)^3, with `a` set by body shape."""
+import re
 
-EEL = ("eel", "lamprey", "oarfish", "ribbon", "serpent", "snake", "wyrm")
-SLENDER = ("pike", "gar", "barracuda", "needle", "muskie", "muskellunge", "zander", "pickerel", "wahoo", "marlin", "sailfish", "swordfish", "trumpet", "lance", "sturgeon", "catfish")
-DEEP = ("gill", "sunfish", "crappie", "pumpkinseed", "bream", "carp", "koi", "piranha", "pomfret", "angel", "tang", "discus", "butterfly", "opah", "pacu", "grouper", "puffer", "boxfish", "batfish", "turbot", "halibut", "flounder", "ray", "skate", "moonfish", "mola")
+EEL = ("eel", "moray", "lamprey", "oarfish", "ribbonfish", "serpent", "wyrm")
+SLENDER = ("pike", "gar", "garfish", "barracuda", "needlefish", "muskie", "muskellunge", "zander", "pickerel", "wahoo", "marlin", "sailfish",
+           "swordfish", "trumpetfish", "sturgeon", "catfish", "shark")
+DEEP = ("bluegill", "sunfish", "crappie", "pumpkinseed", "bream", "carp", "koi", "piranha", "pomfret", "angelfish", "tang", "discus", "butterflyfish",
+        "opah", "pacu", "grouper", "puffer", "boxfish", "batfish", "turbot", "halibut", "flounder", "ray", "manta", "skate", "moonfish", "mola")
 
 
 def shape_a(name):
-    n = (name or "").lower()
-    if any(k in n for k in EEL):
+    words = re.findall(r"[a-z]+", (name or "").lower())
+    has = lambda keys: any(w == k or w.endswith(k) for w in words for k in keys)
+    if has(EEL):
         return 0.0018
-    if any(k in n for k in SLENDER):
+    if has(SLENDER):
         return 0.0075
-    if any(k in n for k in DEEP):
+    if has(DEEP):
         return 0.028
     return 0.013
 

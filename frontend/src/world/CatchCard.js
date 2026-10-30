@@ -43,8 +43,8 @@ export default function CatchCard({ res, onClose }) {
   const dex = () => { onClose(); nav("/game/journal"); };
   return (
     <div className="absolute inset-0 z-40 grid place-items-center bg-black/55" data-testid="catch-popup">
-      <div className={`fr-panel fr-modal pop relative w-[480px] max-w-[94vw] p-4 flex flex-col gap-3 rar-frame-${c.rarity}`}>
-        <button type="button" onClick={onClose} className="absolute -top-3 -right-3 w-10 h-10 transition-transform hover:scale-110" data-testid="catch-close-btn">
+      <div className={`fr-panel fr-modal pop relative w-[480px] max-w-[94%] p-4 flex flex-col gap-3 rar-frame-${c.rarity}`}>
+        <button type="button" onClick={onClose} className="absolute -top-3 -right-3 z-20 w-10 h-10 transition-transform hover:scale-110" data-testid="catch-close-btn">
           <img src="/art/hud/close.webp" alt="Close" className="w-full h-full" />
         </button>
         <div className="text-center font-deco text-xl sm:text-2xl gold-text leading-tight" data-testid="catch-name">
@@ -65,18 +65,18 @@ export default function CatchCard({ res, onClose }) {
           </div>
           <div className="flex flex-col items-center gap-1">
             <Stars rarity={c.rarity} />
-            <div className="text-xs text-amber-100/80 font-bold">You've gained</div>
-            <div className="font-deco text-2xl text-[#ffe9a3] leading-none" data-testid="catch-xp">{res.xp} exp</div>
-            <div className="text-xs text-amber-200 font-bold" data-testid="catch-value">worth {fmt(c.value)} g</div>
+            <div className="text-xs text-amber-100/80 font-bold whitespace-nowrap">You've gained</div>
+            <div className="font-deco text-2xl text-[#ffe9a3] leading-none whitespace-nowrap" data-testid="catch-xp">{res.xp} exp</div>
+            <div className="text-xs text-amber-200 font-bold whitespace-nowrap" data-testid="catch-value">worth {fmt(c.value)} g</div>
           </div>
         </div>
         <div className="flex gap-2 w-full items-center">
           <button type="button" className="fr-btn fr-btn-dark flex-1 py-2" disabled={busy} onClick={onClose} data-testid="catch-keep-btn">Keep</button>
           <button type="button" onClick={dex} className="relative flex-[1.3] h-11 transition-transform hover:scale-105 active:scale-95" data-testid="catch-fishdex-btn">
             <img src="/art/hud/btn_green.webp" alt="" className="absolute inset-0 w-full h-full" />
-            <span className="relative font-black text-white text-sm tracking-wide [text-shadow:0_2px_0_#0a4a0a]">VIEW IN FISHDEX</span>
+            <span className="relative whitespace-nowrap font-black text-white text-[11px] sm:text-sm tracking-wide [text-shadow:0_2px_0_#0a4a0a]">VIEW IN FISHDEX</span>
           </button>
-          <button type="button" className="fr-btn flex-1 py-2" disabled={busy} onClick={sell} data-testid="catch-sell-btn">Sell {fmt(c.vendor ?? Math.round((c.value || 0) * 0.7))} g</button>
+          <button type="button" className="fr-btn flex-1 py-2 whitespace-nowrap" disabled={busy} onClick={sell} data-testid="catch-sell-btn">Sell {fmt(c.vendor ?? Math.round((c.value || 0) * 0.7))} g</button>
         </div>
       </div>
     </div>

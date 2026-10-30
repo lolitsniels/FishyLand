@@ -827,14 +827,15 @@ export default function Scene({ place = "harbour" }) {
     const cfg = sceneFor(key);
     const slow = cfg.tiled && !MAP_CACHE.has(key);
     if (slow) setLoading(key);
-    const load = cfg.tiled ? loadMapArt(cfg) : Assets.load(cfg.bg).then((bg) => ({ bg }));
+    const get = () => (cfg.tiled ? loadMapArt(cfg) : Assets.load(cfg.bg).then((bg) => ({ bg })));
+    const load = get().catch(() => new Promise((res) => setTimeout(res, 1500)).then(get));
     load.then(async ({ bg, mt }) => {
       if (slow) await nextFrame();
       if (seq !== r.seq || !r.app) return;
       r.teardown?.(); r.teardown = buildScene(r.app, r.tex, key, bg, mt);
       setLoading(null);
       setTimeout(prewarm, 2500);
-    });
+    }).catch(() => setLoading(null));
   };
 
   useEffect(() => {
