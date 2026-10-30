@@ -81,7 +81,7 @@ export default function DuelLive() {
         <div className="flex-1">
           <div className="sf-kicker">Duel Pier</div>
           <div className="sf-banner-t">3-minute fishing duel</div>
-          <div className="sf-banner-s">You and another angler fish the same duel pond. The live scoreboard tracks the total weight you land, and the heaviest total when the clock runs out wins 500 gold.</div>
+          <div className="sf-banner-s">You and another angler fish the same duel pond. The live scoreboard tracks the total weight you land, and the heaviest total when the clock runs out wins. Pure bragging rights: duel catches go back in the water and give no gold, xp or items.</div>
           <div className="mt-3 flex gap-2 flex-wrap">
             {st === "idle" ? <button type="button" className="btn btn-gold" onClick={find} data-testid="duel-find">Find an opponent</button>
               : <><span className="sf-banner-s self-center" data-testid="duel-waiting">Looking for an opponent…</span><button type="button" className="btn" onClick={cancel} data-testid="duel-cancel">Cancel</button></>}

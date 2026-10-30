@@ -9,7 +9,6 @@ from server import api, db, get_current_user
 DUEL_SECONDS = 180
 START_DELAY = 6
 QUEUE_TTL = 60
-WIN_GOLD = 500
 
 
 def _now():
@@ -34,7 +33,6 @@ def _view(m, uid):
            "me": {k: me[k] for k in ("username", "kg", "catches", "best")}, "foe": {k: foe[k] for k in ("username", "kg", "catches", "best")}}
     if phase == "done":
         out["result"] = "draw" if round(me["kg"], 3) == round(foe["kg"], 3) else "win" if me["kg"] > foe["kg"] else "lose"
-        out["reward"] = WIN_GOLD if out["result"] == "win" else 0
     return out
 
 
@@ -48,7 +46,7 @@ async def _settle(m):
         if round(a["kg"], 3) != round(b["kg"], 3):
             w = a if a["kg"] > b["kg"] else b
             from bson import ObjectId
-            await db.users.update_one({"_id": ObjectId(w["id"])}, {"$inc": {"gold": WIN_GOLD, "stats.live_duel_wins": 1}})
+            await db.users.update_one({"_id": ObjectId(w["id"])}, {"$inc": {"stats.live_duel_wins": 1}})
     return await db.live_duels.find_one({"id": m["id"]})
 
 
@@ -95,6 +93,10 @@ async def live_leave(user=Depends(get_current_user)):
         await _settle(m)
         await db.live_duels.update_one({"id": m["id"], "players.id": uid}, {"$set": {"players.$.left": True}})
     return {"ok": True}
+
+
+async def in_duel(user) -> bool:
+    return bool(await _active(str(user["_id"])))
 
 
 async def record_catch(user, name: str, weight: float):

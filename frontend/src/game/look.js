@@ -14,3 +14,4 @@ export const lookFace = (a) => `/art/chars/face_${key(a)}.webp`;
 // Grip point of the raised front fist, as a fraction of the sprite box (feet anchor is bottom-centre).
 export const HAND = { m: [0.886, 0.354], f: [0.885, 0.288] };
 export const handSprite = (a) => `art/chars/hand_${key(a)}.webp`;
+export const idleSprite = (a) => `art/chars/idle_${key(a)}.webp`;

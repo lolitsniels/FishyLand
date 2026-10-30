@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGame } from "../tfl/context/GameContext";
-import { lookSprite } from "../game/look";
+import { idleSprite } from "../game/look";
 import { ShopFrame, ShopBanner, SideDeal } from "../tfl/components/ShopFrame";
 
 const TABS = [["outfits", "Outfits"], ["skins", "Rod Skins"], ["pets", "Pets"], ["emotes", "Emotes"]];
@@ -19,7 +19,7 @@ export default function PearlShop() {
   return (
     <div className="fade-in" data-testid="pearl-shop-soon">
       <ShopFrame testid="pearl-shop" tabs={TABS} value={tab} onChange={setTab} side={side} wallet={{ pearls: user.pearls || 0 }}>
-        <ShopBanner testid="pearl-shop-feature" kicker="Cosmetics only" title="Make your angler your own" bg="/art/harbour_wide.jpg" img={`/${lookSprite(user.avatar)}`}
+        <ShopBanner testid="pearl-shop-feature" kicker="Cosmetics only" title="Make your angler your own" bg="/art/harbour_wide.jpg" img={`/${idleSprite(user.avatar)}`}
           sub="Pearls are earned by fishing, quests and events, never bought, and they only ever buy looks." />
         <div className="sf-empty" data-testid="pearl-shop-empty">
           <div className="sf-banner-t !text-lg">{TABS.find(([id]) => id === tab)[1]} arrive soon</div>

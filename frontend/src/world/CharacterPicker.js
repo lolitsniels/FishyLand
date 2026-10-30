@@ -1,4 +1,4 @@
-import { SKINS, HAIRS, parseLook, lookId, lookSprite } from "../game/look";
+import { SKINS, HAIRS, parseLook, lookId, idleSprite } from "../game/look";
 
 const Row = ({ label, children }) => (
   <div className="flex flex-col gap-1.5">
@@ -14,7 +14,7 @@ export function CharacterPicker({ value, onChange, testid = "char-picker" }) {
   return (
     <div className="flex gap-4 items-center" data-testid={testid}>
       <div className="w-[92px] h-[176px] shrink-0 rounded-xl border-2 border-amber-600/70 bg-[radial-gradient(circle_at_50%_70%,rgba(255,220,140,.25),rgba(0,0,0,.4)_70%)] grid place-items-end justify-center overflow-hidden" data-testid={`${testid}-preview`}>
-        <img key={value} src={`/${lookSprite(value)}`} alt="Your angler" className="h-[168px] w-auto object-contain pop" />
+        <img key={value} src={`/${idleSprite(value)}`} alt="Your angler" className="h-[168px] w-auto object-contain pop" />
       </div>
       <div className="flex flex-col gap-3 min-w-0">
         <Row label="Angler">

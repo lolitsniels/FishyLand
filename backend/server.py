@@ -1489,6 +1489,11 @@ async def land(body: LandIn, user=Depends(get_current_user)):
                 "message": fail_msg}
     weight = enc["weight"]
     length = fish_length(f, weight)
+    if await duel_live.in_duel(user):
+        # duel catches only count toward the duel score: no fish, gold, xp or Fishdex progress
+        await duel_live.record_catch(user, f["name"], weight)
+        return {"success": True, "duel": True, "xp": 0, "user": public_user(user),
+                "catch": {"species_id": f["id"], "name": f["name"], "rarity": f["rarity"], "weight": weight, "length_cm": length, "variant": enc["variant"]}}
     journal = await db.journal.find_one({"user_id": str(user["_id"]), "species_id": f["id"]})
     m_old = mastery.level_for(f["rarity"], journal["count"] if journal else 0)
     mp = mastery.perks(m_old)

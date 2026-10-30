@@ -65,18 +65,30 @@ export default function CatchCard({ res, onClose }) {
           </div>
           <div className="flex flex-col items-center gap-1">
             <Stars rarity={c.rarity} />
+            {res.duel ? (
+              <>
+                <div className="text-xs text-amber-100/80 font-bold whitespace-nowrap">Added to your duel score</div>
+                <div className="font-deco text-2xl text-[#ffe9a3] leading-none whitespace-nowrap" data-testid="catch-duel-score">+{wt(c.weight)}</div>
+                <div className="text-[11px] text-amber-200/80 font-bold whitespace-nowrap">The fish goes back in the water</div>
+              </>
+            ) : <>
             <div className="text-xs text-amber-100/80 font-bold whitespace-nowrap">You've gained</div>
             <div className="font-deco text-2xl text-[#ffe9a3] leading-none whitespace-nowrap" data-testid="catch-xp">{res.xp} exp</div>
             <div className="text-xs text-amber-200 font-bold whitespace-nowrap" data-testid="catch-value">worth {fmt(c.value)} g</div>
+            </>}
           </div>
         </div>
         <div className="flex gap-2 w-full items-center">
+          {res.duel ? (
+            <button type="button" className="fr-btn flex-1 py-2" onClick={onClose} data-testid="catch-duel-back-btn">Back to the duel</button>
+          ) : <>
           <button type="button" className="fr-btn fr-btn-dark flex-1 py-2" disabled={busy} onClick={onClose} data-testid="catch-keep-btn">Keep</button>
           <button type="button" onClick={dex} className="relative flex-[1.3] h-11 transition-transform hover:scale-105 active:scale-95" data-testid="catch-fishdex-btn">
             <img src="/art/hud/btn_green.webp" alt="" className="absolute inset-0 w-full h-full" />
             <span className="relative whitespace-nowrap font-black text-white text-[11px] sm:text-sm tracking-wide [text-shadow:0_2px_0_#0a4a0a]">VIEW IN FISHDEX</span>
           </button>
           <button type="button" className="fr-btn flex-1 py-2 whitespace-nowrap" disabled={busy} onClick={sell} data-testid="catch-sell-btn">Sell {fmt(c.vendor ?? Math.round((c.value || 0) * 0.7))} g</button>
+          </>}
         </div>
       </div>
     </div>
