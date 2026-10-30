@@ -11,5 +11,6 @@ export const lookId = ({ g, s, h }) => `look:${g}_${s}_${h}`;
 const key = (a) => { const l = parseLook(a); return `${l.g}_${l.s}_${l.h}`; };
 export const lookSprite = (a) => `art/chars/${key(a)}.webp`;
 export const lookFace = (a) => `/art/chars/face_${key(a)}.webp`;
-// Grip point of the near hand, as a fraction of the sprite box (feet anchor is bottom-centre).
-export const HAND = { m: [0.48, 0.41], f: [0.61, 0.37] };
+// Grip point of the raised front fist, as a fraction of the sprite box (feet anchor is bottom-centre).
+export const HAND = { m: [0.886, 0.354], f: [0.885, 0.288] };
+export const handSprite = (a) => `art/chars/hand_${key(a)}.webp`;

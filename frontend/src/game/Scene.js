@@ -7,7 +7,7 @@ import { gameReady } from "../portal";
 import { sceneFor, inPoly } from "./scenes";
 import { buildMap, placeObjects, auditMap } from "./tilemap";
 import { TILED } from "./maps";
-import { lookSprite, parseLook, HAND } from "./look";
+import { lookSprite, handSprite, parseLook, HAND } from "./look";
 import ROD_META from "./rodMeta.json";
 
 let BG_W = 1264;
@@ -66,6 +66,7 @@ const streakTex = () => canvasTex(64, 256, (g) => {
 });
 
 const ROD_LEN = 150;
+const GRIP = 0.22; // the fist holds the rod this far up from the butt; ROD_LEN is grip -> tip
 // Rod angle (radians, 0 = pointing forward, negative = up) for a given activity.
 const rodAngle = (mode, phase, moving, time, extra = 0) => {
   if (mode === "harbour") return -1.3 + (moving ? Math.sin(time * 11) * 0.05 : Math.sin(time * 1.3) * 0.02);
@@ -80,14 +81,16 @@ function makeFigure() {
   const shadow = new Graphics().ellipse(0, -4, 60 * K, 14 * K).fill({ color: 0x0b1e33, alpha: 0.35 });
   const a = new Sprite(Texture.EMPTY); a.anchor.set(0.5, 1);
   const rod = new Sprite(Texture.EMPTY);
-  c.addChild(shadow, a, rod);
+  const fist = new Sprite(Texture.EMPTY); fist.anchor.set(0.5, 1);
+  c.addChild(shadow, a, rod, fist);
   const st = { look: null, rodId: null, hand: [12, -110], nat: -Math.PI / 4 };
-  const placeRod = () => rod.position.set(st.hand[0], st.hand[1] + a.y);
+  const placeRod = () => { rod.position.set(st.hand[0], st.hand[1] + a.y); fist.y = a.y; };
   return {
     c, a, rod,
     setLook(look) {
       if (look === st.look) return;
       st.look = look;
+      Assets.load(handSprite(look)).then((t) => { if (!fist.destroyed && st.look === look) { fist.texture = t; fist.scale.set(ANGLER_H / t.height); } }).catch(() => {});
       Assets.load(lookSprite(look)).then((t) => {
         if (a.destroyed || st.look !== look) return;
         a.texture = t; a.scale.set(ANGLER_H / t.height);
@@ -103,8 +106,8 @@ function makeFigure() {
       st.nat = Math.atan2(m[3] - m[1], m[2] - m[0]);
       Assets.load(`art/gear/${ROD_META[id] ? id : "rod_cane"}.webp`).then((t) => {
         if (rod.destroyed || st.rodId !== id) return;
-        rod.texture = t; rod.anchor.set(m[0] / t.width, m[1] / t.height);
-        rod.scale.set(ROD_LEN / Math.hypot(m[2] - m[0], m[3] - m[1]));
+        rod.texture = t; rod.anchor.set((m[0] + (m[2] - m[0]) * GRIP) / t.width, (m[1] + (m[3] - m[1]) * GRIP) / t.height);
+        rod.scale.set(ROD_LEN / ((1 - GRIP) * Math.hypot(m[2] - m[0], m[3] - m[1])));
       }).catch(() => {});
     },
     setAngle(d) { placeRod(); rod.rotation = d - st.nat; },
