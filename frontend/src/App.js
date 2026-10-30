@@ -1,3 +1,4 @@
+import DuelLive from "./world/DuelLive";
 import "@/App.css";
 import "./tfl/tfl.css";
 import "./tfl/game-skin.css";
@@ -23,7 +24,6 @@ import Contracts from "./tfl/pages/game/Contracts";
 import Market from "./tfl/pages/game/Market";
 import Crews from "./tfl/pages/game/Crews";
 import Tournaments from "./tfl/pages/game/Tournaments";
-import Duel from "./tfl/pages/game/Duel";
 import Leaderboards from "./tfl/pages/game/Leaderboards";
 import Achievements from "./tfl/pages/game/Achievements";
 import Crafting from "./tfl/pages/game/Crafting";
@@ -41,7 +41,7 @@ function Protected({ children }) {
 
 const GAME_PAGES = [
   ["waters", Waters], ["journal", Journal], ["inventory", Inventory], ["shop", Shop], ["pearl-shop", PearlShop], ["profile/:username?", Profile],
-  ["quests", Quests], ["contracts", Contracts], ["market", Market], ["crews/:id?", Crews], ["tournaments", Tournaments], ["duel", Duel],
+  ["quests", Quests], ["contracts", Contracts], ["market", Market], ["crews/:id?", Crews], ["tournaments", Tournaments], ["duel", DuelLive],
   ["leaderboards", Leaderboards], ["achievements", Achievements], ["crafting", Crafting], ["messages/:username?", Messages], ["almanac", Almanac], ["wiki", Wiki], ["admin", Admin],
 ];
 

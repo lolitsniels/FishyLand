@@ -6,6 +6,7 @@ import { useGame } from "../store";
 import { gameReady } from "../portal";
 import { sceneFor, inPoly } from "./scenes";
 import { buildMap, placeObjects } from "./tilemap";
+import { TILED } from "./maps";
 import { lookSprite, parseLook, HAND } from "./look";
 import ROD_META from "./rodMeta.json";
 
@@ -771,6 +772,21 @@ async function loadMapArt(cfg) {
   return { mt: { img, img_tex, obj } };
 }
 
+// Build the other walkable maps in the background so switching maps is instant.
+let warming = false;
+async function prewarm() {
+  if (warming) return;
+  warming = true;
+  for (const [k, cfg] of Object.entries(TILED)) {
+    if (MAP_CACHE.has(k)) continue;
+    const { mt } = await loadMapArt(cfg).catch(() => ({}));
+    if (!mt) continue;
+    await new Promise((res) => (window.requestIdleCallback || setTimeout)(res, { timeout: 800 }));
+    if (!MAP_CACHE.has(k)) MAP_CACHE.set(k, buildMap(cfg, mt.img));
+  }
+  warming = false;
+}
+
 export default function Scene({ place = "harbour" }) {
   const host = useRef(null);
   const rig = useRef({ app: null, tex: null, teardown: null, place, seq: 0 });
@@ -781,6 +797,7 @@ export default function Scene({ place = "harbour" }) {
     load.then(({ bg, mt }) => {
       if (seq !== r.seq || !r.app) return;
       r.teardown?.(); r.teardown = buildScene(r.app, r.tex, key, bg, mt);
+      setTimeout(prewarm, 1200);
     });
   };
 

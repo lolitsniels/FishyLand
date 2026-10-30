@@ -15,7 +15,7 @@ export const HARBOUR_MAP = {
   ],
   water: [{ smooth: [2780, -200, 3800, -200, 3800, 2600, -200, 2600, -200, 1980, 600, 1900, 1200, 1940, 1800, 1890, 2400, 1880, 2700, 1820, 2790, 1500, 2760, 900, 2800, 300], bankW: 110 }],
   docks: [
-    { poly: [2700, 1600, 3380, 1600, 3380, 1730, 2700, 1730], posts: [...posts(2840, 3380, 1735), ...posts(2840, 3380, 1598)] },
+    { poly: [2700, 1600, 3380, 1600, 3380, 1730, 2700, 1730], posts: posts(2840, 3380, 1735) },
     { poly: [1480, 1720, 1620, 1720, 1620, 2160, 1480, 2160], posts: [[1480, 2160], [1620, 2160], [1480, 2010], [1620, 2010]] },
   ],
   objects: [
@@ -23,7 +23,7 @@ export const HARBOUR_MAP = {
     { k: "guild_hall", x: 2000, y: 945, w: 470, fp: [0.92, 0.6] }, { k: "house", x: 2440, y: 945, flip: true },
     { k: "fountain", x: 1550, y: 1310, w: 250 }, { k: "quest_board", x: 1830, y: 1175, w: 140 }, { k: "quest_board", x: 1270, y: 1175, w: 140 },
     { k: "tavern", x: 900, y: 1585, w: 400 }, { k: "pearl_shop", x: 2120, y: 1585, w: 350 }, { k: "house", x: 300, y: 1585, w: 260 },
-    { k: "ship", x: 3060, y: 1590, w: 620 }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
+    { k: "ship", x: 3060, y: 1590, w: 620, flip: true }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
     ...[400, 900, 1350, 1750, 2200, 2650].map((x) => ({ k: "lantern", x, y: 1125 })),
     ...[500, 1150, 1750, 2350].map((x) => ({ k: "lantern", x, y: 1745 })),
     { k: "lantern", x: 2640, y: 1560 }, { k: "lantern", x: 1420, y: 1690 },
@@ -118,4 +118,29 @@ export const CREW_ISLAND_MAP = {
   sparkle: [0, 0, 2400, 1800], leap: null, life: {},
 };
 
-export const TILED = { harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP };
+// Duel Pier arena: one round pond, a pier from each side, scoreboard stand at the top.
+export const DUEL_MAP = {
+  tiled: true, W: 2200, H: 1500, scale: 0.74, spawn: { x: 1100, y: 1230 }, weather: "gulls", water_tex: "river",
+  base: "grass",
+  ground: [{ tex: "cobble", circle: [1100, 720, 640, 430] }, { tex: "cobble", line: [1100, 1140, 1100, 1400], width: 130 }],
+  water: [{ circle: [1100, 720, 460, 280], bankW: 40, bank: "cobble" }],
+  docks: [
+    { poly: [560, 660, 860, 660, 860, 780, 560, 780], posts: [[860, 660], [860, 780], [740, 780]] },
+    { poly: [1340, 660, 1640, 660, 1640, 780, 1340, 780], posts: [[1340, 660], [1340, 780], [1460, 780]] },
+  ],
+  objects: [
+    { k: "quest_board", x: 1100, y: 250, w: 220 },
+    ...[[300, 300], [1900, 300], [260, 1200], [1940, 1200]].map(([x, y]) => ({ k: "oak", x, y })),
+    { k: "lantern", x: 980, y: 1200 }, { k: "lantern", x: 1220, y: 1200 }, { k: "lantern", x: 520, y: 600 }, { k: "lantern", x: 1680, y: 600 },
+    { k: "bush", x: 700, y: 300 }, { k: "bush", x: 1500, y: 300 }, { k: "barrels", x: 470, y: 900, w: 100 }, { k: "barrels", x: 1730, y: 900, w: 100 },
+  ],
+  spots: [
+    { id: "fish-1", fish: true, label: "West Pier", x: 840, y: 725, cast: [1000, 740] },
+    { id: "fish-2", fish: true, label: "East Pier", x: 1360, y: 725, cast: [1200, 740] },
+    { id: "fish-3", fish: true, label: "South Bank", x: 1100, y: 1060, cast: [1100, 900] },
+    { id: "fish-4", fish: true, label: "North Bank", x: 1100, y: 390, cast: [1100, 540] },
+  ],
+  sparkle: [640, 440, 920, 560], leap: [700, 500, 800, 450], life: {},
+};
+
+export const TILED = { harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP, duel_pier: DUEL_MAP };

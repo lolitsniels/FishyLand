@@ -16,6 +16,7 @@ import CatchCard from "./CatchCard";
 import { fishArt } from "./useFight";
 import { toast } from "sonner";
 import { ChatBox } from "./ChatBox";
+import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
 import { lookFace } from "../game/look";
 
@@ -28,7 +29,7 @@ export const PAGES = {
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
 const BAR_R_WATER = ["quests", "profile"];
-const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : user?.water || "millbrook");
+const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
 const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
@@ -86,7 +87,8 @@ export default function World() {
   const fightEnc = useGame((st) => st.fightEnc);
   const result = useGame((st) => st.result);
   const ph = useGame((st) => st.phase);
-  const [mode, setMode] = useState(() => { fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(placeOf(fx.mode, user)).spawn }; return fx.mode; });
+  const [mode, setMode] = useState(() => {
+    if (sessionStorage.getItem("fr_mode") === "duel") sessionStorage.setItem("fr_mode", "harbour"); fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(placeOf(fx.mode, user)).spawn }; return fx.mode; });
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
@@ -99,6 +101,7 @@ export default function World() {
   const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(placeOf(m, user)).spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => {
+    if (mode === "duel" && page && page !== "inventory" && page !== "journal") { nav("/game", { replace: true }); return; }
     if (mode !== "harbour" && page && HARBOUR_ONLY.has(page) && !(mode === "crew" && page === "crews")) { toast("That's in the harbour. Sail back to visit it.", { id: "harbour-only" }); nav("/game", { replace: true }); }
   }, [mode, page, nav]);
   useEffect(() => {
@@ -149,17 +152,18 @@ export default function World() {
   }, [w, s, user, data]);
   if (!user || !data) return <div className="fixed inset-0 grid place-items-center bg-[#04121c] gold-text font-deco text-2xl" data-testid="game-loading">Loading the harbour…</div>;
   const nearSpot = sceneFor(placeOf(mode, user)).spots.find((x) => x.id === near && !x.fish);
-  const canFish = mode === "water" && !!atSpot;
+  const wet = mode === "water" || mode === "duel";
+  const canFish = wet && !!atSpot;
   const title = PAGES[page]?.[0] || page;
   const idle = ph === "idle" && !result && !fightEnc;
-  const fishLabel = mode !== "water" ? "SAIL" : ph === "fight" ? "REEL" : !idle ? "WAIT" : canFish ? "FISH" : "FIND SPOT";
-  const onFish = () => { if (mode !== "water") nav("/game/waters"); else if (fx.phase === "idle" && fx.atSpot) cast(); };
+  const fishLabel = !wet ? "SAIL" : ph === "fight" ? "REEL" : !idle ? "WAIT" : canFish ? "FISH" : "FIND SPOT";
+  const onFish = () => { if (!wet) nav("/game/waters"); else if (fx.phase === "idle" && fx.atSpot) cast(); };
 
   return (
     <div className="fixed inset-0 overflow-hidden select-none" data-testid="game-page" data-mode={mode} onPointerDown={() => startMusic()}>
       <Scene place={placeOf(mode, user)} />
       <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: w / s, height: h / s, transform: `scale(${s})` }} data-testid="game-hud">
-        <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : mode === "crew" ? `${user.crew?.name || "Crew"} Island` : water?.name} here={here} /></div>
+        <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : mode === "duel" ? "Duel Pier" : mode === "crew" ? `${user.crew?.name || "Crew"} Island` : water?.name} here={here} /></div>
         {mode === "water" && idle && !page && (
           <button type="button" className="fr-btn fr-btn-dark absolute right-3 px-4 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
         )}
@@ -171,20 +175,21 @@ export default function World() {
           </div>
         )}
         {mode === "harbour" && !nearSpot && idle && !page && <Hint>Tap to walk or use WASD · visit a signpost · board the Sea Serpent to travel</Hint>}
-        {mode === "water" && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
+        {wet && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
         <ChatBox />
+        {mode === "duel" && <DuelHud />}
         <QuickTackle />
         <div ref={barRef} className="absolute bottom-2 left-1/2 pointer-events-auto fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1" style={{ transform: `translateX(-50%) scale(${barK})`, transformOrigin: "50% 100%" }} data-testid="action-bar">
           {BAR_L.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
-          <button type="button" data-testid="cast-fish-button" disabled={mode === "water" && (!canFish || !idle)}
+          <button type="button" data-testid="cast-fish-button" disabled={wet && (!canFish || !idle)}
             onPointerDown={(e) => { e.preventDefault(); onFish(); }}
             style={{ backgroundImage: `url(/art/hud/${mode === "harbour" ? "sail" : "fishbtn"}.webp)` }}
             className={`fish-btn fish-btn-img w-[96px] h-[96px] -mt-7 grid place-items-center ${ph === "fight" ? "invisible" : ""} ${!idle ? "busy" : ""} ${mode === "water" && !canFish && idle ? "opacity-60 grayscale" : ""}`}>
             <span className="fish-btn-label">{fishLabel}</span>
           </button>
-          {(mode !== "harbour" ? BAR_R_WATER : BAR_R).map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
+          {(mode !== "harbour" ? BAR_R_WATER : BAR_R).filter((k) => mode !== "duel" || k === "profile").map((k) => <Ring key={k} img={k === "profile" ? lookFace(user.avatar) : PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <Ring img="settings" label="More" size={w < 600 ? 36 : 46} testid="menu-more" onClick={() => setMore(true)} />
         </div>
       </div>

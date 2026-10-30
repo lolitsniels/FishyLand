@@ -55,6 +55,7 @@ export function GameProvider({ children }) {
 
   const login = useCallback((payload) => {
     localStorage.setItem("owo_token", payload.token);
+    sessionStorage.setItem("fr_mode", "harbour");
     if (payload.user?.is_guest) localStorage.setItem("owo_guest_token", payload.token); else localStorage.removeItem("owo_guest_token");
     setUser(payload.user);
   }, []);

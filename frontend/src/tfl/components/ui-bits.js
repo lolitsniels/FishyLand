@@ -87,5 +87,5 @@ export const Stat = ({ label, value, className = "" }) => (
 );
 
 export const RecaptchaNote = ({ className = "" }) => (
-  <p className={`rc-note ${className}`} data-testid="recaptcha-note">{tt("This site is protected by reCAPTCHA and the Google")} <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">{tt("Privacy Policy")}</a> {tt("and")} <a href="https://policies.google.com/terms" target="_blank" rel="noreferrer">{tt("Terms of Service")}</a> {tt("apply.")}</p>
+  <p className={`rc-note ${className}`} data-testid="recaptcha-note">{tt("This site is protected by reCAPTCHA and the Google")} <span>{tt("Privacy Policy")}</span> {tt("and")} <span>{tt("Terms of Service")}</span> {tt("apply.")}</p>
 );

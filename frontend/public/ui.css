@@ -184,3 +184,29 @@ html body .reel-btn.holding { border-image: url(/art/hud/btn_gold.webp) 80 140 f
 .pcard-bar.energy { height: 11px; border: 1px solid rgba(255, 210, 63, .6); }
 .pcard-bar.energy i { background: linear-gradient(180deg, #ffe66b, #ffb31a 60%, #e88a00); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
 .pcard-bar.energy span { line-height: 9px; font-size: 8.5px; color: #2a1503; text-shadow: 0 1px 0 rgba(255, 255, 255, .5); }
+
+/* live duel */
+.duel-board { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 8; display: flex; align-items: center; gap: 10px; padding: 4px 8px; border: 16px solid transparent; border-image: url(/art/hud/panel.webp) 195 fill / 16px / 0 stretch; }
+.duel-side { display: flex; flex-direction: column; align-items: flex-start; min-width: 120px; font-family: var(--ui-font); }
+.duel-side.right { align-items: flex-end; }
+.duel-side b { font-size: 13px; color: #fff3cf; text-shadow: 0 1px 2px #000; }
+.duel-side.lead b { color: #ffd23f; }
+.duel-kg { font: 400 22px "Lilita One", var(--ui-font); color: #fff; text-shadow: 0 2px 0 #000; line-height: 1.1; }
+.duel-side small { font-size: 10.5px; color: #a9c1e0; }
+.duel-clock { font: 400 26px "Lilita One", var(--ui-font); color: #ffd23f; min-width: 110px; text-align: center; text-shadow: 0 2px 0 #000, 0 0 10px rgba(255, 210, 63, .5); }
+.duel-result { width: min(92vw, 420px); padding: 14px; }
+.duel-result-t { font: 400 40px "Lilita One", var(--ui-font); text-shadow: 0 3px 0 #000; }
+.duel-result-t.win { color: #ffd23f; } .duel-result-t.lose { color: #ff8a7a; } .duel-result-t.draw { color: #bfe3ff; }
+.duel-final { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.duel-final > div { display: flex; flex-direction: column; padding: 8px; border-radius: 6px; background: rgba(6, 16, 32, .6); border: 1px solid rgba(226, 180, 90, .35); }
+.duel-final > div.me { border-color: #ffd23f; }
+.duel-final b { color: #fff3cf; font-size: 13px; } .duel-final span { font: 400 22px "Lilita One", var(--ui-font); color: #fff; } .duel-final small { color: #a9c1e0; font-size: 10.5px; }
+.duel-reward { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font: 400 22px "Lilita One", var(--ui-font); color: #ffd23f; }
+.duel-reward img { width: 26px; height: 26px; }
+@media (max-width: 640px) { .duel-board { top: 180px; gap: 4px; } .duel-side { min-width: 84px; } .duel-kg { font-size: 17px; } .duel-clock { font-size: 20px; min-width: 76px; } }
+img.px-icon { display: inline-block; vertical-align: middle; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .6)); }
+
+/* one navy + brass palette for every menu (overrides the old brown theme vars) */
+html body { --bg: #071427 !important; --bg-2: rgba(10, 28, 54, .78) !important; --bg-deep: #040c1a !important; --panel: rgba(12, 30, 58, .85) !important; --panel-2: rgba(18, 42, 78, .8) !important;
+  --panel-hi: rgba(30, 64, 110, .85) !important; --border: rgba(226, 180, 90, .32) !important; --border-2: rgba(226, 180, 90, .55) !important; }
+.fr-modal [class*="bg-[var(--bg-2)]"] { border-radius: 6px; }
