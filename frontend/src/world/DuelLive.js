@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, errMsg } from "../tfl/lib/api";
 import { toast } from "sonner";
+import { fx } from "../game/fx";
 
 const fmtT = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 const goMode = (m) => window.dispatchEvent(new CustomEvent("fr-mode", { detail: m }));
@@ -9,19 +10,24 @@ const goMode = (m) => window.dispatchEvent(new CustomEvent("fr-mode", { detail: 
 export function DuelHud() {
   const [m, setM] = useState(null);
   const gone = useRef(0);
+  const placed = useRef(false);
   useEffect(() => {
     let live = true;
     const pull = async () => {
       try {
         const r = await api.get("/duel/live/state");
         if (!live) return;
-        if (r.data.state === "matched") { gone.current = 0; setM(r.data.match); }
+        if (r.data.state === "matched") {
+          gone.current = 0; setM(r.data.match); fx.duelPhase = r.data.match.phase;
+          // each duelist starts on their own side of the path so they don't overlap
+          if (!placed.current) { placed.current = true; fx.me = { x: fx.me.x + (r.data.match.side ? 60 : -60), y: fx.me.y + 40 }; }
+        }
         else if (++gone.current > 2) goMode("harbour");
       } catch { /* retry */ }
     };
     pull();
     const t = setInterval(pull, 1500);
-    return () => { live = false; clearInterval(t); };
+    return () => { live = false; clearInterval(t); fx.duelPhase = null; };
   }, []);
   if (!m) return null;
   const leave = async () => { try { await api.post("/duel/live/leave"); } catch (e) { toast.error(errMsg(e)); } goMode("harbour"); };

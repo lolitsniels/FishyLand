@@ -30,7 +30,7 @@ def _view(m, uid):
     phase = "countdown" if now < start else "live" if now < end else "done"
     me = next(p for p in m["players"] if p["id"] == uid)
     foe = next(p for p in m["players"] if p["id"] != uid)
-    out = {"id": m["id"], "phase": phase, "start": m["start"], "end": m["end"], "seconds_left": max(0, int((end - now).total_seconds())),
+    out = {"id": m["id"], "phase": phase, "side": 0 if m["players"][0]["id"] == uid else 1, "start": m["start"], "end": m["end"], "seconds_left": max(0, int((end - now).total_seconds())),
            "me": {k: me[k] for k in ("username", "kg", "catches", "best")}, "foe": {k: foe[k] for k in ("username", "kg", "catches", "best")}}
     if phase == "done":
         out["result"] = "draw" if round(me["kg"], 3) == round(foe["kg"], 3) else "win" if me["kg"] > foe["kg"] else "lose"

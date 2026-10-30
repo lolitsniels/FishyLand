@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 17 (frontend, two browser contexts: TestAngler + TestAngler2). (1) DUEL PIER FIXED: both players queued through the /game/duel UI (duel-find -> duel-waiting -> matched). Both switched to fx.mode 'duel' and the DuelHud scoreboard showed the right names and timer. P1 was teleported onto fish-1 and cast with the FISH button (cast-fish-button enabled). The phases were cast -> wait -> fight -> resolving -> landed, and a Rock Bass (0.663 kg) counted on the server and on both scoreboards: P1 me 0.66 / foe 0.00, P2 the mirror. In a second duel, both players cast at the same time with Space. P2 landed a Ghost Carp (6.94 kg) and P1 a Creek Chub, and the boards updated on both sides. Real click-to-walk from the duel spawn to the glowing South Bank spot set atSpot=fish-3 and the hint changed to 'press FISH or Space'. The duel-end screen worked: P1 got 'Victory!' with a +500 reward (gold 7053 -> 7553), P2 got 'Defeat' with no reward, and duel-back-harbour returned both to harbour mode. (2) PEER PATHING FIXED: with ?debugpeers=1, TestAngler2's positions were posted via /api/world/pos. Millbrook (800,1230)->(2150,1100): 48 samples, 0 off land, and the trail goes over the bridge. Millbrook reverse: 48 samples, 0 off land. Harbour (1550,2080 duel dock)->(2800,1665 ship dock) across the sea gap: 56 samples, 0 off land; the peer walked up the dock and along the shore. (3) REGRESSION OK: Millbrook water fishing (cast -> fight -> catch popup 'Warmouth CAUGHT!') works, and the travel map badge map-players-millbrook shows. No page errors in any run. Note: /api/fish/land was intercepted to force success=true, the same approach as iteration 16. Cast, bite and scoring all used real server data.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/duel/live/leave", "issue": "Leaving during the live phase does nothing (no 'left' flag, no forfeit). The player stays 'matched', and queueing again puts them back into the same duel. It is only a no-op, but there is no way to forfeit mid-duel."},
+      {"endpoint": "/api/fish/land -> duel_live.record_catch", "issue": "Casting is allowed during the 6 s countdown, but record_catch only counts catches when start <= now. A fish landed before the start is silently not counted. Consider blocking the cast (or toasting) while the duel phase is 'countdown'."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Duel Pier spawn", "issues": ["Both duelists spawn at the same point (1100,1230), so their figures and nameplates overlap ('TeTestAngler 2'). Use separate spawn points per side."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/duel_api_check.py"],
+  "action_items": [
+    "Optional: give each duelist their own spawn point to avoid overlapping nameplates",
+    "Optional: block or warn on casting during the duel countdown, because catches before the start are not counted",
+    "Optional: Scene.js peer pathing falls back to a straight line [{x:p.x,y:p.y}] when tm.nav.path() returns null (unreachable target) and snaps when the target is off the grid or >1400 px away. Snapping is fine, but the null-path straight-line fallback can still show a peer walking across water. Snap in that case instead."
+  ],
+  "critical_code_review_comments": [
+    "Scene.js ~603: the `|| [{ x: p.x, y: p.y }]` fallback reintroduces straight-line walking over water for unreachable targets. Snap instead.",
+    "Scene.js walking: dt is clamped to 0.05, so on low-FPS devices (seen in headless at a few fps) WASD and peer movement get much slower than 230 px/s. Holding W for 1 s moved only about 46 px in headless.",
+    "duel_live._active looks back 300 s after the end, so a finished duel is shown again on requeue until the player clicks 'Back to the harbour' (this is how the result screen is reached, which is fine). Users who closed the tab during the result must click through once more.",
+    "The duel fish pool follows each user's current water (/fish/cast). Players with better waters may have an unfair weight advantage. Consider a duel-specific pool."
+  ],
+  "updated_files": ["/app/tests/duel_api_check.py"],
+  "success_rate": {"backend": "n/a (frontend run; duel APIs exercised via UI, all 200)", "frontend": "100% of requested flows"},
+  "seed_data_creation": "Played 3 live duels between TestAngler and TestAngler2. TestAngler won 500 gold in duel 1. Several fish were added to both inventories. All duels are now finished or left.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Two-player duel: the second context is created via page.context.browser.new_context(). Set localStorage owo_token and sessionStorage fr_mode='harbour', open /game/duel, P1 clicks duel-find (duel-waiting), then P2 clicks duel-find. Wait for duel-scoreboard in both. Teleport with window.__fx.me (fish-1 840,725; fish-2 1360,725; fish-3 1100,1060). Use Space or cast-fish-button, and route /api/fish/land to force success. Background contexts render at a low FPS, so teleport instead of walking there. Clear old duels with `python3 /app/tests/duel_api_check.py leave` after a duel ends (leave is rejected during the countdown). The peer test needs ?debugpeers=1 and reads window.__peerPos. Note that the presence _pos is keyed per user, so a TA2 browser tab still posting will overwrite your API posts."
+}

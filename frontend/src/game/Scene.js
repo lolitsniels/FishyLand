@@ -600,8 +600,8 @@ function buildScene(app, tex, key, bgTex, mt) {
       if (p.x !== v.tx || p.y !== v.ty) {
         // walk peers along the walk grid (never straight across water); far jumps or off-grid positions snap
         const far = Math.hypot(p.x - v.c.x, p.y - v.c.y) > 1400 || (tm && !canWalk(v.c.x, v.c.y)) || (tm && !canWalk(p.x, p.y));
-        if (far) { v.c.x = p.x; v.c.y = p.y; v.wp = []; }
-        else v.wp = (tm && tm.nav.path({ x: v.c.x, y: v.c.y }, { x: p.x, y: p.y })) || [{ x: p.x, y: p.y }];
+        const wp = far ? null : tm ? tm.nav.path({ x: v.c.x, y: v.c.y }, { x: p.x, y: p.y }) : [{ x: p.x, y: p.y }];
+        if (!wp) { v.c.x = p.x; v.c.y = p.y; v.wp = []; } else v.wp = wp;
       }
       v.tx = p.x; v.ty = p.y; v.seen = now; v.phase = p.phase; v.f.setLook(p.look); v.f.setRod(p.rod);
     });
