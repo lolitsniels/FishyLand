@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Lock } from "lucide-react";
-import { fmt } from "../lib/api";
+import { useEffect, useState } from "react";
+import { Lock, User } from "lucide-react";
+import { api, fmt } from "../lib/api";
 
 // Pin positions on art/hud/world_map.webp (1264x848), in %.
 const PINS = {
@@ -11,6 +11,13 @@ const goMode = (m) => window.dispatchEvent(new CustomEvent("fr-mode", { detail: 
 
 export function WorldMap({ waters, user, mode, onTravel, expedition }) {
   const [sel, setSel] = useState(null);
+  const [counts, setCounts] = useState({});
+  useEffect(() => {
+    let alive = true;
+    const load = () => api.get("/world/counts").then((r) => alive && setCounts(r.data.counts || {})).catch(() => {});
+    load(); const iv = setInterval(load, 8000);
+    return () => { alive = false; clearInterval(iv); };
+  }, []);
   const info = (w) => {
     const unlocked = w.premium ? !!user.premium && user.level >= w.level : user.unlocked_waters.includes(w.key);
     const can = w.premium ? !!user.premium && user.level >= w.level : user.level >= w.level && user.gold >= w.fee;
@@ -27,6 +34,11 @@ export function WorldMap({ waters, user, mode, onTravel, expedition }) {
           <button key={key} type="button" className={`wm-pin ${st.unlocked ? "" : "locked"} ${here ? "here" : ""} ${sel === key ? "on" : ""}`} style={{ left: `${PINS[key][0]}%`, top: `${PINS[key][1]}%` }}
             onClick={(e) => { e.stopPropagation(); setSel(key); }} data-testid={`map-pin-${key}`}>
             <span className="wm-dot"><img src={key === "harbour" ? "/art/hud/sail.webp" : `/art/waters/${key}_thumb.jpg`} alt="" /></span>
+            {counts[key] > 0 && (
+              <span className="absolute -top-1 -right-2 z-10 flex items-center gap-0.5 rounded-full bg-gradient-to-b from-[#5fe36a] to-[#1f9a2c] border-2 border-[#0d4d14] px-1.5 py-[1px] text-[11px] font-black text-white shadow-md [text-shadow:0_1px_0_#0a3a0f]" data-testid={`map-players-${key}`}>
+                <User size={11} strokeWidth={3} />{counts[key]}
+              </span>
+            )}
             {expedition === key && <span className="wm-exp" data-testid={`map-expedition-${key}`}>Expedition</span>}
             <span className="wm-label">{name}{!st.unlocked && <Lock size={10} className="inline ml-1 -mt-0.5" />}</span>
           </button>

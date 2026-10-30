@@ -47,3 +47,12 @@ async def set_look(body: LookIn, user=Depends(get_current_user)):
     await db.users.update_one({"_id": user["_id"]}, {"$set": {"avatar": body.avatar}})
     user["avatar"] = body.avatar
     return {"user": public_user(user)}
+
+
+@api.get("/world/counts")
+async def world_counts(user=Depends(get_current_user)):
+    t, out = time.time(), {}
+    for v in _pos.values():
+        if t - v["at"] <= STALE_SEC and (v["loc"] == "harbour" or v["loc"] in WATER_BY_KEY):
+            out[v["loc"]] = out.get(v["loc"], 0) + 1
+    return {"counts": out}
