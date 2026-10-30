@@ -46,7 +46,8 @@ const SOUNDS = {
 };
 
 export function sfx(name) {
-  if (!useGame.getState().settings.sound || useGame.getState().paused) return;
+  const g = useGame.getState();
+  if (!g.settings.sound || g.paused || g.platformMuted) return;
   try { SOUNDS[name]?.(); } catch (e) { /* audio blocked */ }
 }
 
@@ -88,6 +89,6 @@ export function applyAudio() {
   const st = useGame.getState();
   if (musicGain) musicGain.gain.value = st.settings.music ? 1 : 0;
   if (!ctx) return;
-  if (st.paused) ctx.suspend().catch(() => {});
+  if (st.paused || st.platformMuted) ctx.suspend().catch(() => {});
   else if (musicTimer) ctx.resume().catch(() => {});
 }

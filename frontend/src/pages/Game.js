@@ -28,7 +28,7 @@ function useHudScale() {
   const calc = () => {
     const compact = window.innerHeight < 520;
     const sc = compact ? Math.min(window.innerWidth / 1100, window.innerHeight / 600)
-      : PORTAL ? Math.min(1.15, window.innerWidth / 1100, window.innerHeight / 680)
+      : PORTAL ? Math.min(1.15, window.innerWidth / 1000, window.innerHeight / 640)
       : Math.min(1.15, window.innerWidth / 1420, window.innerHeight / 790);
     return { scale: Math.max(0.45, sc), compact };
   };
@@ -110,7 +110,8 @@ export default function Game() {
   useEffect(() => {
     let hadAd = false;
     const off = onPause((reasons) => {
-      const paused = reasons.size > 0;
+      const paused = [...reasons].some((r) => r !== "audio");
+      useGame.setState({ platformMuted: reasons.has("audio") });
       if (reasons.has("ad")) hadAd = true;
       const st = { paused };
       if (!paused && hadAd) { st.needTap = true; hadAd = false; }

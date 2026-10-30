@@ -31,3 +31,11 @@ Full build brief "FISHING REALM — Complete Build Brief" (2.5D high-fantasy bro
 - P1 Phase 5: wings/mounts/pets/fashion/rod skins/titles/skills/spirit systems
 - P1 Phase 6: diamonds, recharge (provider TBD by owner), VIP, mall, pass, gacha with odds + pity, wheel, auto-fishing
 - P2 Phase 7/8: events scheduler, world boss, guilds, market, tournaments, rankings, admin panel, bot catcher, analytics, SEO pages, portal flag
+
+## 2026-06 Portal compliance (Playgama + GameDistribution)
+- Portal mode (REACT_APP_PORTAL=1 build or ?portal=1 in preview) via Playgama Bridge SDK (covers game_distribution too)
+- Offline engine frontend/src/game/localApi.js (mirrors backend endpoints, same deterministic sim), saves via bridge.storage
+- No login/email/server calls/VIP/links/placeholders/chat; preroll at Play, midroll after each fish; pause+mute on ad/hidden/platform pause; audio-off mutes only; Tap to Continue after ads
+- Bundled fonts (no Google Fonts), procedural music + music toggle, 4-step tutorial, 800x600 HUD tuning, relative asset paths with <base href="%PUBLIC_URL%/">
+- Build: GD_GAME_ID=... bash /app/scripts/build_portal.sh -> /app/portal_builds/fishing-realm-portal.zip + thumbnails (512x512, 512x384, 200x120); listing text in /app/portal_builds/README.md
+- Web: hero-name profanity filter, lockout keyed per email

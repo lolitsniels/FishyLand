@@ -30,7 +30,7 @@ export default function ChatBox({ compact }) {
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [lines.length, tab]);
 
   return (
-    <div className={`fr-panel w-[340px] max-w-[34vw] flex flex-col rise ${open ? "h-[170px]" : "h-[34px]"}`} style={{ animationDelay: "0.3s" }} data-testid="chat-box">
+    <div className={`fr-panel w-[340px] ${PORTAL ? "max-w-[26vw]" : "max-w-[34vw]"} flex flex-col rise ${open ? "h-[170px]" : "h-[34px]"}`} style={{ animationDelay: "0.3s" }} data-testid="chat-box">
       <div className="flex items-center border-b border-amber-700/60">
         {TABS.map((tb) => (
           <button key={tb} type="button" onClick={() => { setTab(tb); setOpen(true); }} data-testid={`chat-tab-${tb.toLowerCase()}`}

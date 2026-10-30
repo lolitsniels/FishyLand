@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 2: portal (Playgama/GD) mode and web regression. PORTAL (?portal=1) passes: portal-start with no login form, Play -> HUD, tutorial 4 steps (titles correct) then hidden after reload; ZERO /api calls (hosts seen: same-origin, bridge.playgama.com, api.playgama.com, plus preview infra and fonts.googleapis.com, which the zip build strips); no event-grid/left-rail/vip-badge/chat-input/menu-skills/menu-auto/channel-selector; action bar is exactly inventory, gear, shop, cast-fish-button, fishdex, settings; settings has sound, music, low-graphics, show-fps and open-tutorial, with no logout or account. Offline economy: shop gold 1000->950, cast stamina 100->99, waiting-message then tension-minigame, fight resolved locally ('The fish escaped!'), inventory tabs, stamina potion 99->129, enhance (rod BR 300->336, gold 950->750), reel tab, fishdex 0/10 with detail, waters modal; gold, stamina and BR persist after reload. Visibility hidden shows pause-overlay and visible clears it. At 800x600: no horizontal overflow, no HUD overlap, all modals fit. WEB: register 'fuckboy1' (and 'F_u_c_k') -> 'Please choose a different hero name'; owner login, tutorial, settings with logout-btn, open-tutorial-btn, logout, guest -> /play, tutorial skip that persists, and cast all work. BUT a CRITICAL web regression: the game scene art fails to load on /play. Backend: scripts/e2e_fishing.py passes (3/3 landed, empty and too-fast rejected); pytest 13/14 (brute-force lockout still fails, see RCA); new regression file 4/5 (the art-path bug).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Brute-force lockout still not triggering in tests: identifier is ip:email and the client's egress IP alternates between requests (DB shows 35.225.230.28 and 34.170.12.145 for the same test email, 3 counts each). Lockout never reaches 5 per key. Suggest also keeping a per-email counter (e.g. lock on email alone after N fails across IPs) or keying by email only."},
+      {"endpoint": "POST /api/auth/register", "issue": "Substring profanity list causes false positives (Scunthorpe problem): 'sex' blocks Essex/Sussex, 'dick' blocks Dickens, 'rape' blocks Grapefruit, 'fag' blocks Fagan. Consider word-boundary or leetspeak-normalized whole-token matching for short words."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Web mode Game scene (Scene.js Assets.load + all <img src='art/...'>, gameData.json img paths)", "issue": "Last commit changed '/art/...' to relative 'art/...' for the portal build. In web mode (BrowserRouter) on /play these resolve to /play/art/*.png, which the SPA fallback serves as text/html. Pixi throws 'Loader.load Failed to load /play/art/wings.png - source image could not be decoded' as an unhandled rejection (Emergent error overlay pops up). The scene renders as a blank dark-teal screen with no lagoon, angler, wings or pet. Affected requests: /play/art/angler.png, crystal_lagoon.jpg, wings.png, pet.png, fish/glimmer_minnow.png. Fish images in fishdex/catch popup are likely affected too. Portal mode is fine (MemoryRouter keeps URL at /).", "selector": "[data-testid='game-canvas']", "priority": "CRITICAL"},
+      {"component": "portal.js audio handling", "issue": "AUDIO_STATE_CHANGED(false) and isAudioEnabled===false call emitPause('audio', true), which sets paused=true and shows the 'Paused' overlay with no resume button. On platforms or sessions where audio starts disabled, or when the platform mutes, the game is frozen and unplayable. Audio-off should only mute music and SFX; only PAUSE_STATE_CHANGED, the ad state and visibility should pause gameplay. (Code review; the mock platform reports audio enabled, so this was not reproduced in the browser.)", "selector": "[data-testid='pause-overlay']", "priority": "HIGH"}
+    ],
+    "integration_issues": [
+      {"flow": "Portal interstitial after each fish", "issue": "useFishing.finish: the empty-holds loss branch (no reel input) never calls showInterstitial(), while the landed (closeResult) and normal lost branches do. Inconsistent ad cadence.", "affected_selectors": []}
+    ],
+    "design_issues": [
+      {"screen": "Portal HUD at 800x600", "issues": ["HUD scale 0.727 makes the chat/system text ~8.7px and the tracker and player-panel labels very small; consider a min font size or a lower scale floor for small iframes."]},
+      {"screen": "Portal HUD", "issues": ["PvP/Peace mode-toggle is still shown in offline single-player portal mode and does nothing; hide it in PORTAL.", "Waters modal lists 5+ locked waters (Lv10-50) that cannot be travelled to; portal QA may treat these as unfinished or 'coming soon' content. Consider hiding the locked ones in portal or labeling them clearly."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter2_regression.py", "/app/backend/tests/test_fishing_realm.py", "/app/scripts/e2e_fishing.py", "/app/test_reports/pytest/pytest_iter2_regression.xml", "/app/test_reports/pytest/pytest_results_iter2.xml"],
+  "action_items": [
+    "CRITICAL: fix relative asset paths in web mode. Simplest fix: add <base href=\"%PUBLIC_URL%/\"> in public/index.html (dev resolves to '/', the portal build with PUBLIC_URL=. resolves to './'), or prefix all art URLs with process.env.PUBLIC_URL + '/'. Verify that /play renders the scene and that Pixi shows no 'Loader.load' errors.",
+    "HIGH: do not pause gameplay on platform audio-disabled; just mute (remove the 'audio' reason from the pause set and gate music/SFX on it instead).",
+    "Call showInterstitial() in the empty-input loss branch too (useFishing.finish).",
+    "Make the brute-force lockout robust to rotating client IPs (per-email counter).",
+    "Optional: hide mode-toggle in portal; refine the profanity matcher; check the 800x600 minimum text size."
+  ],
+  "critical_code_review_comments": [
+    "Scene.js, Landing.js, Game.js, Minimap.js, PlayerPanel.js, PortalApp.js and gameData.json use relative 'art/...' URLs. These break on any nested route in web mode.",
+    "portal.js emitPause('audio') conflates mute with pause; there is no resume button when paused=true.",
+    "portal.js registers its document visibilitychange listener at module load even in web mode. Harmless, but web mode now also pauses on tab hide; confirm that is intended.",
+    "localApi land(): when holds is empty, S.enc is cleared but save() is not called. That is OK since enc is not persisted, but the stats.lost counter is not incremented for empty-input losses (the client never calls land).",
+    "index.html loads Google Fonts (Inter) in the preview; portal_postprocess strips it from the build, which is OK."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter2_regression.py"],
+  "success_rate": {"backend": "93% (13/14 pytest + e2e pass; regression 4/5 with the 1 failure being the frontend asset bug)", "frontend": "90% (portal: all requested checks pass; web: flows pass, but the scene art is broken)"},
+  "test_credentials": "owner@fishingrealm.com / RealmOwner#2026 (from /app/memory/test_credentials.md); bcrypt $2b$ verified; httpOnly Secure cookies set; seed_admin is insert-only-if-missing",
+  "seed_data_creation": "Test users test_*@example.com and Hero<hex> registered; guests created",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Portal mode at /?portal=1 uses localApi and bridge storage (the mock platform persists via the browser). Each new browser context is a fresh save. To detect html-served art, watch responses for '/art/' with content-type text/html. The Emergent preview error overlay ([data-emergent-overlay-host]) intercepts clicks after unhandled rejections; remove it via JS to continue. Pause can be tested by overriding document.hidden and dispatching visibilitychange. The brute-force test fails because of rotating egress IPs from the test pod.",
+  "rca of the issue": "Web blank scene: git diff of the last commit shows Scene.js went from Assets.load('/art/..') to Assets.load('art/..') so the portal zip works from any folder. In web mode the URL is /play, so the browser resolves art/x.png to /play/art/x.png. The preview server's SPA fallback returns index.html (200 text/html). Pixi's decode fails and the rejection bubbles up. Reproduce: guest play -> /play, observe the blank scene and the pageerror. Mitigation: use <base href=\"%PUBLIC_URL%/\"> or a PUBLIC_URL-prefixed asset helper."
+}

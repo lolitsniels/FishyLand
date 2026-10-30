@@ -25,7 +25,7 @@ export function useFishing() {
       sfx("snap");
       st.setLostMsg(t(clientOutcome === "snapped" ? "snapped" : "escaped"));
       st.pushSystem("You never reeled — the fish got away.", "lost");
-      later(() => { st.setLostMsg(null); phase("idle"); }, 1600);
+      later(() => { st.setLostMsg(null); phase("idle"); showInterstitial(); }, 1600);
       return;
     }
     phase("resolving");

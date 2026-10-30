@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="5" time="1.280" timestamp="2026-10-30T10:00:32.769085+00:00" hostname="agent-env-d5c78ec4-2846-489b-a5f8-964300cb4243"><testcase classname="tests.test_iter2_regression" name="test_register_profane_name_rejected[fuckboy1]" time="0.145" /><testcase classname="tests.test_iter2_regression" name="test_register_profane_name_rejected[F_u_c_k]" time="0.122" /><testcase classname="tests.test_iter2_regression" name="test_register_clean_name_ok" time="0.336" /><testcase classname="tests.test_iter2_regression" name="test_art_root_is_image" time="0.193" /><testcase classname="tests.test_iter2_regression" name="test_art_relative_under_play_route_is_image" time="0.122"><failure message="AssertionError: got text/html; charset=utf-8&#10;assert False&#10; +  where False = &lt;built-in method startswith of str object at 0xffd54e3a1c50&gt;('image/')&#10; +    where &lt;built-in method startswith of str object at 0xffd54e3a1c50&gt; = 'text/html; charset=utf-8'.startswith">def test_art_relative_under_play_route_is_image():
+        # Web mode resolves 'art/wings.png' against /play -&gt; /play/art/wings.png. Currently SPA html (BUG).
+        r = requests.get(f"{ROOT}/play/art/wings.png")
+&gt;       assert r.headers["content-type"].startswith("image/"), f"got {r.headers['content-type']}"
+E       AssertionError: got text/html; charset=utf-8
+E       assert False
+E        +  where False = &lt;built-in method startswith of str object at 0xffd54e3a1c50&gt;('image/')
+E        +    where &lt;built-in method startswith of str object at 0xffd54e3a1c50&gt; = 'text/html; charset=utf-8'.startswith
+
+tests/test_iter2_regression.py:38: AssertionError</failure></testcase></testsuite></testsuites>

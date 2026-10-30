@@ -15,7 +15,7 @@ export function WatersPanel() {
   return (
     <Modal title="World Map · Waters" testid="waters-modal">
       <div className="grid sm:grid-cols-2 gap-2">
-        {data.waters.map((w, i) => {
+        {data.waters.filter((w) => !PORTAL || w.playable).map((w, i) => {
           const current = w.id === "crystal_lagoon";
           return (
             <div key={w.id} className={`fr-chip !rounded px-3 py-2 flex items-center gap-2 ${current ? "!border-amber-300 shadow-[0_0_10px_#ffd34d]" : "opacity-80"}`} data-testid={`water-${w.id}`}>

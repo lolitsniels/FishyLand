@@ -58,10 +58,10 @@ export default function PlayerPanel() {
           <StaminaTimer sec={p.stamina_next_sec} />
         </div>
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => setPvp(!pvp)} data-testid="mode-toggle"
+          {!PORTAL && <button type="button" onClick={() => setPvp(!pvp)} data-testid="mode-toggle"
             className={`fr-chip flex items-center gap-1 px-2 py-0.5 text-[10px] font-cinzel font-bold ${pvp ? "text-red-300" : "text-emerald-300"}`}>
             {pvp ? <Swords size={11} /> : <Shield size={11} />} {pvp ? "PvP" : "Peace"}
-          </button>
+          </button>}
           {bait !== "worm" && (
             <span className="fr-chip px-2 py-0.5 text-[10px] text-cyan-200" data-testid="active-bait-buff">{data.items[bait].name} · {data.items[bait].desc}</span>
           )}

@@ -1,4 +1,5 @@
 import os
+import re
 import random
 from datetime import datetime, timezone, timedelta
 
@@ -87,12 +88,14 @@ async def _username_free(name: str) -> bool:
     return await db.users.find_one({"username_lower": name.lower()}) is None
 
 
-BLOCKED_WORDS = ["fuck", "shit", "bitch", "cunt", "nigg", "fag", "rape", "nazi", "hitler", "porn", "sex", "dick", "pussy", "whore", "slut", "asshole", "retard"]
+BLOCKED_WORDS = ["fuck", "shit", "bitch", "cunt", "nigg", "nazi", "hitler", "porn", "pussy", "whore", "slut", "asshole", "retard"]
+BLOCKED_TOKENS = {"sex", "dick", "rape", "fag", "fags", "cock", "tits", "anal"}
 
 
 def _name_ok(name: str) -> bool:
     n = name.lower().replace("0", "o").replace("1", "i").replace("3", "e").replace("4", "a").replace("5", "s").replace("_", "")
-    return not any(w in n for w in BLOCKED_WORDS)
+    tokens = set(re.split(r"[^a-z]+", re.sub(r"([a-z])([A-Z])", r"\1 \2", name).lower()))
+    return not any(w in n for w in BLOCKED_WORDS) and not (tokens & BLOCKED_TOKENS) and n not in BLOCKED_TOKENS
 
 
 def _client_ip(request: Request) -> str:
@@ -132,7 +135,7 @@ async def guest(response: Response):
 @router.post("/login")
 async def login(body: LoginIn, request: Request, response: Response):
     email = body.email.strip().lower()
-    ident = f"{_client_ip(request)}:{email}"
+    ident = f"email:{email}"
     att = await db.login_attempts.find_one({"identifier": ident})
     now = datetime.now(timezone.utc)
     if att and att.get("count", 0) >= 5 and att.get("locked_until") and att["locked_until"].replace(tzinfo=timezone.utc) > now:
