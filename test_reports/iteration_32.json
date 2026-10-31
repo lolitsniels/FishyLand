@@ -1,0 +1,30 @@
+{
+  "summary": "Re-tested only harbour building collision (tavern, guild_hall, market_stall, pearl_shop, tackle_shop) plus their signboards. I probed every reachable 6px walk cell around each building with window.__walk and flood fill, then measured how much of the angler's 52x150 body is covered by the opaque sprite whenever his feet are above the building's real sortY (from window.__objs). Then I walked the real path in game and took screenshots. Market stall, Pearl Shop and Tackle Shop now pass. The only cells over 25% cover sit behind the roof (feet at 70% of the building's height or higher, which is normal back-side occlusion) or in a narrow alley. Crew HQ and Anchor Café still have walk-in pockets in front of the walls, and screenshots confirm both. All 5 signboards open their page on click.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Harbour walk grid - guild_hall (Crew HQ 2000,945, sortY 906)", "issue": "There is a walkable pocket under the left wall at x~1780-1850, y~872-908 and a smaller one near the right of the stairs at x~2120-2190, y~884-908. It is reachable by walking straight up from the pavement at (1825,1000). At (1827,869) the angler is drawn 100% behind the left wall, so only his name tag shows on the building. 142 reachable cells are in front of the walls with more than 25% of the body covered.", "selector": "canvas (window.__walk(1827,869) === true)", "priority": "HIGH"},
+      {"component": "Harbour walk grid - tavern (Anchor Café 900,1585, sortY 1568)", "issue": "Front-left of the deck: a pocket at x 702-750, y 1554-1566 sits above sortY, so the angler is drawn behind the café. Up to 75% of his body is hidden by the deck, plants and left post. Reachable by walking up from (740,1660). A screenshot confirms it.", "selector": "canvas (window.__walk(748,1564) === true)", "priority": "HIGH"},
+      {"component": "Harbour walk grid - tackle_shop / market_stall alley", "issue": "Minor: in the alley between the tackle shop's right edge and the market stall (x~1364, y 768-792), about 31% of the body is covered by the tackle shop's right wall. Not confirmed visually because my BFS path did not reach that point within the wait time.", "selector": "canvas", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/tests/walk_probe.py", "/app/tests/walk_path.py", "/app/tests/sign_click.py", "/app/tests/building_sweep.py", "/app/tests/collide_helpers.py"],
+  "action_items": [
+    "tilemap.js walk-grid block loop: columns that are not 'over' (up*h <= w*0.22) keep their own raised c.y, so the strip between that column's bottom and the building's base/sortY stays walkable while the sprite above covers the angler. Extend every column's block down to at least the building's base/sortY, e.g. fillRect(c.x-c.cw/2-4, c.y-d, c.cw+8, Math.max(c.y, sortY) - (c.y-d) + 10), or set c.y = Math.max(c.y, base) for all columns, not just over columns. This fixes the Crew HQ left-wall pocket (x1780-1850, y872-908) and right pocket (x2120-2190).",
+    "Anchor Café: its sortY (1568) is lower on screen than the main base line (1551), so notches in the front deck between x 702-750 at y 1554-1566 are above sortY. Fill down to sortY, or apply a small morphological close, so no walkable cell lies between a column's bottom and the sortY.",
+    "After fixing, re-run PROBE_JS from /app/tests/walk_probe.py. Expected result: WALL_cells == 0 for every building."
+  ],
+  "critical_code_review_comments": [
+    "footColumns only snaps 'over' columns to the base. Columns that are moderately raised (stilts, decks, recessed side walls with a transparent bottom) leave open pockets. Walkability should never be open between a column's bottom and the building's sortY within its x-span."
+  ],
+  "updated_files": ["/app/tests/walk_probe.py", "/app/tests/walk_path.py", "/app/tests/sign_click.py"],
+  "success_rate": {"backend": "n/a (skipped)", "frontend": "Collision 3/5 buildings clean (market_stall, pearl_shop, tackle_shop); 2/5 fail (guild_hall, tavern). Signboards 5/5 open (contracts, crews, market, pearl-shop, shop)."},
+  "test_credentials": "TestAngler / Angler#2026 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "none",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use exec(open('/app/tests/collide_helpers.py').read()) then boot(page). walk_probe.PROBE_JS({keys:[...], thr:0.25}) floods reachable cells and reports WALL_cells, meaning feet in the lower 70% of the building's height, above sortY, with cover over 25%. roofOcclusionCells are normal back-side occlusion. walk_path.walk_to(page, from, to) BFS-walks the angler via fx.path for visual checks. sign_click.click_sign uses the camera formula (sc=1.1 at 1920x1080, x=sw/2+(wx-me.x)*sc, y=sh*0.55+(wy-(me.y-60))*sc). After page.go_back the scene reloads, so boot fresh if a click misses.",
+  "rca of the issue": "Repro: walk straight up (W) from the pavement at (1825,1000). The angler stops at about (1827,869), inside Crew HQ's left wall, and is drawn fully behind it. Cause: in footColumns, Crew HQ's left columns end above the median base (raised floor, lower edge partly transparent) but by less than w*0.22, so they are not flagged 'over'. They are blocked only from their own c.y upward, which leaves the band from c.y down to base/sortY (906) walkable. Same mechanism at the Anchor Café's deck front-left, where sortY is 17px below the main base. Fix: block each column down to max(c.y, base/sortY)."
+}

@@ -222,7 +222,9 @@ export function buildMap(map, img, objTex = {}) {
     const rx = Math.max(16, (w * fw) / 2), ry = Math.max(14, (w * fh) / 2);
     const cols = def.rect && footColumns(o, def, objTex[o.k]);
     // block the building's whole standing area: from its base up to most of its height, so nobody can stand "inside" the walls
-    if (cols) for (const c of cols) { const d = Math.max(2 * ry, c.tall * 0.78); g.fillRect(c.x - c.cw / 2 - 4, c.y - d, c.cw + 8, d + 10); }
+    // ...and down to the draw-order line, so there is no pocket where the angler would be drawn behind the building
+    if (cols) { const ys = cols.map((c) => c.y).sort((a, b) => a - b), sortY = ys[Math.floor(ys.length / 2)];
+      for (const c of cols) { const d = Math.max(2 * ry, c.tall * 0.78), bot = Math.max(c.y, sortY) + 12; g.fillRect(c.x - c.cw / 2 - 4, c.y - d, c.cw + 8, bot - (c.y - d)); } }
     else if (def.rect) g.fillRect(o.x - rx, o.y - 2 * ry, 2 * rx, 2 * ry + 6);
     else { g.beginPath(); g.ellipse(o.x, o.y - ry, rx, ry, 0, 0, 7); g.fill(); }
   }
