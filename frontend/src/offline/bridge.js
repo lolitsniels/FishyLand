@@ -14,7 +14,8 @@ export async function initBridge() {
   if (!br) return;
   await br.initialize();
   // English is the game's only language; platform.language is read once at start as the source language
-  document.documentElement.lang = (br.platform.language || "en").startsWith("en") ? "en" : "en";
+  const lang = br.platform.language || "en";
+  document.documentElement.lang = lang.startsWith("en") ? lang : "en";
   const vals = await br.storage.get([SAVE_KEY, KV_KEY]);
   const parse = (v) => { if (v == null) return null; try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return null; } };
   saved = { [SAVE_KEY]: parse(vals?.[0]), [KV_KEY]: parse(vals?.[1]) };

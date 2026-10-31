@@ -15,7 +15,7 @@ const STEPS = [
   { title: "Your Fishdex", text: "Every new kind of fish you catch goes in your Fishdex. There are over 350 to find. Can you catch them all?", target: "menu-journal", next: "Next" },
   { title: "Better gear, bigger fish", text: "Gold buys better rods, reels and bait in the Tackle Shop at the harbour. Better gear means bigger and rarer fish!", target: "menu-inventory", next: "Next" },
   { title: "Secret fish", text: "Some fish are secret! My friends at the harbour tell riddles about where and when to find them. Walk up to them and listen closely.", next: "Ooh, secrets!" },
-  process.env.REACT_APP_OFFLINE === "1" ? { title: "Coming soon: friends!", text: "Soon you'll be able to chat with other anglers, join a Crew with its own island and race your friends at the Duel Pier. Keep fishing and get ready!" } :
+  process.env.REACT_APP_OFFLINE === "1" ? { title: "Coming soon: friends!", text: "Soon you'll be able to chat with other anglers, join a Crew with its own island and race your friends at the Duel Pier. Keep fishing and get ready!", next: "Can't wait!" } :
   { title: "Fish with friends", text: "Chat with other anglers here, join a Crew and get your own island, or race a friend at the Duel Pier. The world is full of real players!", target: "chat-box", next: "Awesome" },
   { title: "You're ready!", text: "That's everything, angler! Here's a starter gift to get you going: 10 Pearls, 10 worms and 10 bread crusts. Tight lines, and have fun!", finish: true },
 ];
@@ -27,7 +27,9 @@ export function WorldTutorial({ mode }) {
   const [step, setStep] = useState(t?.step || 0);
   const start = useRef(null);
   const sawResult = useRef(false);
-  useEffect(() => { setStep(t?.step || 0); }, [t?.step]);
+  // a late user refresh must never pull the card back a step; a restart (done -> not done) starts over
+  useEffect(() => { setStep((cur) => Math.max(cur, t?.step || 0)); }, [t?.step]);
+  useEffect(() => { if (t && !t.done) setStep(t.step || 0); }, [t?.done]); // eslint-disable-line
   const go = (n) => { setStep(n); api.post("/tutorial/step", { step: n }).catch(() => {}); };
   const s = STEPS[Math.min(step, STEPS.length - 1)];
 

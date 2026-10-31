@@ -14,6 +14,12 @@
             body, #root { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
             input, textarea { -webkit-user-select: text; user-select: text; }
             img { -webkit-user-drag: none; }
+            /* online-only actions (market, trophy wall, chat links, crafting, bosses) wait for the multiplayer version */
+            [data-testid^="list-fish-"], [data-testid^="mount-fish-"], [data-testid^="link-chat-"], [data-testid="bait-selected-button"],
+            [data-testid^="sell-gear-"], [data-testid^="sell-bait-"], [data-testid^="sell-ing-"], [data-testid="inventory-tab-ingredients"], [data-testid="inventory-tab-other"],
+            [data-testid="shop-to-market"], [data-testid="shop-tab-enhance"], [data-testid="journal-tab-leviathans"], [data-testid="journal-tab-bosses"],
+            [data-testid="keepnet-panel"] a[href*="profile"], [data-testid="inventory-use-filter"],
+            [data-testid="profile-open-pearl-shop"], [data-testid="profile-badges-hint"], [data-testid="title-picker-panel"] { display: none !important; }
         </style>
     </head>
     <body>

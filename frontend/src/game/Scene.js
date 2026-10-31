@@ -388,7 +388,7 @@ function buildScene(app, tex, key, bgTex, mt) {
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
       const ring = new Graphics().roundRect(-28, -68, 56, 56, 12).fill({ color: 0x0a1420, alpha: 0.72 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.28 });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
-      Assets.load(sp.img.startsWith("/") ? sp.img : `art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
+      Assets.load(sp.img.includes("/") ? sp.img : `art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
       const lb = new Text({ text: sp.label, style: { fontFamily: "Noto Sans", fontWeight: "800", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
       lb.anchor.set(0.5, 0); lb.y = -10;
       c.addChild(glow, ring, ic, lb);
