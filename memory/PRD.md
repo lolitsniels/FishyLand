@@ -64,9 +64,14 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   Props never on bridges/piers (settle deck check; out-of-map counts as water). Map cache for fast re-entry. Image QA rules in MAP_DESIGN.md. Yellow energy bar + lightning icon.
   Testing iteration_12: backend 5/5 (+1 skip), frontend all pass after 2 tester fixes.
 
+- 2026-06 (iter 24): Tutorial finish really grants 10 Pearls + 10 worms + 10 bread (backend/tutorial.py), card sits below the player panel on phones/tablets.
+  Crew Pond: 10 pond-only species (ids 950-959, game_data.POND_FISH, art fish_v2/950-959) stocked in order with crew bank gold by leader/officers at
+  Pond Keeper Maud (NPC + sign on crew island, world/PondKeeper.js, backend/crew_pond.py GET /crews/{id}/pond, POST /crews/{id}/pond/stock).
+  3 fishing rings round the pond; POST /fish/cast {spot:"crew_pond"} rolls only stocked species (water "crew_pond"). Fishdex has a Crew Pond chip.
+  Testing iteration_24: backend 12/12, frontend pass (tablet overlap fixed after).
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
-- P1: Crew pond stocking (crew upgrade to add fish to the island pond)
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
 - P0: Living-map animations for the 12 waters (per-water props)
 - P1: Pearl Shop cosmetics (currently empty)

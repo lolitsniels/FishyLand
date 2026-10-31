@@ -52,10 +52,10 @@ export default function Journal() {
     <div className="space-y-3 fade-in" data-testid="journal-page">
       <GameTabs testid="journal-tab" value={tab} onChange={setTab} tabs={[["species", "Species", "fishdex"], ["leviathans", "Crew Bosses", "crew"], ["bosses", "Bosses", "guild"]]} />
       {tab === "leviathans" ? <LeviathanJournal /> : tab === "bosses" ? <BossJournal /> : <>
-      <div className="g-hero p-4 flex flex-col justify-end" style={{ backgroundImage: `url(/art/waters/${water === "all" ? user.water : water}.jpg)` }} data-testid="journal-hero">
+      <div className="g-hero p-4 flex flex-col justify-end" style={{ backgroundImage: `url(/art/waters/${water === "all" ? user.water : water === "crew_pond" ? "millbrook" : water}.jpg)` }} data-testid="journal-hero">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="label !text-[#cff6ff]">{water === "all" ? tt("All waters") : data?.waters.find((w) => w.key === water)?.name}</div>
+            <div className="label !text-[#cff6ff]">{water === "all" ? tt("All waters") : (water === "crew_pond" ? "Crew Pond" : data?.waters.find((w) => w.key === water)?.name)}</div>
             <div className="font-deco gold-text text-2xl" data-testid="journal-progress">{found} / {total} <span className="text-base">{tt("discovered")}</span>{secretsFound > 0 && <span className="text-[#c9a7f0] text-sm" data-testid="journal-secrets-found"> + {secretsFound} secret</span>}</div>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -69,6 +69,7 @@ export default function Journal() {
         {data?.waters.map((w) => { const open = user.unlocked_waters.includes(w.key); return (
           <button key={w.key} type="button" disabled={!open} className={`g-chip ${water === w.key ? "on" : ""} ${open ? "" : "locked"}`} style={{ backgroundImage: `url(/art/waters/${w.key}_thumb.jpg)` }} onClick={() => setWater(w.key)} title={open ? w.name : `${w.name} (locked)`} data-testid={`journal-water-${w.key}`}><span>{w.name}</span></button>
         ); })}
+        <button type="button" className={`g-chip ${water === "crew_pond" ? "on" : ""}`} style={{ backgroundImage: "url(/art/waters/millbrook_thumb.jpg)" }} onClick={() => setWater("crew_pond")} title="Crew Pond" data-testid="journal-water-crew_pond"><span>Crew Pond</span></button>
       </div>
       <div className="flex flex-wrap gap-2 items-center">
         <select className="input !w-auto" value={filter} onChange={(e) => setFilter(e.target.value)} data-testid="journal-rarity-filter">

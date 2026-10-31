@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 24: tested the tutorial pearls reward and the Crew Pond feature (backend and frontend), plus regressions. Backend: 12/12 pytest passed. Tutorial complete gives +10 pearls/+10 worms/+10 bread exactly once. Pond info, stocking rules (order, bank, already stocked, 403 for non-manager or non-member), pond cast (403 with no crew, 400 when empty, only stocked species with water crew_pond), normal cast never gives ids 950-959, pond landing creates a catch plus a journal entry with water crew_pond, and game/data has the 10 pond fish with art. Frontend: final tutorial text and toast mention 10 Pearls (pearls 0->10 in the HUD). On mobile 390x844 the card sits below the player panel (card top 134.7 vs panel bottom 133.9). Crew island: Pond Keeper Maud is visible, the spot prompt opens a modal with 10 cards, and stocking 951 updated progress 1->2/10, bank 197,500->192,500 and showed a toast. All 3 rings show FISH, and a cast posts {spot:'crew_pond'} and starts a fight with species 950 (DB pending water crew_pond). Off the rings the crew-hint shows, SAIL goes to /game/waters, and clubhouse entry works. Millbrook regression: cast with {} hooked species 21 at millbrook.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/fish/cast (spot=crew_pond)", "issue": "Trash on a miss uses enhance.roll_trash(user['water']) instead of the pond water. Cosmetic only."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "WorldTutorial card on tablet", "issue": "At 768x1024 the tutorial card (top 74px, x146-622) covers the gold/pearl row of the player panel (panel x9-285, bottom 139). The mobile fix only applies at max-width 640px, so tablet widths 641-~900 still hide the pearls counter.", "selector": "[data-testid='tutorial-card']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Fishdex (Journal)", "issues": ["Pond fish (water crew_pond) only show under 'All waters'. There is no Crew Pond chip because game/data waters does not include crew_pond."]},
+      {"screen": "Mobile harbour", "issues": ["The success toast at the top briefly covers the player panel. It is transient, so minor."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter24_pond_tutorial.py", "/app/test_reports/pytest/pytest_iter24.xml"],
+  "action_items": [
+    "Extend the .wtut-card offset (top ~150px) to tablet widths, e.g. @media (max-width: 900px), or whenever the card overlaps the player panel horizontally",
+    "Optional: add a Crew Pond filter in Fishdex; use the pond water for trash rolls"
+  ],
+  "critical_code_review_comments": [
+    "crew_pond.pond_stock: if all 10 are stocked, nxt is None and nxt['id'] would crash. It is currently unreachable because the 'already stocked' check runs first for valid ids, but a guard would be safer.",
+    "server.py is 4186 lines and should be split into modules."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter24_pond_tutorial.py"],
+  "success_rate": {"backend": "100%", "frontend": "95% (tablet tutorial overlap)"},
+  "seed_data_creation": "Created guest accounts for the tutorial tests. The test fixtures and the final script restored Test Crew to pond [950] and bank 197,500. TestAngler energy was set to 100. TestAngler now has extra crew_pond catches of species 950/951.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use window.__fx.me = {x,y} to teleport. Crew pond rings are at (1200,1215), (880,1000), (1520,1000); the keeper sign is at (1545,1190). Set sessionStorage fr_mode='crew' before /game. The pytest file edits Mongo directly (energy, pond, bank) and restores pond/bank afterwards. Guest signup resumes the same guest per IP, so reset tutorial via Mongo."
+}

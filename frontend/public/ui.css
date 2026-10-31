@@ -262,7 +262,8 @@ html body .panel.fl-card, html body .panel.fl-login { padding: 16px 18px !import
 @keyframes wtut-bob { 0%, 100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-5px); } }
 @keyframes wtut-pulse { 50% { opacity: .45; } }
 @keyframes wtut-glow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 215, 90, 0)); } 50% { filter: drop-shadow(0 0 14px rgba(255, 215, 90, 1)) brightness(1.15); } }
-@media (max-width: 640px) { .wtut-card { top: 182px; } .wtut-mascot { width: 78px; } .wtut-text { font-size: 13px; } .wtut-title { font-size: 16px; } }
+@media (max-width: 1200px) { .wtut-card { top: 192px; } }
+@media (max-width: 640px) { .wtut-card { top: 190px; } .wtut-mascot { width: 78px; } .wtut-text { font-size: 13px; } .wtut-title { font-size: 16px; } }
 
 /* Crew pond: Pond Keeper stock cards */
 .pond-card { min-height: 196px; transition: transform .2s ease, box-shadow .2s ease; }
