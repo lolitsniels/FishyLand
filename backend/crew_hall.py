@@ -11,6 +11,7 @@ PERKS = {
     "market": {"name": "Trade Licence", "unit": "+{n} market listing slots", "costs": [6500, 19000, 44000], "per": [2, 4, 6]},
     "energy": {"name": "Galley Rations", "unit": "+{n}% energy regeneration", "costs": [11500, 31500, 81500], "per": [10, 20, 30]},
     "repair": {"name": "Ship's Chandler", "unit": "-{n}% gear repair costs for every member", "costs": [7500, 22500, 56500], "per": [15, 30, 50]},
+    "vault": {"name": "Crew Vault", "unit": "the bank holds up to {n} gold", "costs": [20000, 75000, 250000], "per": [500000, 1500000, 5000000], "fmt": True},
     "hall": {"name": "Crew Hall", "unit": "+{n} member capacity, hall banner & notice board", "costs": [6500, 22000, 69000], "per": [5, 10, 20]},
 }
 # Requirements to build each tier (index = tier being built - 1). Crews that already own a tier keep it.
@@ -19,6 +20,15 @@ REQ_LABEL = {"members": "crew members", "orders": "crew orders filled", "bosses"
 HALL_NAMES = ["Dockside Shack", "Fishermen's Lodge", "Great Hall", "Harbour Palace"]
 MARKET_SLOTS = 10
 MIN_DEPOSIT = 10
+BANK_BASE = 250000
+
+
+def bank_cap(c):
+    return perk_value(c.get("perks"), "vault") or BANK_BASE
+
+
+def _unit(p, n):
+    return p["unit"].format(n=f"{n:,}" if p.get("fmt") else n)
 
 
 def perk_value(perks, key):
@@ -52,9 +62,9 @@ def hall_out(c):
     defs = []
     for k, p in PERKS.items():
         t = perks.get(k, 0)
-        defs.append({"key": k, "name": p["name"], "tier": t, "max": 3, "current": p["unit"].format(n=p["per"][t - 1]) if t else None,
-                     "next": p["unit"].format(n=p["per"][t]) if t < 3 else None, "cost": p["costs"][t] if t < 3 else None, "reqs": tier_reqs(c, t)})
-    return {"bank": c.get("bank", 0), "perks": perks, "defs": defs, "motd": c.get("motd", ""), "hall_name": HALL_NAMES[perks.get("hall", 0)],
+        defs.append({"key": k, "name": p["name"], "tier": t, "max": 3, "current": _unit(p, p["per"][t - 1]) if t else None,
+                     "next": _unit(p, p["per"][t]) if t < 3 else None, "cost": p["costs"][t] if t < 3 else None, "reqs": tier_reqs(c, t)})
+    return {"bank": c.get("bank", 0), "bank_cap": bank_cap(c), "perks": perks, "defs": defs, "motd": c.get("motd", ""), "hall_name": HALL_NAMES[perks.get("hall", 0)],
             "hall_tier": perks.get("hall", 0), "max_members": crew_max(c), "log": c.get("hall_log", [])[-12:][::-1]}
 
 
@@ -92,6 +102,9 @@ async def hall_deposit(crew_id: str, body: DepositIn, user=Depends(get_current_u
     c = await _member_crew(crew_id, user)
     from botwatch import guard_trade
     guard_trade(user)
+    room = bank_cap(c) - c.get("bank", 0)
+    if body.amount > room:
+        raise HTTPException(400, f"The crew bank is full: it holds {bank_cap(c):,} gold ({max(0, room):,} space left). Upgrade the Crew Vault at the Captain's Desk.")
     await charge(user, {}, gold=body.amount)
     await db.crews.update_one({"_id": c["_id"]}, {"$inc": {"bank": body.amount},
                                                   "$push": {"hall_log": {"$each": [{"who": user["username"], "text": f"deposited {body.amount:,} gold", "at": iso(now())}], "$slice": -50}}})
@@ -122,7 +135,7 @@ async def hall_buy(crew_id: str, body: BuyIn, user=Depends(get_current_user)):
     from crew_extras import crew_log
     await crew_log(c["_id"], user["username"], f"built {p['name']} tier {t + 1}", "hall")
     await db.chat.insert_one({"channel": "crew", "crew_id": crew_id, "username": "Harbourmaster", "level": 0, "at": iso(now()),
-                              "text": f"The crew hall grows: {p['name']} tier {t + 1}, {p['unit'].format(n=p['per'][t])} for every member."})
+                              "text": f"The crew hall grows: {p['name']} tier {t + 1}, {_unit(p, p['per'][t])}."})
     if t + 1 == 3:
         await add_feed("crew", user["username"], f"Crew [{c['tag']}] {c['name']} completed {p['name']} at its highest tier.", "epic")
     return {"hall": hall_out(await db.crews.find_one({"_id": c["_id"]})), "user": public_user(await db.users.find_one({"_id": user["_id"]}))}

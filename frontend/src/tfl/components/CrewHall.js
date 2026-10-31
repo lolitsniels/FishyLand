@@ -31,7 +31,7 @@ function PerkRow({ p, canManage, bank, onBuy }) {
   );
 }
 
-export default function CrewHall({ crew, canManage, member, onChanged, extra }) {
+export default function CrewHall({ crew, canManage, member, onChanged, extra, compact = false }) {
   const { user, setUser } = useGame();
   const [h, setH] = useState(null);
   const [amt, setAmt] = useState(100);
@@ -44,8 +44,8 @@ export default function CrewHall({ crew, canManage, member, onChanged, extra }) 
   if (!h) return null;
   const tier = h.hall_tier;
   return (
-    <Panel icon="crews" title={<span>{tt("Crew hall ·")} {h.hall_name}</span>} right={h.bank != null && <span className="num">{tt("bank")} <Gold n={h.bank} data-testid="crew-bank" /></span>} bodyClass="!p-0" testId="crew-hall">
-      {tier > 0 && (
+    <Panel icon="crews" title={compact ? tt("Clubhouse upgrades") : <span>{tt("Crew hall ·")} {h.hall_name}</span>} right={h.bank != null && <span className="num">{tt("bank")} <Gold n={h.bank} data-testid="crew-bank" />{h.bank_cap ? <span className="text-[var(--muted)]" data-testid="crew-bank-cap"> / {fmt(h.bank_cap)}</span> : null}</span>} bodyClass="!p-0" testId="crew-hall">
+      {tier > 0 && !compact && (
         <div className="relative h-[120px] border-b border-[var(--border)] bg-cover bg-center" style={{ backgroundImage: `url(/art/hall/hall_${tier}.jpg)` }} data-testid="hall-banner">
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,9,8,.1), rgba(10,9,8,.85))" }} />
           <div className="absolute bottom-2 left-3 right-3 text-[12.5px]">

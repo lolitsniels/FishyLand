@@ -7,6 +7,7 @@ import { useGame as useTfl } from "../tfl/context/GameContext";
 import { CrewInbox, InviteAnglerBox, BroadcastBox } from "../tfl/pages/game/Crews";
 import { CrewActivity, EmblemColour, WithdrawBox, CrewName } from "../tfl/components/CrewTabs";
 import { lookFace } from "../game/look";
+import CrewHall from "../tfl/components/CrewHall";
 
 const TITLES = { "club-notice": "Notice Board", "club-portraits": "Member Portraits", "club-trophies": "Trophy Shelf", "club-desk": "Captain's Desk", "club-mail": "Mailbox" };
 const Box = ({ title, children, testid }) => (
@@ -90,6 +91,7 @@ function Desk({ crew, canManage, isLeader, reload, onLeave }) {
     </Box>
     {canManage && crew.member_count < crew.max_members && <Box title="Invite an angler" testid="club-desk-invite"><InviteAnglerBox crewId={crew.id} onSent={reload} /></Box>}
     {isLeader && <EmblemColour crew={crew} onChanged={reload} />}
+    <div className="mb-3"><CrewHall crew={crew} canManage={canManage} member compact onChanged={reload} /></div>
     {isLeader && <WithdrawBox crew={crew} onChanged={reload} />}
     <div className="flex justify-end mt-2"><button className="btn btn-danger btn-sm" onClick={onLeave} data-testid="leave-crew-button">Leave crew</button></div>
   </>;

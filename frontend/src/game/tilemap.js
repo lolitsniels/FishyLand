@@ -8,7 +8,7 @@ export const OBJ = {
   pearl_shop: { rect: true, w: 380, fp: [0.9, 0.62] },
   market_stall: { rect: true, w: 330, fp: [0.9, 0.5] },
   bait_hut: { rect: true, w: 370, fp: [0.86, 0.5] },
-  house: { rect: true, w: 300, fp: [0.88, 0.62] },
+  house: { rect: true, w: 300, fp: [0.9, 0.8] },
   quest_board: { w: 150, fp: [0.9, 0.16], rect: true },
   fountain: { w: 270, fp: [0.94, 0.5], rect: true, jet: [0.66, 0.2, 0.62, 0.72] },
   lantern: { w: 60, fp: [0.5, 0.12], glow: [0.5, 0.13] },
@@ -203,7 +203,8 @@ export function auditMap(map, tm) {
   const { W, H } = map, k = 8, gw = Math.ceil(W / k), gh = Math.ceil(H / k);
   const c = document.createElement("canvas"); c.width = gw; c.height = gh;
   const g = c.getContext("2d", { willReadFrequently: true }); g.scale(1 / k, 1 / k); g.fillStyle = g.strokeStyle = "#fff"; g.lineCap = g.lineJoin = "round";
-  for (const s of (map.ground || []).filter((s) => s.line)) paint(g, s);
+  // anything that reads as a walkway: every line plus paved squares and streets
+  for (const s of (map.ground || []).filter((s) => s.line || ["cobble", "flag", "dirt", "planks"].includes(s.tex))) paint(g, s);
   for (const d of map.docks || []) { pathPoly(g, d.poly); g.fill(); }
   for (const b of map.bridges || []) { pathLine(g, [...b.a, ...b.b]); g.lineWidth = b.w; g.stroke(); }
   const px = g.getImageData(0, 0, gw, gh).data;
@@ -211,7 +212,7 @@ export function auditMap(map, tm) {
   const name = (o) => `${o.k}@${Math.round(o.x)},${Math.round(o.y)}`;
   const onPath = tm.objects.filter((o) => {
     const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
-    if (!fw || def.wet) return false;
+    if (!fw || def.wet || o.plaza) return false;
     const rx = (w * fw) / 2 * 0.85, ry = (w * fh) * 0.85;
     return [[o.x, o.y - 6], [o.x - rx, o.y - 6], [o.x + rx, o.y - 6], [o.x, o.y - ry], [o.x - rx, o.y - ry], [o.x + rx, o.y - ry]].some(([x, y]) => onGround(x, y));
   }).map(name);
