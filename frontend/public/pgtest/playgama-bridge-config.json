@@ -1,0 +1,15 @@
+{
+    "advertisement": {
+        "minimumDelayBetweenInterstitial": 60,
+        "interstitial": {
+            "placements": [
+                { "id": "travel" }
+            ]
+        },
+        "rewarded": {
+            "placements": [
+                { "id": "energy" }
+            ]
+        }
+    }
+}

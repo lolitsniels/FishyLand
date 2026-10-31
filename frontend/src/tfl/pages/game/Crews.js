@@ -16,6 +16,7 @@ import { CrewBoss } from "../../components/CrewBoss";
 import { TABS, CrewTabs, CrewName, CrewHome, WithdrawBox, EmblemColour } from "../../components/CrewTabs";
 import { t as tt } from "../../i18n";
 import { fx } from "../../../game/fx";
+import { ls } from "../../../offline/bridge";
 
 function CreateCrew({ cost, minLevel, onCreated }) {
   const { user } = useGame();
@@ -143,12 +144,12 @@ export default function Crews() {
   const [d, setD] = useState(null);
   const [crew, setCrew] = useState(null);
   const [inbox, setInbox] = useState(null);
-  const [tab, setTab] = useState(() => (id && localStorage.getItem(`owo_crew_tab_${id}`)) || "home");
+  const [tab, setTab] = useState(() => (id && ls.getItem(`owo_crew_tab_${id}`)) || "home");
   const load = () => api.get("/crews").then((r) => setD(r.data)).catch(() => {});
   const loadCrew = () => id && api.get(`/crews/${id}`).then((r) => setCrew(r.data)).catch(() => nav("/game/crews"));
   const loadInbox = () => api.get("/crews/inbox").then((r) => setInbox(r.data)).catch(() => {});
   useEffect(() => { load(); loadInbox(); }, []);
-  useEffect(() => { setCrew(null); loadCrew(); setTab((id && localStorage.getItem(`owo_crew_tab_${id}`)) || "home"); }, [id]); // eslint-disable-line
+  useEffect(() => { setCrew(null); loadCrew(); setTab((id && ls.getItem(`owo_crew_tab_${id}`)) || "home"); }, [id]); // eslint-disable-line
   const refreshAll = () => { load(); loadCrew(); loadInbox(); window.dispatchEvent(new CustomEvent("crew-inbox-changed")); };
   const act = async (path, msg) => { try { const r = await api.post(path); if (r.data.username) setUser(r.data); toast.success(msg); refreshAll(); return true; } catch (e) { toast.error(errMsg(e)); return false; } };
   const apply = async (c) => { try { const r = await api.post(`/crews/${c.id}/apply`); toast.success(r.data.joined ? `You joined ${c.name}` : `Request sent to ${c.name}`); if (r.data.joined) { const me = await api.get("/auth/me"); setUser(me.data); } refreshAll(); } catch (e) { toast.error(errMsg(e)); } };
@@ -174,7 +175,7 @@ export default function Crews() {
     const roleAct = async (path, name, msg) => { try { await api.post(`/crews/${crew.id}/${path}`, { username: name }); toast.success(msg); loadCrew(); } catch (e) { toast.error(errMsg(e)); } };
     const allowed = TABS.filter(([key]) => !["contest", "contract", "hall", "leviathan"].includes(key)).filter(([, , , need]) => !need || (need === "manage" ? canManage : member)).map(([k]) => k);
     const cur = allowed.includes(tab) ? tab : "home";
-    const pick = (t) => { setTab(t); localStorage.setItem(`owo_crew_tab_${crew.id}`, t); };
+    const pick = (t) => { setTab(t); ls.setItem(`owo_crew_tab_${crew.id}`, t); };
     return (
       <div className="space-y-3 fade-in" data-testid="crew-detail-page">
         <div className="panel px-3 py-2 flex items-center justify-between gap-3 flex-wrap">

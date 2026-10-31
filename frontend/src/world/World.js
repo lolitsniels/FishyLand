@@ -16,6 +16,8 @@ import CatchCard from "./CatchCard";
 import { fishArt } from "./useFight";
 import { toast } from "sonner";
 import { ChatBox } from "./ChatBox";
+import { OFFLINE, interstitial } from "../offline/bridge";
+import { AdEnergy } from "./AdEnergy";
 import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
 import { GameSettings } from "./GameSettings";
@@ -23,6 +25,7 @@ import { ClubhousePanel } from "./Clubhouse";
 import { PondKeeper } from "./PondKeeper";
 import { WorldTutorial } from "./WorldTutorial";
 import { lookFace } from "../game/look";
+import { ss } from "../offline/bridge";
 
 export const PAGES = {
   inventory: ["Inventory", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "/art/hud/tackle.webp"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
@@ -32,11 +35,11 @@ export const PAGES = {
 };
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
-const BAR_R_WATER = ["quests", "profile"];
+const BAR_R_WATER = OFFLINE ? ["profile"] : ["quests", "profile"];
 const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "clubhouse" ? "clubhouse" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
-const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
+const MORE = OFFLINE ? [] : ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
 
 function useScale() {
   const calc = () => { const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight; return { s: Math.max(w < 600 ? 0.74 : 0.55, Math.min(1.15, w / 1000, h / 640)), w, h }; };
@@ -72,7 +75,7 @@ function usePresence(loc) {
     const send = () => api.post("/world/pos", { loc, x: fx.me.x, y: fx.me.y, phase: fx.phase }).then((r) => { if (alive) { fx.others = r.data.players; setHere(r.data.here); } }).catch(() => {});
     fx.others = [];
     send();
-    const iv = setInterval(send, 600);
+    const iv = OFFLINE ? null : setInterval(send, 600);
     return () => { alive = false; clearInterval(iv); fx.others = []; };
   }, [loc]);
   return here;
@@ -92,7 +95,7 @@ export default function World() {
   const result = useGame((st) => st.result);
   const ph = useGame((st) => st.phase);
   const [mode, setMode] = useState(() => {
-    if (sessionStorage.getItem("fr_mode") === "duel") sessionStorage.setItem("fr_mode", "harbour"); fx.mode = sessionStorage.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(placeOf(fx.mode, user)).spawn }; return fx.mode; });
+    if (ss.getItem("fr_mode") === "duel") ss.setItem("fr_mode", "harbour"); fx.mode = ss.getItem("fr_mode") || fx.mode; fx.me = { ...sceneFor(placeOf(fx.mode, user)).spawn }; return fx.mode; });
   const [near, setNear] = useState(null);
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
@@ -106,7 +109,7 @@ export default function World() {
   useEffect(() => { setMusicPlace(placeOf(mode, user)); }, [mode, user?.water]);
   useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
 
-  const goTo = (m, at) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...(at || sceneFor(placeOf(m, user)).spawn) }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
+  const goTo = (m, at) => { if (OFFLINE && m !== fx.mode) interstitial("travel"); fx.mode = m; ss.setItem("fr_mode", m); fx.me = { ...(at || sceneFor(placeOf(m, user)).spawn) }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => {
     if (mode === "duel" && page && page !== "inventory" && page !== "journal") { nav("/game", { replace: true }); return; }
@@ -197,7 +200,8 @@ export default function World() {
         {wet && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
-        <ChatBox />
+        {!OFFLINE && <ChatBox />}
+        {OFFLINE && idle && !page && <AdEnergy u={user} />}
         {mode === "duel" && <DuelHud />}
         <QuickTackle />
         <WorldTutorial mode={mode} />
@@ -219,9 +223,9 @@ export default function World() {
             {[...MORE, ...(user.is_admin ? ["admin"] : [])].filter((k) => mode === "harbour" || !HARBOUR_ONLY.has(k)).map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={52} testid={`more-${k}`} onClick={() => { setMore(false); nav(`/game/${k}`); }} />)}
             <Ring img="settings" label="Settings" size={52} testid="more-settings" onClick={() => { setMore(false); setSettingsOpen(true); }} />
           </div>
-          <div className="flex justify-center mt-3">
+          {!OFFLINE && <div className="flex justify-center mt-3">
             <button type="button" className="fr-btn fr-btn-dark px-5 py-1.5 text-sm flex items-center gap-2" onClick={async () => { await logout(); nav("/"); }} data-testid="logout-button"><LogOut size={14} /> Log out</button>
-          </div>
+          </div>}
         </Modal>
       )}
       {settingsOpen && <GameSettings onClose={() => setSettingsOpen(false)} />}

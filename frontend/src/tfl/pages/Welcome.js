@@ -20,8 +20,9 @@ import "../landing.css";
 import { bmmVisit } from "../lib/bmmTracker";
 import { START_SCREEN } from "../lib/portal";
 import { PortalStart } from "../components/landing/PortalStart";
+import { ls } from "../../offline/bridge";
 
-(() => { try { const c = new URLSearchParams(window.location.search).get("ref"); if (c) localStorage.setItem("owo_ref", c.toUpperCase()); } catch {} })();
+(() => { try { const c = new URLSearchParams(window.location.search).get("ref"); if (c) ls.setItem("owo_ref", c.toUpperCase()); } catch {} })();
 
 const Person = ({ className }) => (
   <svg viewBox="0 0 16 16" className={className} aria-hidden="true"><circle cx="8" cy="4.2" r="3.2" /><path d="M1.6 15.5c0-3.9 2.9-6.4 6.4-6.4s6.4 2.5 6.4 6.4z" /></svg>

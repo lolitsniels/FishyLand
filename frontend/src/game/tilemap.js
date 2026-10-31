@@ -18,7 +18,7 @@ export const OBJ = {
   bush: { w: 130, fp: [0.8, 0.3] },
   rocks: { w: 180, fp: [0.86, 0.36] },
   barrels: { w: 130, fp: [0.9, 0.42], rect: true },
-  reeds: { w: 150, fp: [0, 0] },
+  reeds: { w: 150, fp: [0, 0], shore: true },
   rowboat: { w: 230, fp: [0, 0], bob: 1.2, wet: true },
   ship: { w: 820, fp: [0, 0], bob: 2, wet: true },
   bridge: { w: 700, fp: [0, 0], ground: true },
@@ -26,7 +26,7 @@ export const OBJ = {
   stone_cottage: { rect: true, w: 290, fp: [0.88, 0.55], smoke: [0.64, 0.05] },
   cairn: { w: 90, fp: [0.7, 0.25] },
   stilt_hut: { rect: true, w: 330, fp: [0.9, 0.5] },
-  marsh_grass: { w: 130, fp: [0, 0] },
+  marsh_grass: { w: 130, fp: [0, 0], shore: true },
   lighthouse: { rect: true, w: 250, fp: [0.9, 0.36], glow: [0.47, 0.09] },
   cliff_rock: { w: 250, fp: [0.86, 0.4] },
   coast_hut: { rect: true, w: 310, fp: [0.9, 0.5] },
@@ -163,6 +163,17 @@ export function buildMap(map, img) {
     const deck = (x, y) => (map.docks || []).some((d) => { const xs = d.poly.filter((_, i) => i % 2 === 0), ys = d.poly.filter((_, i) => i % 2); return x > Math.min(...xs) - 30 && x < Math.max(...xs) + 30 && y > Math.min(...ys) - 30 && y < Math.max(...ys) + 40; })
       || (map.bridges || []).some((b) => { const [ax, ay] = b.a, [bx, by] = b.b, L2 = (bx - ax) ** 2 + (by - ay) ** 2, t = Math.max(0, Math.min(1, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / L2)); return Math.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)) < b.w / 2 + 40; });
     const dry = (x, y) => !deck(x, y) && !deck(x - half, y) && !deck(x + half, y) && [[x, y], [x - half, y], [x + half, y], [x, y - w * 0.2], [x - half, y - w * 0.2], [x + half, y - w * 0.2]].every(([a, b]) => !isWater(a, b + 6) && !isWater(a, b + 24));
+    // reeds grow in the shallows: base in the water, dry bank within reach
+    const shore = (x, y) => !deck(x, y) && isWater(x, y + 6) && isWater(x - half * 0.6, y + 6) && isWater(x + half * 0.6, y + 6)
+      && [[0, -70], [-70, 0], [70, 0], [0, 70], [-50, -50], [50, -50]].some(([dx, dy]) => !isWater(x + dx, y + dy));
+    if (def.shore) {
+      if (shore(o.x, o.y)) return o;
+      for (let r = 16; r <= 640; r += 16) for (let k = 0; k < 24; k++) {
+        const x = o.x + Math.cos((k * Math.PI) / 12) * r, y = o.y + Math.sin((k * Math.PI) / 12) * r;
+        if (shore(x, y)) return { ...o, x, y, _moved: true };
+      }
+      return { ...o, _dropped: true };
+    }
     if (dry(o.x, o.y)) return o;
     for (let r = 16; r <= 480; r += 16) for (let k = 0; k < 16; k++) {
       const x = o.x + Math.cos((k * Math.PI) / 8) * r, y = o.y + Math.sin((k * Math.PI) / 8) * r;

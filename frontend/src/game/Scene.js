@@ -3,7 +3,7 @@ import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite
 import { AdvancedBloomFilter, GodrayFilter, GlowFilter } from "pixi-filters";
 import { fx } from "./fx";
 import { useGame } from "../store";
-import { gameReady } from "../portal";
+import { gameReady } from "../offline/bridge";
 import { sceneFor, inPoly } from "./scenes";
 import { buildMap, placeObjects, auditMap } from "./tilemap";
 import { TILED } from "./maps";
@@ -874,6 +874,7 @@ export default function Scene({ place = "harbour" }) {
       if (seq !== r.seq || !r.app) return;
       r.teardown?.(); r.teardown = buildScene(r.app, r.tex, key, bg, mt);
       setLoading(null);
+      requestAnimationFrame(() => gameReady());
       setTimeout(prewarm, 2500);
     }).catch(() => setLoading(null));
   };
@@ -904,7 +905,6 @@ export default function Scene({ place = "harbour" }) {
       if (!alive) return;
       r.app = app; r.tex = { ambient };
       mount(r);
-      gameReady();
       unsub = useGame.subscribe((s, prev) => { if (s.paused !== prev.paused) s.paused ? app.ticker.stop() : app.ticker.start(); });
       let frames = 0, last = performance.now(), samples = [];
       app.ticker.add(() => {

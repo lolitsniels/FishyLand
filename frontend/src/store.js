@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { kv } from "./portal";
+import { ls } from "./offline/bridge";
 
 export const loadSettings = () => {
-  try { return { sound: true, music: true, low: false, fps: false, ...JSON.parse(kv.get("fr_settings") || "{}") }; }
+  try { return { sound: true, music: true, low: false, fps: false, ...JSON.parse(ls.getItem("fr_settings") || "{}") }; }
   catch { return { sound: true, music: true, low: false, fps: false }; }
 };
 
@@ -35,7 +35,7 @@ export const useGame = create((set, get) => ({
     set({ system: [...get().system.slice(-60), { id: ++lineId, text, kind, at: new Date() }] }),
   setSetting: (k, v) => {
     const settings = { ...get().settings, [k]: v };
-    kv.set("fr_settings", JSON.stringify(settings));
+    ls.setItem("fr_settings", JSON.stringify(settings));
     set({ settings });
   },
 }));

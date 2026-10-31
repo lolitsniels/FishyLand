@@ -8,6 +8,7 @@ import { useState } from "react";
 import { api, errMsg } from "../lib/api";
 import { useGame } from "../context/GameContext";
 import { t as tt } from "../i18n";
+import { ls } from "../../offline/bridge";
 
 export default function GuestSetupBanner() {
   const { user, login } = useGame();
@@ -26,7 +27,7 @@ export default function GuestSetupBanner() {
     setBusy(true); setErr("");
     try {
       const body = { username, password, ...(email.trim() ? { email: email.trim() } : {}) };
-      const r = await api.post("/auth/complete-signup", { ...body, source: localStorage.getItem("owo_source") || undefined, source_page: localStorage.getItem("owo_source_page") || undefined });
+      const r = await api.post("/auth/complete-signup", { ...body, source: ls.getItem("owo_source") || undefined, source_page: ls.getItem("owo_source_page") || undefined });
       login(r.data);
       setOpen(false);
     } catch (ex) { setErr(errMsg(ex)); } finally { setBusy(false); }

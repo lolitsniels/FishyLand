@@ -19,6 +19,7 @@ import { MobileGroup, InfoTabs } from "../../components/MobileSheets";
 import { NewsPanel } from "../../components/NewsPanel";
 import { pixelIcon, PixelIcon } from "../../components/PixelIcon";
 import { PORTAL } from "../../lib/portal";
+import { ls } from "../../../offline/bridge";
 
 export default function Harbor() {
   const { user, setUser, lookups, data } = useGame();
@@ -27,7 +28,7 @@ export default function Harbor() {
   const [recent, setRecent] = useState([]);
   const [journalCount, setJournalCount] = useState(null);
   const [news, setNews] = useState([]);
-  const [newsSeen, setNewsSeen] = useState(() => localStorage.getItem("owo_news_seen") || "");
+  const [newsSeen, setNewsSeen] = useState(() => ls.getItem("owo_news_seen") || "");
   const ev = useExpedition();
   useEffect(() => {
     const live = () => {
@@ -42,7 +43,7 @@ export default function Harbor() {
   }, []);
   const unreadNews = news.filter((n) => new Date(n.created_at) > new Date(newsSeen || 0)).length;
   const freshCatches = recent.filter((c) => Date.now() - new Date(c.caught_at) < 3600000).length;
-  const markNewsSeen = () => { const at = new Date().toISOString(); localStorage.setItem("owo_news_seen", at); setNewsSeen(at); };
+  const markNewsSeen = () => { const at = new Date().toISOString(); ls.setItem("owo_news_seen", at); setNewsSeen(at); };
   const showFriend = !PORTAL && !(user.seen_flags || []).includes("friend_tab");
   const openFriend = () => { setUser({ ...user, seen_flags: [...(user.seen_flags || []), "friend_tab"] }); api.post("/me/seen", { flag: "friend_tab" }).catch(() => {}); nav("/game/recruit"); };
   const water = lookups?.waterByKey[user.water];

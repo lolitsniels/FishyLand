@@ -1,16 +1,17 @@
+import { ls, ss } from "../../offline/bridge";
 // Portal mode (GameDistribution "gd", Smaz Games "smaz", Playgama "pg"): only when the game runs inside an iframe opened with ?portal=gd|smaz.
 export const GD_GAME_ID = "6125e447803340d2badcf321ad44ec4b";
 const KEY = "fl_portal", REF_KEY = "fl_gd_ref", PORTALS = ["gd", "smaz", "pg"];
 const framed = (() => { try { return window.top !== window.self; } catch { return true; } })();
 const params = new URLSearchParams(window.location.search);
-if (framed && PORTALS.includes(params.get("portal"))) localStorage.setItem(KEY, params.get("portal"));
-if (params.get("gd_sdk_referrer_url")) sessionStorage.setItem(REF_KEY, params.get("gd_sdk_referrer_url"));
+if (framed && PORTALS.includes(params.get("portal"))) ls.setItem(KEY, params.get("portal"));
+if (params.get("gd_sdk_referrer_url")) ss.setItem(REF_KEY, params.get("gd_sdk_referrer_url"));
 
-export const PORTAL = framed && PORTALS.includes(localStorage.getItem(KEY)) ? localStorage.getItem(KEY) : null;
+export const PORTAL = framed && PORTALS.includes(ls.getItem(KEY)) ? ls.getItem(KEY) : null;
 export const PORTAL_SOURCE = { gd: "gamedistribution", smaz: "smazgames", pg: "playgama" }[PORTAL] || null;
 // itch.io build: same full game, but opens on a game-style start screen instead of the website homepage.
-if (framed && params.get("portal") === "itch") sessionStorage.setItem("fl_start", "itch");
-export const START_SCREEN = PORTAL || (framed && sessionStorage.getItem("fl_start") === "itch" ? "itch" : null);
+if (framed && params.get("portal") === "itch") ss.setItem("fl_start", "itch");
+export const START_SCREEN = PORTAL || (framed && ss.getItem("fl_start") === "itch" ? "itch" : null);
 export const PORTAL_BLOCKED = ["/game/support", "/game/vote", "/game/recruit"];
 // Playgama forbids any real-money purchase prompt (Angler Pass, boosters, cosmetics).
 export const NO_IAP = PORTAL === "pg";
@@ -33,15 +34,15 @@ export function initPortal() {
     window.addEventListener("message", (e) => {
       if (e.source !== window.parent) return;
       if (e.data?.fl === "host") window.__flMuted = !!(e.data.muted || e.data.paused);
-      if (e.data?.fl === "restore" && e.data.token && !localStorage.getItem("owo_token")) { localStorage.setItem("owo_token", e.data.token); window.location.reload(); }
+      if (e.data?.fl === "restore" && e.data.token && !ls.getItem("owo_token")) { ls.setItem("owo_token", e.data.token); window.location.reload(); }
     });
     let last = null;
-    const sync = () => { const t = localStorage.getItem("owo_token"); if (t !== last) { last = t; portalSignal("save", { token: t || "" }); } };
+    const sync = () => { const t = ls.getItem("owo_token"); if (t !== last) { last = t; portalSignal("save", { token: t || "" }); } };
     setInterval(sync, 3000);
     portalSignal("ready");
     return;
   }
-  const ref = sessionStorage.getItem(REF_KEY);
+  const ref = ss.getItem(REF_KEY);
   if (ref && !params.get("gd_sdk_referrer_url")) {
     const u = new URL(window.location.href); u.searchParams.set("gd_sdk_referrer_url", ref); window.history.replaceState(null, "", u);
   }

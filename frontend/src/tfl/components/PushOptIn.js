@@ -9,6 +9,7 @@ import { Bell, BellOff, X } from "lucide-react";
 import { toast } from "sonner";
 import { pushSupported, currentSubscription, enablePush, disablePush } from "../lib/push";
 import { t as tt } from "../i18n";
+import { ls, ss } from "../../offline/bridge";
 
 const DISMISS_KEY = "fl_push_dismissed_at";
 const DISMISS_DAYS = 21;
@@ -18,7 +19,7 @@ function isStandalone() {
 }
 
 function dismissedRecently() {
-  const at = Number(localStorage.getItem(DISMISS_KEY) || 0);
+  const at = Number(ls.getItem(DISMISS_KEY) || 0);
   return at && Date.now() - at < DISMISS_DAYS * 86400 * 1000;
 }
 
@@ -31,7 +32,7 @@ export function PushOptIn() {
     if (!pushSupported()) return;
     const check = async () => {
       // Only ping people who have actually installed the app OR who have just installed it in this session.
-      const installed = isStandalone() || sessionStorage.getItem("fl_just_installed") === "1";
+      const installed = isStandalone() || ss.getItem("fl_just_installed") === "1";
       if (!installed) return;
       if (Notification.permission === "denied") return;
       if (Notification.permission === "granted") {
@@ -42,14 +43,14 @@ export function PushOptIn() {
       setShow(true);
     };
     check();
-    const onInstalled = () => { sessionStorage.setItem("fl_just_installed", "1"); check(); };
+    const onInstalled = () => { ss.setItem("fl_just_installed", "1"); check(); };
     window.addEventListener("appinstalled", onInstalled);
     return () => window.removeEventListener("appinstalled", onInstalled);
   }, []);
 
   if (!show) return null;
 
-  const dismiss = () => { setShow(false); localStorage.setItem(DISMISS_KEY, String(Date.now())); };
+  const dismiss = () => { setShow(false); ls.setItem(DISMISS_KEY, String(Date.now())); };
   const enable = async () => {
     setBusy(true);
     const r = await enablePush();

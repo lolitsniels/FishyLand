@@ -45,6 +45,7 @@ function TestWaterCard() {
 
 
 import { WorldMap } from "../../components/WorldMap";
+import { ss } from "../../../offline/bridge";
 
 export default function Waters() {
   const { user, setUser, data } = useGame();
@@ -58,7 +59,7 @@ export default function Waters() {
   return (
     <div className="space-y-3 fade-in" data-testid="waters-page">
       <div className="wm-banner" data-testid="expedition-banner"><ExpeditionPanel ev={ev} waterKey={user.water} /></div>
-      {data && <WorldMap waters={data.waters} user={user} mode={sessionStorage.getItem("fr_mode") || "harbour"} onTravel={travel} expedition={ev?.active?.water} />}
+      {data && <WorldMap waters={data.waters} user={user} mode={ss.getItem("fr_mode") || "harbour"} onTravel={travel} expedition={ev?.active?.water} />}
     </div>
   );
 }

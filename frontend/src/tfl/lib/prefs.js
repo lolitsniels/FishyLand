@@ -6,8 +6,9 @@
  */
 import { useEffect, useState } from "react";
 import { defaultWeightUnit } from "./api";
+import { ls } from "../../offline/bridge";
 
-// Tiny per-device display preferences (localStorage), broadcast via a window event so open panels update live.
+// Tiny per-device display preferences (ls), broadcast via a window event so open panels update live.
 const KEY = "owo_prefs";
 const DEFAULTS = { chat_timestamps: true, weight_unit: defaultWeightUnit(), legendary_alerts: true, share_buttons: true, sound_on: true, sound_volume: 0.35, sound_mention: true, ui_scale: "auto", toasts: "all" };
 
@@ -23,11 +24,11 @@ export const applyUiScale = () => {
 };
 
 export const getPrefs = () => {
-  try { return { ...DEFAULTS, ...(JSON.parse(localStorage.getItem(KEY) || "{}")) }; } catch { return { ...DEFAULTS }; }
+  try { return { ...DEFAULTS, ...(JSON.parse(ls.getItem(KEY) || "{}")) }; } catch { return { ...DEFAULTS }; }
 };
 
 export const setPref = (k, v) => {
-  localStorage.setItem(KEY, JSON.stringify({ ...getPrefs(), [k]: v }));
+  ls.setItem(KEY, JSON.stringify({ ...getPrefs(), [k]: v }));
   window.dispatchEvent(new CustomEvent("prefs-changed"));
 };
 

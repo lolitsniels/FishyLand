@@ -5,17 +5,18 @@ import { api, errMsg } from "../../lib/api";
 import { useGame } from "../../context/GameContext";
 import { createGuest } from "../../lib/guest";
 import { bmmRegistration } from "../../lib/bmmTracker";
+import { ls } from "../../../offline/bridge";
 
 export function SignupForm() {
   const { login, data } = useGame();
   const nav = useNavigate();
   const [f, setF] = useState({ username: "", password: "", email: "" });
-  const [ref, setRef] = useState(() => localStorage.getItem("owo_ref") || "");
-  const [showRef, setShowRef] = useState(() => !!localStorage.getItem("owo_ref"));
+  const [ref, setRef] = useState(() => ls.getItem("owo_ref") || "");
+  const [showRef, setShowRef] = useState(() => !!ls.getItem("owo_ref"));
   const [recruiter, setRecruiter] = useState(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState("");
-  const guestToken = localStorage.getItem("owo_guest_token") || "";  useEffect(() => {
+  const guestToken = ls.getItem("owo_guest_token") || "";  useEffect(() => {
     const code = ref.trim().toUpperCase();
     if (code.length < 4) { setRecruiter(null); return; }
     const t = setTimeout(() => api.get(`/referrals/lookup/${code}`).then((r) => setRecruiter(r.data.recruiter)).catch(() => setRecruiter(false)), 350);
@@ -24,18 +25,18 @@ export function SignupForm() {
   const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
   const done = (r) => {
     if (r.referral) r.referral.applied ? toast.success(`Recruited by ${r.referral.recruiter}: you'll both earn rewards as you level up`) : toast.error(r.referral.reason);
-    localStorage.removeItem("owo_ref"); login(r); nav("/game");
+    ls.removeItem("owo_ref"); login(r); nav("/game");
   };
   const submit = async (e) => {
     e.preventDefault(); setBusy("signup"); setErr("");
     const starters = (data?.avatars || []).filter((a) => a.price === 0);
     const body = { username: f.username.trim(), password: f.password, ...(f.email.trim() ? { email: f.email.trim() } : {}),
       ...(starters.length ? { avatar: starters[Math.floor(Math.random() * starters.length)].id } : {}),
-      ...(ref.trim() ? { ref: ref.trim().toUpperCase() } : {}), source: localStorage.getItem("owo_source") || undefined, source_page: localStorage.getItem("owo_source_page") || undefined };
+      ...(ref.trim() ? { ref: ref.trim().toUpperCase() } : {}), source: ls.getItem("owo_source") || undefined, source_page: ls.getItem("owo_source_page") || undefined };
     try {
       if (guestToken) {
         try { const r = await api.post("/auth/complete-signup", body, { headers: { Authorization: `Bearer ${guestToken}` } }); toast.success("Your guest progress has been carried over"); return done(r.data); }
-        catch (ex) { if (ex?.response?.status !== 401 && ex?.response?.status !== 403) throw ex; localStorage.removeItem("owo_guest_token"); }
+        catch (ex) { if (ex?.response?.status !== 401 && ex?.response?.status !== 403) throw ex; ls.removeItem("owo_guest_token"); }
       }
       const reg = (await api.post("/auth/register", body)).data; bmmRegistration(reg.user?.id); done(reg);
     } catch (ex) { setErr(errMsg(ex)); setBusy(""); }
@@ -70,7 +71,7 @@ export function PlayNowButton() {
   const [busy, setBusy] = useState(false);
   const go = async () => {
     setBusy(true);
-    try { const r = await createGuest("welcome", localStorage.getItem("owo_ref") || ""); if (r.referral && !r.referral.applied) toast.error(r.referral.reason); login(r); nav("/game"); }
+    try { const r = await createGuest("welcome", ls.getItem("owo_ref") || ""); if (r.referral && !r.referral.applied) toast.error(r.referral.reason); login(r); nav("/game"); }
     catch (ex) { toast.error(errMsg(ex)); setBusy(false); }
   };
   return (

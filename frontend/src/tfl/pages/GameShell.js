@@ -32,6 +32,7 @@ import { t as tt } from "../i18n";
 import { Candles } from "./game/Halloween";
 import { sfx } from "../lib/sound";
 import { PORTAL, PORTAL_BLOCKED, portalSignal } from "../lib/portal";
+import { ls } from "../../offline/bridge";
 
 const P = pixelIcon;
 const NAV = [
@@ -94,8 +95,8 @@ export default function GameShell() {
   const { pathname } = useLocation();
   const [online, setOnline] = useState([]);
   const [feed, setFeed] = useState([]);
-  const [chatOpen, setChatOpenRaw] = useState(() => isDesktop() && localStorage.getItem(CHAT_KEY) === "1");
-  const setChatOpen = (v) => setChatOpenRaw((c) => { const n = typeof v === "function" ? v(c) : v; if (isDesktop()) localStorage.setItem(CHAT_KEY, n ? "1" : "0"); if (n) { setMentions(0); api.post("/chat/seen").catch(() => {}); } return n; });
+  const [chatOpen, setChatOpenRaw] = useState(() => isDesktop() && ls.getItem(CHAT_KEY) === "1");
+  const setChatOpen = (v) => setChatOpenRaw((c) => { const n = typeof v === "function" ? v(c) : v; if (isDesktop()) ls.setItem(CHAT_KEY, n ? "1" : "0"); if (n) { setMentions(0); api.post("/chat/seen").catch(() => {}); } return n; });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { weight_unit: unit } = usePrefs();
   const [unread, setUnread] = useState(0);

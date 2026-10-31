@@ -6,15 +6,17 @@
  */
 import axios from "axios";
 import { toast } from "sonner";
+import { ls } from "../../offline/bridge";
 
 export const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export const api = axios.create({ baseURL: API, withCredentials: true });
+if (process.env.REACT_APP_OFFLINE === "1") api.defaults.adapter = (cfg) => import("../../offline/server").then((m) => m.offlineAdapter(cfg));
 // Background polls (GETs) are dropped while the tab is hidden; duel matchmaking and auth still go through.
 const KEEP_HIDDEN = /^\/?(duel|auth)\b/;
 api.interceptors.request.use((cfg) => {
   if (document.hidden && (cfg.method || "get").toLowerCase() === "get" && !KEEP_HIDDEN.test(cfg.url || "")) return Promise.reject(new axios.CanceledError("tab hidden"));
-  const t = localStorage.getItem("owo_token");
+  const t = ls.getItem("owo_token");
   if (t) cfg.headers.Authorization = `Bearer ${t}`;
   cfg.headers["X-Client"] = window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone ? "pwa" : "web";
   return cfg;
@@ -76,7 +78,7 @@ export const defaultWeightUnit = () => {
   return LB_REGIONS.has(region) ? "lb" : "kg";
 };
 export const weightUnit = () => {
-  try { return JSON.parse(localStorage.getItem("owo_prefs") || "{}").weight_unit || defaultWeightUnit(); } catch { return defaultWeightUnit(); }
+  try { return JSON.parse(ls.getItem("owo_prefs") || "{}").weight_unit || defaultWeightUnit(); } catch { return defaultWeightUnit(); }
 };
 const fmtW = (w) => (w >= 10 ? w.toFixed(1) : w >= 1 ? w.toFixed(2) : w.toFixed(3));
 // Number only, in the player's unit (kg or lb). `wt` adds the unit label; `wtRange` formats "a–b unit".
@@ -85,7 +87,7 @@ export const wt = (w) => `${kg(w)} ${weightUnit()}`;
 // Server-written sentences ('landed a 5.13 kg Huchen'), convert inline kg figures for lb players.
 export const wtText = (t) => (weightUnit() === "lb" && typeof t === "string" ? t.replace(/(\d+(?:\.\d+)?)\s?kg\b/g, (_, n) => `${kg(Number(n))} lb`) : t);
 export const lengthUnit = () => {
-  try { const p = JSON.parse(localStorage.getItem("owo_prefs") || "{}"); return p.length_unit || ((p.weight_unit || defaultWeightUnit()) === "lb" ? "in" : "cm"); } catch { return "cm"; }
+  try { const p = JSON.parse(ls.getItem("owo_prefs") || "{}"); return p.length_unit || ((p.weight_unit || defaultWeightUnit()) === "lb" ? "in" : "cm"); } catch { return "cm"; }
 };
 export const ln = (cm) => {
   if (cm == null || Number.isNaN(Number(cm))) return "-";

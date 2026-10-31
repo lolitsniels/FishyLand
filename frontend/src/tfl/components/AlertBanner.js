@@ -14,10 +14,11 @@ import { X } from "lucide-react";
 import { LeapingFish } from "./LeapingFish";
 import { t as tt } from "../i18n";
 import { sfx } from "../lib/sound";
+import { ls } from "../../offline/bridge";
 
 const HIDDEN_KEY = "owo_hidden_alerts";
-const loadHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]")); } catch { return new Set(); } };
-const saveHidden = (h) => localStorage.setItem(HIDDEN_KEY, JSON.stringify([...h].slice(-200)));
+const loadHidden = () => { try { return new Set(JSON.parse(ls.getItem(HIDDEN_KEY) || "[]")); } catch { return new Set(); } };
+const saveHidden = (h) => ls.setItem(HIDDEN_KEY, JSON.stringify([...h].slice(-200)));
 const FADE_MS = 8000;
 const CHEER_MS = 25000;  // catches stay up longer so anglers can watch the cheers roll in
 

@@ -9,14 +9,15 @@ import { useEffect } from "react";
 import Seo, { SITE_URL } from "../../components/Seo";
 import MarketingShell, { GUIDES, GuideNav } from "../../components/MarketingShell";
 import { api } from "../../lib/api";
+import { ls, ss } from "../../../offline/bridge";
 
 // Remembers the last guide read, so a later sign-up is credited to it; counts one view per guide per session.
 function useGuideView(slug) {
   useEffect(() => {
-    localStorage.setItem("owo_guide", slug);
+    ls.setItem("owo_guide", slug);
     const k = `owo_gv_${slug}`;
-    if (sessionStorage.getItem(k)) return;
-    sessionStorage.setItem(k, "1");
+    if (ss.getItem(k)) return;
+    ss.setItem(k, "1");
     api.post("/track/guide", { slug }).catch(() => {});
   }, [slug]);
 }

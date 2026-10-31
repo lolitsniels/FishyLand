@@ -5,13 +5,14 @@
  * is strictly prohibited without prior written permission from the owner.
  */
 import i18next from "i18next";
+import { ls } from "../offline/bridge";
 
 // The site is English-only; t() only fills {{placeholders}} in the English strings.
 export const OLD_LANG_PATHS = ["nl", "de", "pl", "ru", "uk", "sv", "no", "fi", "tr", "pt", "zh"];
 export const getLang = () => "en";
 
 export async function initI18n() {
-  try { localStorage.removeItem("owo_lang"); localStorage.removeItem("owo_play_lang"); } catch { /* storage blocked */ }
+  try { ls.removeItem("owo_lang"); ls.removeItem("owo_play_lang"); } catch { /* storage blocked */ }
   await i18next.init({ lng: "en", resources: { en: { translation: {} } }, keySeparator: false, nsSeparator: false, interpolation: { escapeValue: false }, returnEmptyString: false });
   document.documentElement.lang = "en";
   return "en";

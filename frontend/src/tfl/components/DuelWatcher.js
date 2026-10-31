@@ -13,22 +13,23 @@ import { useGame } from "../context/GameContext";
 import { Avatar } from "./Avatar";
 import { t as tt } from "../i18n";
 import { PixelIcon } from "./PixelIcon";
+import { ls } from "../../offline/bridge";
 
 // Follows a duellist around the game: shows the queue pill on any page and the "opponent found" popup with its accept timer.
 export const DUEL_WATCH_KEY = "owo_duel_watch";
-export const setDuelWatch = (on) => { if (on) localStorage.setItem(DUEL_WATCH_KEY, "1"); else localStorage.removeItem(DUEL_WATCH_KEY); window.dispatchEvent(new Event("duel-watch")); };
+export const setDuelWatch = (on) => { if (on) ls.setItem(DUEL_WATCH_KEY, "1"); else ls.removeItem(DUEL_WATCH_KEY); window.dispatchEvent(new Event("duel-watch")); };
 const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 export default function DuelWatcher() {
   const { user, setUser } = useGame();
   const nav = useNavigate();
   const { pathname } = useLocation();
-  const [on, setOn] = useState(() => !!localStorage.getItem(DUEL_WATCH_KEY));
+  const [on, setOn] = useState(() => !!ls.getItem(DUEL_WATCH_KEY));
   const [s, setS] = useState(null);
   const [left, setLeft] = useState(0);
   const [busy, setBusy] = useState(false);
   const readyRef = useRef(false);
-  useEffect(() => { const f = () => setOn(!!localStorage.getItem(DUEL_WATCH_KEY)); window.addEventListener("duel-watch", f); return () => window.removeEventListener("duel-watch", f); }, []);
+  useEffect(() => { const f = () => setOn(!!ls.getItem(DUEL_WATCH_KEY)); window.addEventListener("duel-watch", f); return () => window.removeEventListener("duel-watch", f); }, []);
   const poll = useCallback(async () => {
     try {
       const r = await api.get("/duel/state"); const d = r.data; setS(d);

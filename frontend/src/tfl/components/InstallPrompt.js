@@ -8,13 +8,14 @@ import { useEffect, useState } from "react";
 import { Download, X, Share } from "lucide-react";
 import { t as tt } from "../i18n";
 import { useInstallPrompt, isMobileUA, isIOS, isStandalone } from "../lib/install";
+import { ls } from "../../offline/bridge";
 
 const DISMISS_KEY = "fl_install_dismissed_at";
 const DESK_KEY = "fl_install_desk_nudged";
 const DISMISS_DAYS = 10;
 
 function dismissedRecently() {
-  const at = Number(localStorage.getItem(DISMISS_KEY) || 0);
+  const at = Number(ls.getItem(DISMISS_KEY) || 0);
   return at && Date.now() - at < DISMISS_DAYS * 86400 * 1000;
 }
 
@@ -34,10 +35,10 @@ export function InstallPrompt() {
     return () => clearTimeout(t);
   }, [mobile]);
 
-  const eligible = !isStandalone() && (mobile ? !dismissedRecently() : !localStorage.getItem(DESK_KEY));
+  const eligible = !isStandalone() && (mobile ? !dismissedRecently() : !ls.getItem(DESK_KEY));
   const show = !closed && eligible && (canInstall || ios);
   if (!show) return null;
-  const remember = () => localStorage.setItem(mobile ? DISMISS_KEY : DESK_KEY, String(Date.now()));
+  const remember = () => ls.setItem(mobile ? DISMISS_KEY : DESK_KEY, String(Date.now()));
   const dismiss = () => { setClosed(true); remember(); };
   const accept = async () => { await install(); dismiss(); };
 

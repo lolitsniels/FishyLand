@@ -1,3 +1,4 @@
+import { ls } from "../../offline/bridge";
 /*
  * FishyLand, Copyright © 2026. All rights reserved.
  * This source code is proprietary and confidential. Unauthorized copying, reproduction,
@@ -6,7 +7,7 @@
  */
 // Light theme switch + phone keyboard tracking (iOS keeps fixed panels behind the keyboard otherwise).
 const KEY = "owo_prefs";
-const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; } };
+const read = () => { try { return JSON.parse(ls.getItem(KEY) || "{}"); } catch { return {}; } };
 
 export function applyModes() {
   document.documentElement.classList.toggle("theme-light", read().theme === "light");

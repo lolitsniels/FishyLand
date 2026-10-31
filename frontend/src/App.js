@@ -2,7 +2,8 @@ import DuelLive from "./world/DuelLive";
 import "@/App.css";
 import "./tfl/tfl.css";
 import "./tfl/game-skin.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, MemoryRouter, Routes, Route, Navigate } from "react-router-dom";
+import { OFFLINE } from "./offline/bridge";
 import { Toaster } from "sonner";
 import { GameProvider, useGame } from "./tfl/context/GameContext";
 import Landing from "./pages/Landing";
@@ -44,13 +45,17 @@ const GAME_PAGES = [
   ["quests", Quests], ["contracts", Contracts], ["market", Market], ["crews/:id?", Crews], ["tournaments", Tournaments], ["duel", DuelLive],
   ["leaderboards", Leaderboards], ["achievements", Achievements], ["crafting", Crafting], ["messages/:username?", Messages], ["almanac", Almanac], ["wiki", Wiki], ["admin", Admin],
 ];
+// offline (portal) build: solo pages only, everything multiplayer waits for the online version
+const OFFLINE_PAGES = new Set(["waters", "journal", "inventory", "shop", "profile/:username?"]);
+const PAGES = OFFLINE ? GAME_PAGES.filter(([p]) => OFFLINE_PAGES.has(p)) : GAME_PAGES;
+const Router = ({ children }) => (OFFLINE ? <MemoryRouter initialEntries={["/game"]}>{children}</MemoryRouter> : <BrowserRouter>{children}</BrowserRouter>);
 
 function App() {
   return (
     <GameProvider>
-      <BrowserRouter>
+      <Router>
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={OFFLINE ? <Navigate to="/game" replace /> : <Landing />} />
           <Route path="/wiki" element={<PublicWiki />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -61,11 +66,11 @@ function App() {
           <Route path="/game" element={<Protected><World /></Protected>}>
             <Route index element={null} />
             <Route path="fish" element={null} />
-            {GAME_PAGES.map(([p, C]) => <Route key={p} path={p} element={<C />} />)}
+            {PAGES.map(([p, C]) => <Route key={p} path={p} element={<C />} />)}
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to={OFFLINE ? "/game" : "/"} replace />} />
         </Routes>
-      </BrowserRouter>
+      </Router>
       <Toaster position="top-center" richColors theme="dark" toastOptions={{ style: { fontFamily: "Cinzel, serif", border: "1px solid #c8961f", background: "#1a0f07", color: "#fdf1cf" } }} />
     </GameProvider>
   );

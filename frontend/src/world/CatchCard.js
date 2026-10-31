@@ -86,7 +86,7 @@ export default function CatchCard({ res, onClose }) {
           <button type="button" className="fr-btn fr-btn-dark flex-1 py-2" disabled={busy} onClick={onClose} data-testid="catch-keep-btn">Keep</button>
           <button type="button" onClick={dex} className="relative flex-[1.3] h-11 transition-transform hover:scale-105 active:scale-95" data-testid="catch-fishdex-btn">
             <img src="/art/hud/btn_green.webp" alt="" className="absolute inset-0 w-full h-full" />
-            <span className="relative whitespace-nowrap font-black text-white text-[11px] sm:text-sm tracking-wide [text-shadow:0_2px_0_#0a4a0a]">VIEW IN FISHDEX</span>
+            <span className="relative whitespace-nowrap font-black text-white text-[10px] sm:text-[12.5px] px-3 [text-shadow:0_2px_0_#0a4a0a]">VIEW IN FISHDEX</span>
           </button>
           <button type="button" className="fr-btn flex-1 py-2 whitespace-nowrap" disabled={busy} onClick={sell} data-testid="catch-sell-btn">Sell {fmt(c.vendor ?? Math.round((c.value || 0) * 0.7))} g</button>
           </>}

@@ -8,6 +8,7 @@ import { createGuest } from "../tfl/lib/guest";
 import { CharacterPicker } from "../world/CharacterPicker";
 import { DEFAULT_LOOK } from "../game/look";
 import Seo from "../tfl/components/Seo";
+import { ls } from "../offline/bridge";
 
 const HOME_LD = { "@context": "https://schema.org", "@type": "VideoGame", name: "FishyLand", url: window.location.origin, image: `${window.location.origin}/art/og.jpg`,
   description: "Free online fishing MMO in your browser: walk the harbour with real players, fish 12 waters, catch hundreds of species and win live fishing duels.",
@@ -58,10 +59,10 @@ function SignupBox({ go }) {
   const register = async (e) => {
     e.preventDefault(); setBusy("signup"); setErr("");
     const body = { username: f.username.trim(), password: f.password, avatar: look, ...(f.email.trim() ? { email: f.email.trim() } : {}) };
-    const guestToken = localStorage.getItem("owo_guest_token");
+    const guestToken = ls.getItem("owo_guest_token");
     try {
       const r = guestToken
-        ? await api.post("/auth/complete-signup", body, { headers: { Authorization: `Bearer ${guestToken}` } }).catch((ex) => { if ([401, 403].includes(ex?.response?.status)) { localStorage.removeItem("owo_guest_token"); return api.post("/auth/register", body); } throw ex; })
+        ? await api.post("/auth/complete-signup", body, { headers: { Authorization: `Bearer ${guestToken}` } }).catch((ex) => { if ([401, 403].includes(ex?.response?.status)) { ls.removeItem("owo_guest_token"); return api.post("/auth/register", body); } throw ex; })
         : await api.post("/auth/register", body);
       login(r.data); toast.success(`Welcome to the harbour, ${r.data.user.username}!`); go();
     } catch (ex) { setErr(errMsg(ex)); setBusy(""); }

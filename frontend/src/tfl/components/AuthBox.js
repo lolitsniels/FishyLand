@@ -13,6 +13,7 @@ import { createGuest } from "../lib/guest";
 import { bmmRegistration } from "../lib/bmmTracker";
 import { toast } from "sonner";
 import { t as tt } from "../i18n";
+import { ls } from "../../offline/bridge";
 
 export default function AuthBox({ mode, setMode }) {
   const { login, data } = useGame();
@@ -21,14 +22,14 @@ export default function AuthBox({ mode, setMode }) {
   const [password, setP] = useState("");
   const [email, setE] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [ref, setRef] = useState(() => localStorage.getItem("owo_ref") || "");
-  const [showRef, setShowRef] = useState(() => !!localStorage.getItem("owo_ref"));
+  const [ref, setRef] = useState(() => ls.getItem("owo_ref") || "");
+  const [showRef, setShowRef] = useState(() => !!ls.getItem("owo_ref"));
   const [recruiter, setRecruiter] = useState(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [forgot, setForgot] = useState(false);
   const [forgotMsg, setForgotMsg] = useState("");
-  const [guestToken, setGuestToken] = useState(() => localStorage.getItem("owo_guest_token") || "");
+  const [guestToken, setGuestToken] = useState(() => ls.getItem("owo_guest_token") || "");
   const starters = (data?.avatars || []).filter((a) => a.price === 0);
   useEffect(() => { if (!avatar && starters.length) setAvatar(starters[Math.floor(Math.random() * starters.length)].id); }, [starters.length]); // eslint-disable-line
   useEffect(() => {
@@ -37,10 +38,10 @@ export default function AuthBox({ mode, setMode }) {
     const t = setTimeout(() => api.get(`/referrals/lookup/${code}`).then((r) => setRecruiter(r.data.recruiter)).catch(() => setRecruiter(false)), 350);
     return () => clearTimeout(t);
   }, [ref]);
-  const refBody = () => ({ ...(ref.trim() ? { ref: ref.trim().toUpperCase() } : {}), source: localStorage.getItem("owo_source") || undefined, source_page: localStorage.getItem("owo_source_page") || undefined, guide: localStorage.getItem("owo_guide") || undefined });
+  const refBody = () => ({ ...(ref.trim() ? { ref: ref.trim().toUpperCase() } : {}), source: ls.getItem("owo_source") || undefined, source_page: ls.getItem("owo_source_page") || undefined, guide: ls.getItem("owo_guide") || undefined });
   const afterAuth = (r) => {
     if (r.referral) { if (r.referral.applied) toast.success(tt("Recruited by {{v0}}: you'll both earn rewards as you level up", { v0: r.referral.recruiter })); else toast.error(r.referral.reason); }
-    localStorage.removeItem("owo_ref");
+    ls.removeItem("owo_ref");
     login(r);
     nav("/game");
   };
@@ -57,7 +58,7 @@ export default function AuthBox({ mode, setMode }) {
           afterAuth(r.data); return;
         } catch (ex) {
           if (ex?.response?.status !== 401 && ex?.response?.status !== 403) throw ex;
-          localStorage.removeItem("owo_guest_token"); setGuestToken("");
+          ls.removeItem("owo_guest_token"); setGuestToken("");
         }
       }
       const r = await api.post(`/auth/${mode}`, body);
