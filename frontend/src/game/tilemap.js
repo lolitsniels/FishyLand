@@ -230,7 +230,7 @@ export function buildMap(map, img, objTex = {}) {
     const x0 = cols ? Math.min(...cols.map((c) => c.x - c.cw / 2)) : o.x - (w * fw) / 2, x1 = cols ? Math.max(...cols.map((c) => c.x + c.cw / 2)) : o.x + (w * fw) / 2;
     const cx = (x0 + x1) / 2 + w * 0.03, rx = ((x1 - x0) / 2) * (def.rect ? 1.12 : 1.35), base = cols ? Math.max(...cols.map((c) => c.y)) : o.y;
     const ry = Math.max(10, def.rect ? Math.min(w * fh * 0.55, 70) : w * Math.max(fh, 0.12) * 0.7);
-    for (const [k, a, sy] of [[1, 0.32, 0.45], [0.72, 0.28, 0.2]]) {
+    for (const [k, a, sy] of [[1, 0.42, 0.45], [0.72, 0.36, 0.2]]) {
       ctx.save(); ctx.translate(cx, base - ry * sy); ctx.scale(1, (ry * k) / (rx * k));
       const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * k);
       gr.addColorStop(0, `rgba(18,14,6,${a})`); gr.addColorStop(0.65, `rgba(18,14,6,${a * 0.55})`); gr.addColorStop(1, "rgba(18,14,6,0)");
