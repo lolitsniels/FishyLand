@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite, Text, NineSliceSprite, DisplacementFilter, ColorMatrixFilter, Rectangle } from "pixi.js";
+import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite, Text, DisplacementFilter, ColorMatrixFilter, Rectangle } from "pixi.js";
 import { AdvancedBloomFilter, GodrayFilter, GlowFilter } from "pixi-filters";
 import { fx } from "./fx";
 import { useGame } from "../store";
@@ -388,12 +388,16 @@ function buildScene(app, tex, key, bgTex, mt) {
     } else {
       // painted signboard: icon + building name on a navy and gold plank
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
-      const lb = new Text({ text: sp.label, style: { fontFamily: "Lilita One, Noto Sans", fontSize: 17, fill: 0xffe9a3, stroke: { color: 0x0b1a33, width: 4 }, letterSpacing: 0.3 } });
-      const bw = Math.round(lb.width + 72), bh = 44;
-      const plank = new NineSliceSprite({ texture: Texture.EMPTY, leftWidth: 46, rightWidth: 46, topHeight: 20, bottomHeight: 20 });
-      plank.width = bw; plank.height = bh; plank.x = -bw / 2; plank.y = -bh - 14;
-      Assets.load("art/hud/sign_banner.webp").then((t) => { if (!plank.destroyed) { plank.texture = t; plank.width = bw; plank.height = bh; } }).catch(() => {});
-      const post = new Graphics().rect(-3, -16, 6, 16).fill({ color: 0x5a3a1a });
+      const lb = new Text({ resolution: 2, text: sp.label, style: { fontFamily: "Lilita One, Noto Sans", fontSize: 17, fill: 0xffe9a3, stroke: { color: 0x0b1a33, width: 4 }, letterSpacing: 0.3 } });
+      const bw = Math.round(lb.width + 70), bh = 40;
+      // drawn in vectors so it stays crisp at any width: navy plank, gold rim, inner trim and rivets
+      const plank = new Graphics()
+        .roundRect(-bw / 2, -bh - 12, bw, bh, 12).fill({ color: 0x000000, alpha: 0.28 })
+        .roundRect(-bw / 2, -bh - 14, bw, bh, 12).fill({ color: 0x14305c }).stroke({ width: 3, color: 0xe2b048 })
+        .roundRect(-bw / 2 + 5, -bh - 9, bw - 10, bh - 10, 8).stroke({ width: 1, color: 0xffe7a3, alpha: 0.55 })
+        .rect(-bw / 2 + 8, -bh - 11, bw - 16, 5).fill({ color: 0xffffff, alpha: 0.07 })
+        .circle(-bw / 2 + 9, -14 - bh / 2, 2.4).fill({ color: 0xffd35a }).circle(bw / 2 - 9, -14 - bh / 2, 2.4).fill({ color: 0xffd35a });
+      const post = new Graphics().rect(-2.5, -15, 5, 15).fill({ color: 0x6b4520 }).rect(-2.5, -15, 2, 15).fill({ color: 0x8a5a2b });
       ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.x = -bw / 2 + 30; ic.y = -14 - bh / 2;
       Assets.load(sp.img.includes("/") ? sp.img : `art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(30 / Math.max(t.width, t.height)); } }).catch(() => {});
       lb.anchor.set(0, 0.5); lb.x = -bw / 2 + 50; lb.y = -14 - bh / 2;
