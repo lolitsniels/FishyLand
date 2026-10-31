@@ -30,7 +30,7 @@ const CATEGORIES = [
   { id: "identity", label: "Name change", icon: PenLine },
   { id: "friends", label: "Friend slots", icon: Users },
   { id: "soon", label: "Coming soon", icon: Hourglass },
-];
+].filter((c) => process.env.REACT_APP_OFFLINE !== "1" || ["frames", "colours", "soon"].includes(c.id)); // offline: no portrait art, names, walls or friends
 
 function Walls({ cos, reload }) {
   const { user, setUser } = useGame();
@@ -254,7 +254,7 @@ export default function PearlShop() {
   const { user } = useGame();
   const [cos, setCos] = useState(null);
   const [params] = useSearchParams();
-  const [cat, setCat] = useState(params.get("tab") || "portraits");
+  const [cat, setCat] = useState(params.get("tab") || CATEGORIES[0].id);
   const load = () => api.get("/cosmetics").then((r) => setCos(r.data)).catch(() => {});
   useEffect(() => { load(); }, []);
   return (

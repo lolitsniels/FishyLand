@@ -153,14 +153,14 @@ function cast() {
   if (!(rnd() < (GEAR[u.gear.rod]?.free_cast || 0))) u.energy -= CAST_COST;
   u.stats.casts += 1;
   if (bait) u.bait[bait.id] -= 1;
-  HB.event("cast", {});
+  const castEv = HB.event("cast", {});
   const t = u.tutorial || {};
   const guaranteed = !t.done && t.step === 2 && !t.guaranteed && !u.stats.catches;
   if (guaranteed) t.guaranteed = true;
   S.pending = null;
   if (!guaranteed && Math.floor(rnd() * 100) + 1 > 72 + bite) {
     save();
-    return { result: "nothing", encounter: null, user: pub(), message: pick(["The line drifts. Nothing bites.", "A nibble... then nothing.", "Your bait comes back untouched.", "Ripples spread and fade. The water keeps its secrets."], [1, 1, 1, 1]) };
+    return { ...castEv, result: "nothing", encounter: null, user: pub(), message: pick(["The line drifts. Nothing bites.", "A nibble... then nothing.", "Your bait comes back untouched.", "Ripples spread and fade. The water keeps its secrets."], [1, 1, 1, 1]) };
   }
   let f;
   if (guaranteed) { const plain = BY_WATER[water.key].filter((x) => x.rarity === "common" && !x.bait_only); f = plain[Math.floor(rnd() * plain.length)]; }
@@ -172,7 +172,7 @@ function cast() {
   const id = `e${S.seq++}`;
   S.pending = { id, species_id: f.id, weight, variant, vmult, water: water.key, created: Date.now(), params, period, weather: conditions(water.key).weather };
   save();
-  return { result: "hooked", encounter: { id, ...params }, message: "Fish on!", user: pub() };
+  return { ...castEv, result: "hooked", encounter: { id, ...params }, message: "Fish on!", user: pub() };
 }
 
 function land(body) {

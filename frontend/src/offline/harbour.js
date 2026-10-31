@@ -7,6 +7,9 @@ const weekKey = (d = new Date()) => { const t = new Date(d); t.setUTCDate(t.getU
 const seeded = (s) => { let x = [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 9); return () => ((x = (x * 1103515245 + 12345) >>> 0) / 4294967296); };
 const endOf = (days) => { const t = new Date(); t.setUTCHours(24, 0, 0, 0); t.setUTCDate(t.getUTCDate() + days - 1); return t.toISOString(); };
 
+// market listing / crafting chapters need the online version; the offline story skips them
+const STORY = H.story.filter((q) => !["list", "craft"].includes(q.objective.event));
+
 export function makeHarbour(ctx) {
   const { S, U, pub, save, levelOf, WATERS, BY_WATER, WATER, FISH } = ctx;
   const st = () => (S().h = S().h || { story: {}, daily: null, weekly: null, ach: [], contracts: { offers: [], accepted: [], day: null, done_today: 0, favour: {} }, done: 0 });
@@ -37,10 +40,10 @@ export function makeHarbour(ctx) {
   const storyStatus = (q, i) => {
     const s = st().story[q.id];
     if (s?.status === "done" || s?.status === "active") return s.status;
-    const prev = i === 0 || st().story[H.story[i - 1].id]?.status === "done";
+    const prev = i === 0 || st().story[STORY[i - 1].id]?.status === "done";
     return !prev ? "locked" : lvl() < q.level ? "level_locked" : "available";
   };
-  const storyOut = () => H.story.map((q, i) => ({ id: q.id, kind: "story", name: q.name, level: q.level, story: q.story, desc: q.desc, reward: q.reward, target: q.target,
+  const storyOut = () => STORY.map((q, i) => ({ id: q.id, kind: "story", name: q.name, level: q.level, story: q.story, desc: q.desc, reward: q.reward, target: q.target,
     progress: Math.min(q.target, st().story[q.id]?.progress || 0), status: storyStatus(q, i), done_at: st().story[q.id]?.done_at || null }));
   const questsOut = () => ({ guest: [], story: storyOut(), daily: roll("daily"), weekly: roll("weekly"), streak: { count: 0, today_done: false, days: 7, bonus: { gold: 0, xp: 0, pearls: 0 } }, completed: st().done });
   const matches = (flt, e) => (!flt.water || flt.water === e.water) && (!flt.min_rarity || RANK.indexOf(e.rarity) >= RANK.indexOf(flt.min_rarity))
@@ -53,7 +56,7 @@ export function makeHarbour(ctx) {
   function event(ev, e = {}) {
     const done = [], amount = (q) => ((q.measure || q.objective?.measure) === "gold" ? e.gold || 0 : (q.measure || q.objective?.measure) === "kg" ? e.weight || 0 : e.count || 1);
     for (const kind of ["daily", "weekly"]) for (const q of roll(kind).quests) if (advance(q, ev, e, amount(q))) { q.status = "done"; q.done_at = new Date().toISOString(); grant(q.reward); done.push({ name: q.name, kind, reward: q.reward }); }
-    H.story.forEach((q) => {
+    STORY.forEach((q) => {
       const s = st().story[q.id];
       if (!s || s.status !== "active") return;
       const tmp = { status: "active", objective: q.objective, target: q.target, progress: s.progress || 0 };
@@ -133,7 +136,7 @@ export function makeHarbour(ctx) {
     const ids = new Set(fish.map((x) => x.id)), old = lvl();
     S().catches = S().catches.filter((x) => !ids.has(x.id));
     a.progress = (a.progress || 0) + fish.length;
-    if (a.progress < a.qty) { save(); return { done: false, state: contractsOut(), user: pub() }; }
+    if (a.progress < a.qty) { save(); return { done: false, state: contractsOut(), user: pub(), delivered: fish.length, progress: a.progress, target: a.qty }; }
     c.accepted = c.accepted.filter((k) => k !== a); c.done_today += 1; c.total = (c.total || 0) + 1; c.favour[a.patron] = (c.favour[a.patron] || 0) + a.favour;
     grant({ gold: a.gold, xp: a.xp, pearls: a.pearls });
     const ev = event("contract", {});
@@ -159,7 +162,7 @@ export function makeHarbour(ctx) {
   const ok = (fn) => (b, m) => { const r = fn(b, m); save(); return r; };
   const routes = [
     ["get", /^\/quests$/, () => questsOut()],
-    ["post", /^\/quests\/([^/]+)\/accept$/, ok((b, m) => { const i = H.story.findIndex((q) => q.id === m[1]); if (i < 0 || storyStatus(H.story[i], i) !== "available") fail("You can't take that quest yet"); st().story[m[1]] = { status: "active", progress: 0 }; return { story: storyOut() }; })],
+    ["post", /^\/quests\/([^/]+)\/accept$/, ok((b, m) => { const i = STORY.findIndex((q) => q.id === m[1]); if (i < 0 || storyStatus(STORY[i], i) !== "available") fail("You can't take that quest yet"); st().story[m[1]] = { status: "active", progress: 0 }; return { story: storyOut() }; })],
     ["get", /^\/achievements$/, () => achOut()],
     ["get", /^\/cosmetics$/, () => cosOut()],
     ["post", /^\/cosmetics\/buy-(avatar|colour|frame|wall)$/, ok((b, m) => { buy(`${m[1]}s`, b[`${m[1]}_id`]); return { user: pub() }; })],
