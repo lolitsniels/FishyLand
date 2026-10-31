@@ -100,4 +100,6 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - Water texture no longer scrolls (corals stay still); only the ripple displacement drifts
 
 - Crews split: harbour Crew HQ = list of all crews + join/request/create + invites only; island Crew Clubhouse = own crew Home/Members/Manage (settings, requests, emblem, leave). Weekly crew challenge retired (no new contests, /contests upcoming empty, wiki text updated)
+- Walk-in Crew Clubhouse (map key clubhouse, mode "clubhouse", yacht club art art/map/club_*.webp, t_clubwall/t_clubfloor): Notice Board (motd editor + broadcast + activity), Member Portraits (faces, promote/demote/kick), Trophy Shelf (GET /crews/{id} trophies), Captain's Desk (joining toggle, invite, colour, bank, leave), Mailbox (join requests). Managers = leader+officers. Island signpost "Enter the Crew Clubhouse"; exit returns near the hall. Presence scoped club:<crew>. Motd no longer needs the Hall perk.
+
 

@@ -119,6 +119,7 @@ export default function World() {
     window.addEventListener("fr-mode", on);
     return () => window.removeEventListener("fr-mode", on);
   });
+  useEffect(() => { if ((mode === "crew" || mode === "clubhouse") && user && !user.crew) goTo("harbour"); }, [mode, user?.crew]); // eslint-disable-line
   useEffect(() => { if (page === "fish") { goTo("water"); nav("/game", { replace: true }); } }, [page, nav]);
   useEffect(() => {
     if (!user?.water) return;

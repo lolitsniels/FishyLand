@@ -17,15 +17,26 @@ const Box = ({ title, children, testid }) => (
 );
 const ReadOnly = () => <p className="text-[12.5px] text-amber-100/70 italic" data-testid="club-readonly">Only the leader and officers can change this.</p>;
 
+function MotdEditor({ crew, reload }) {
+  const [text, setText] = useState(crew.motd || "");
+  const save = async () => { try { await api.post(`/crews/${crew.id}/hall/motd`, { text }); toast.success("Notice pinned"); reload(); } catch (e) { toast.error(errMsg(e)); } };
+  return (
+    <div className="flex flex-col gap-2 mt-2">
+      <textarea className="input w-full min-h-[70px] text-[13px]" maxLength={300} value={text} onChange={(e) => setText(e.target.value)} placeholder="Pin a notice for the crew" data-testid="club-motd-input" />
+      <div className="flex justify-end"><button className="btn btn-gold btn-sm" onClick={save} data-testid="club-motd-save">Pin notice</button></div>
+    </div>
+  );
+}
+
 function Notice({ crew, canManage, reload }) {
   return <>
-    <Box title="Crew notice" testid="club-motd"><p className="text-[13px] italic text-[#f4ead2]">{crew.motd || "Nothing pinned yet."}</p></Box>
+    <Box title="Crew notice" testid="club-motd"><p className="text-[13px] italic text-[#f4ead2]">{crew.motd || "Nothing pinned yet."}</p>{canManage && <MotdEditor crew={crew} reload={reload} />}</Box>
     {canManage && <Box testid="club-broadcast"><BroadcastBox crew={crew} onSent={reload} /></Box>}
     <CrewActivity crewId={crew.id} />
   </>;
 }
 
-function Portraits({ crew, me, reload }) {
+function Portraits({ crew, me, reload, onClose }) {
   const nav = useNavigate();
   const isLeader = crew.leader === me;
   const role = async (path, name, msg) => { try { await api.post(`/crews/${crew.id}/${path}`, { username: name }); toast.success(msg); reload(); } catch (e) { toast.error(errMsg(e)); } };
@@ -33,7 +44,7 @@ function Portraits({ crew, me, reload }) {
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="club-portrait-grid">
       {crew.members.map((m) => (
         <div key={m.user_id} className="panel p-2 flex flex-col items-center text-center gap-1" data-testid={`portrait-${m.username}`}>
-          <button type="button" onClick={() => nav(`/game/profile/${encodeURIComponent(m.username)}`)} className="club-frame" data-testid={`portrait-open-${m.username}`}>
+          <button type="button" onClick={() => { onClose(); nav(`/game/profile/${encodeURIComponent(m.username)}`); }} className="club-frame" data-testid={`portrait-open-${m.username}`}>
             <img src={m.avatar ? lookFace(m.avatar) : "/art/hud/mascot.webp"} alt={m.username} />
           </button>
           <b className="text-[13px] text-[#f4ead2] truncate max-w-full">{m.username}</b>
@@ -75,7 +86,7 @@ function Desk({ crew, canManage, isLeader, reload, onLeave }) {
         <span>{crew.open ? "Anyone can join." : "Invite only, requests need approval."}</span>
         {isLeader && <button className="btn btn-sm" onClick={async () => { await api.post(`/crews/${crew.id}/settings`, { open: !crew.open }); reload(); }} data-testid="toggle-open-button">{crew.open ? "Make invite-only" : "Open to join"}</button>}
       </div>
-      {!isLeader && <ReadOnly />}
+      {!isLeader && <p className="text-[12.5px] text-amber-100/70 italic" data-testid="club-readonly">Only the captain can change who may join.</p>}
     </Box>
     {canManage && crew.member_count < crew.max_members && <Box title="Invite an angler" testid="club-desk-invite"><InviteAnglerBox crewId={crew.id} onSent={reload} /></Box>}
     {isLeader && <EmblemColour crew={crew} onChanged={reload} />}
@@ -104,7 +115,7 @@ export function ClubhousePanel({ spot, onClose }) {
         <div className="tfl-skin" data-testid={`club-panel-${spot}`}>
           <div className="text-center font-display text-[15px] text-[#f4ead2] mb-3"><CrewName crew={crew} /></div>
           {spot === "club-notice" && <Notice crew={crew} canManage={canManage} reload={reload} />}
-          {spot === "club-portraits" && <Portraits crew={crew} me={user.username} reload={reload} />}
+          {spot === "club-portraits" && <Portraits crew={crew} me={user.username} reload={reload} onClose={onClose} />}
           {spot === "club-trophies" && <Trophies crew={crew} />}
           {spot === "club-desk" && <Desk crew={crew} canManage={canManage} isLeader={isLeader} reload={reload} onLeave={leave} />}
           {spot === "club-mail" && (canManage

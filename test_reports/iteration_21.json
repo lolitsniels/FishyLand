@@ -1,0 +1,53 @@
+{
+  "summary": "Tested the walk-in Crew Clubhouse (yacht club). Backend: 11/11 pytest pass for crew detail trophies {catches,kg,species,best[]}, members[].avatar/role, crew-scoped presence (club:<crew> is separate from the crew island and hidden from non-members), and leader-only settings/promote/demote/kick. iter12 and iter20 regressions also pass (16/16). UI at 1920x800 and 390x844: harbour go-crew-island, then the clubhouse signpost on the island. The room switches to mode 'clubhouse', the chip reads '<crew> Clubhouse' and club-hint shows. The room has a navy/white porthole wall, wooden floor, notice board, portrait panel, trophy cabinet, desk, brass mailbox, sofa, plants and compass rug. Map audit is clean: {moved:[],dropped:[],onPath:[],wetBad:[],spots:[],spawn:true}. The back wall blocks walking (player stops at y=451 at x=250/760/1250/1700). Desk, portraits, mailbox and sofa block movement. All 5 furniture panels open via the spot prompt or E with the right content. Role views are correct for leader, officer and member: leader gets toggle, emblem colour and withdraw; officer gets invite, broadcast and approve/decline but sees club-readonly on Joining; member sees club-readonly and club-mail-locked. Approve in the Mailbox works and the list refreshes to club-mail-empty. Promote from the portraits works. portrait-open goes to /game/profile/<user>. 'Back to the island' lands at (1200,790) on the island near the clubhouse. Leave crew from the desk sends the player to the harbour.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /crews/{id}/hall/motd (crew_hall.py:131)", "issue": "The crew notice can only be written once the Crew Hall perk is bought, and only through the hall tab (filtered out since iter20). The Clubhouse Notice Board shows crew.motd but has no editor, so it always says 'Nothing pinned yet.' The /settings endpoint ignores motd."},
+      {"endpoint": "POST /world/pos (world_presence.py)", "issue": "Presence is kept in memory (_pos). uvicorn --reload restarts whenever files under /app/backend change, including tests/__pycache__, and that wipes all positions. This caused a flaky test (test_same_crew_sees_each_other failed 2 of 5 runs) and only happens in dev. Not a product bug."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Clubhouse.js Notice", "issue": "There is no way to pin or edit the crew notice from the Notice Board for the leader or officers (club-motd is read-only). Add a motd input for canManage that posts to /crews/{id}/hall/motd, and drop the hall-perk gate in the backend, or move motd into /settings.", "selector": "[data-testid='club-motd']", "priority": "MEDIUM"},
+      {"component": "World.js / Clubhouse", "issue": "A user who is not in a crew but has sessionStorage fr_mode='clubhouse' (or who is kicked while inside) loads into an empty 'Crew Clubhouse'. Every furniture modal stays on 'Loading…' forever because cid is undefined. Fix: if mode is clubhouse or crew and !user.crew, goTo('harbour').", "selector": "[data-testid='clubhouse-modal']", "priority": "MEDIUM"},
+      {"component": "Clubhouse.js Desk", "issue": "Officers see the ReadOnly text 'Only the leader and officers can change this.' under Joining. They are officers, and the open toggle is leader-only in the backend. Show 'Only the captain can change this.' when !isLeader.", "selector": "[data-testid='club-readonly']", "priority": "LOW"},
+      {"component": "Clubhouse.js Portraits", "issue": "Clicking portrait-open opens the profile page-modal on top of clubhouse-modal, which stays mounted, so two blurred modals stack. The profile modal is also titled 'My Angler' for another user. Consider closing the club modal (setClub(null)) before nav, or accept the stacking as 'back' behaviour.", "selector": "[data-testid^='portrait-open-']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Clubhouse room 1920x800", "issues": [
+        "The exit spot 'Back to the island' (1000,1240) and the bottom ~100px of the room sit under the action bar because the camera clamps at the map bottom. The exit marker is invisible on desktop until you walk onto it, and the player sprite can hide behind the HUD at y>1240. Move the spot or spawn up to about y=1150 or add padding to the map bottom.",
+        "The wall block ends at y=440, but the floor visually starts around y≈465. A player standing at the block limit has their feet on the navy wainscot. Raise blocks to about 465–470.",
+        "There is no door or doormat art at the exit; a visible door at the bottom would make 'Back to the island' easier to find."
+      ]},
+      {"screen": "Clubhouse panels", "issues": [
+        "Notice Board: the Broadcast Box has no title, so a stray divider line shows at its top.",
+        "Captain's Desk: 'Withdraw from crew bank' renders outside a panel Box, unlike the other sections.",
+        "Mailbox: the CrewInbox grid is md:grid-cols-2, so the request card takes only half the 760px modal width."
+      ]},
+      {"screen": "Clubhouse 390x844", "issues": ["At spawn, the club-hint chip overlaps the 'Back to the island' spot label"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter21_clubhouse.py", "/app/test_reports/pytest/pytest_iter21.xml"],
+  "action_items": [
+    "Add a crew-notice (motd) editor to the Notice Board for leader and officers, and remove or relax the hall-perk gate on /crews/{id}/hall/motd",
+    "Redirect to the harbour when mode is 'clubhouse' or 'crew' and the user has no crew (stale sessionStorage, kicked while inside)",
+    "Make the clubhouse exit visible on desktop: move the 'Back to the island' spot and spawn up, add a door, or keep it clear of the action bar",
+    "Raise the clubhouse wall block from 440 to about 465 so the player cannot stand on the wainscot",
+    "Change the officer read-only text on the Desk to say only the captain can change Joining",
+    "Optional: close the club modal when opening a portrait profile; give the broadcast and withdraw boxes consistent panel styling; make the mailbox request card full width"
+  ],
+  "critical_code_review_comments": [
+    "Clubhouse.js reload() is used as a useEffect callback, so it returns undefined, which is fine. It fires /crews/{id} and /crews/inbox twice on open (seen in the network log), which is redundant.",
+    "Desk toggle-open has no try/catch or toast on error, unlike the other actions.",
+    "ClubhousePanel renders only while mode==='clubhouse'. If the user is kicked while the room is open, the crew GET still succeeds (non-member) and shows that crew's data. There is no membership check client-side, and the backend crew_detail does not require membership."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter21_clubhouse.py"],
+  "success_rate": {"backend": "100% (11/11; 1 flaky presence test caused by dev auto-reload)", "frontend": "88%"},
+  "test_credentials": "Niels/Niels112233! (leader, level 100), TestAngler2 and TestAngler / Angler#2026 from /app/memory/test_credentials.md",
+  "seed_data_creation": "Created the crew 'TEST Yacht Club' [TYC] (Niels leader, TestAngler2 and TestAngler members) for UI testing. Cleaned up afterwards (all members left, crew now 404). The pytest fixture creates and removes 'TEST Iter21 Club'.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest with -n 0 (xdist breaks the module crew fixture). Enter the room with sessionStorage fr_mode='clubhouse' plus a reload, or call window.__fx.openSpot('clubhouse') from the island. You can teleport with window.__fx.me={x,y}, and window.__fx.openSpot('club-desk' etc.) opens panels directly. Furniture coordinates: notice 520,520; portraits 1000,530; trophies 1480,530; desk 1600,920; mailbox 360,920; exit spot 1000,1240. Do not teleport inside furniture footprints (the player gets stuck). Clubhouse mapcheck URL: /game?mapview=1&mapcheck=1&map=clubhouse."
+}

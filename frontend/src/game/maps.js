@@ -121,16 +121,16 @@ export const CREW_ISLAND_MAP = {
 // Duel Pier arena: one round pond, a pier from each side, scoreboard stand at the top.
 // Inside the crew clubhouse (yacht club): every crew function is a piece of furniture to walk up to.
 export const CLUBHOUSE_MAP = {
-  tiled: true, indoor: true, W: 2000, H: 1300, scale: 0.74, spawn: { x: 1000, y: 1160 }, weather: null,
+  tiled: true, indoor: true, W: 2000, H: 1300, scale: 0.74, spawn: { x: 1000, y: 990 }, weather: null,
   base: "clubfloor",
   ground: [{ tex: "clubwall", poly: [0, 0, 2000, 0, 2000, 410, 0, 410] }],
   water: [],
-  blocks: [[0, 0, 2000, 0, 2000, 440, 0, 440]],
+  blocks: [[0, 0, 2000, 0, 2000, 465, 0, 465]],
   objects: [
-    { k: "club_rug", x: 1000, y: 1040, w: 360 },
+    { k: "club_rug", x: 1000, y: 930, w: 290 },
     { k: "club_notice", x: 520, y: 520 }, { k: "club_portraits", x: 1000, y: 530 }, { k: "club_trophies", x: 1480, y: 530 },
     { k: "club_desk", x: 1600, y: 920 }, { k: "club_mailbox", x: 360, y: 920 },
-    { k: "club_sofa", x: 560, y: 1200 }, { k: "club_plant", x: 170, y: 540 }, { k: "club_plant", x: 1830, y: 540 }, { k: "club_plant", x: 1860, y: 1200, w: 140 },
+    { k: "club_sofa", x: 600, y: 1090 }, { k: "club_plant", x: 170, y: 540 }, { k: "club_plant", x: 1830, y: 540 }, { k: "club_plant", x: 1860, y: 1100, w: 140 },
   ],
   spots: [
     { id: "club-notice", label: "Notice Board", img: "quests", x: 520, y: 590 },
@@ -138,7 +138,7 @@ export const CLUBHOUSE_MAP = {
     { id: "club-trophies", label: "Trophy Shelf", img: "rankings", x: 1480, y: 600 },
     { id: "club-desk", label: "Captain's Desk · Settings", img: "settings", x: 1600, y: 980 },
     { id: "club-mail", label: "Mailbox · Join requests", img: "pass", x: 360, y: 980 },
-    { id: "crew-island", label: "Back to the island", img: "map", x: 1000, y: 1240 },
+    { id: "crew-island", label: "Back to the island", img: "map", x: 1000, y: 1065 },
   ],
   sparkle: [0, 0, 0, 0], leap: null, life: {},
 };

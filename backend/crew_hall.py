@@ -132,6 +132,5 @@ async def hall_buy(crew_id: str, body: BuyIn, user=Depends(get_current_user)):
 async def hall_motd(crew_id: str, body: MotdIn, user=Depends(get_current_user)):
     c = await _member_crew(crew_id, user)
     if not manages(c, str(user["_id"])): raise HTTPException(403, "Only the crew leader and officers can write on the notice board")
-    if not c.get("perks", {}).get("hall"): raise HTTPException(400, "Buy the Crew Hall upgrade first to unlock the notice board")
     await db.crews.update_one({"_id": c["_id"]}, {"$set": {"motd": body.text.strip()}})
     return {"ok": True}
