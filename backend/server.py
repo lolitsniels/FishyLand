@@ -33,7 +33,7 @@ from typing_extensions import Annotated
 from secrets_data import SECRET_FISH, SECRET_BY_ID, SECRET_CHANCE, SECRET_TITLE, window_open
 from contracts_data import perk_val as favour_perk
 from game_data import (WATER_POOL, BAIT_ONLY_OTHER, RARE_SET_WEAR_SKIP, FISH, FISH_BY_ID, FISH_BY_WATER, WATERS, RODS, REELS, LINES, BAITS, GEAR_BY_ID, BAIT_BY_ID,
-                       RARITY_BASE_VALUE, RARITY_XP, RARITY_WEIGHT, GROUNDBAIT_MULT, BEHAVIORS, VARIANTS, INGREDIENTS, ING_BY_ID, RECIPES)
+                       RARITY_BASE_VALUE, RARITY_XP, RARITY_WEIGHT, GROUNDBAIT_MULT, BEHAVIORS, VARIANTS, INGREDIENTS, ING_BY_ID, RECIPES, POND_FISH, POND_WATER)
 from quests_data import STORY_QUESTS, STORY_BY_ID, GUEST_QUESTS, GUEST_ORDER, daily_pool, weekly_pool
 from avatars_data import AVATAR_BY_ID, STARTER_AVATARS, colour_hex
 from referrals_data import LEVEL_STEP, RECRUIT_LEVEL_PEARLS, TITLE_LEVEL, MENTOR_TITLE, level_milestone
@@ -49,6 +49,7 @@ JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALG = "HS256"
 PyObjectId = Annotated[str, BeforeValidator(str)]
 WATER_BY_KEY = {w["key"]: w for w in WATERS}
+WATER_BY_KEY["crew_pond"] = {"key": "crew_pond", "name": "Crew Pond", "type": "Crew island pond", "salt": False, "level": 1, "fee": 0, "image": "/art/waters/millbrook.jpg", "desc": "The round pond on your crew island."}
 WATER_BY_KEY["hallow"] = {"key": "hallow", "name": "Any water (Halloween)", "type": "Halloween event", "salt": False, "level": 1, "fee": 0, "image": "/art/water_willow.jpg", "desc": "Halloween fish bite in every water while the event runs."}
 MAX_ENERGY = 100
 PREMIUM_MAX_ENERGY = 150
@@ -814,7 +815,7 @@ def soft_cap(raw, cap):
 
 
 def _game_data_payload():
-    return {"waters": [{**w, "rough_pct": round(HARD_WATER_BONUS * water_pressure(w["key"]) * 100), "pressure": water_pressure(w["key"])} for w in WATERS], "fish": [{k: v for k, v in f.items() if k not in ("hours", "window_label")} for f in FISH], "rods": RODS, "reels": REELS, "lines": LINES, "baits": BAITS, "ingredients": INGREDIENTS, "recipes": RECIPES,
+    return {"waters": [{**w, "rough_pct": round(HARD_WATER_BONUS * water_pressure(w["key"]) * 100), "pressure": water_pressure(w["key"])} for w in WATERS], "fish": [{k: v for k, v in f.items() if k not in ("hours", "window_label")} for f in FISH + POND_FISH], "rods": RODS, "reels": REELS, "lines": LINES, "baits": BAITS, "ingredients": INGREDIENTS, "recipes": RECIPES,
             "behaviors": BEHAVIORS, "variants": [v[0] for v in VARIANTS],
             "avatars": [{"id": a["id"], "name": a["name"], "sex": a["sex"], "price": a["price"], "kind": a.get("kind")} for a in AVATAR_BY_ID.values()],
             "durability": {"max": MAX_DURABILITY, "worn_penalty": WORN_PENALTY, "repair_rate": REPAIR_RATE}}
@@ -1322,15 +1323,20 @@ async def note_fight_pattern(user, body, params):
     await db.users.update_one({"_id": user["_id"]}, {"$push": {"rhythm.fights": {"$each": [sig], "$slice": -FIGHT_PATTERN}}})
 
 
+class CastIn(BaseModel):
+    spot: Optional[str] = None
+
+
 @api.post("/fish/cast")
-async def cast(user=Depends(get_current_user)):
+async def cast(body: Optional[CastIn] = None, user=Depends(get_current_user)):
     if user["energy"] < CAST_COST:
         raise HTTPException(400, "You are exhausted. Rest a while before casting again.")
     flagged = await note_cast_rhythm(user)
     hc = humancheck.pending(user)
     if flagged and not hc: hc = humancheck.pending(await db.users.find_one({"_id": user["_id"]}, {"humancheck": 1}) or {})  # a flag just fired: it may have dealt a check
     if hc: raise HTTPException(423, {"code": "humancheck", "msg": "A quick check before you cast again: prove you're an angler, not a machine.", "challenge": humancheck.public_challenge(hc)})
-    water = WATER_BY_KEY[user["water"]]
+    pond = await crew_pond.stocked_for(user) if body and body.spot == POND_WATER else None
+    water = WATER_BY_KEY[POND_WATER if pond else user["water"]]
     if water.get("premium") and not premium_active(user): raise HTTPException(403, f"Your Angler Pass has ended, {water['name']} is closed to you until you renew. Travel to another water.")
     cond = conditions_for(water["key"])
     luck, bite, bait, _ = await cast_luck(user, water)
@@ -1342,7 +1348,7 @@ async def cast(user=Depends(get_current_user)):
     # Tutorial first-cast guarantee: once per account, only while the tutorial waits for the first fish and nothing has ever been landed.
     # Yields a plain common of this water (no boss/secret/variant rolls), so there is nothing to farm.
     t = user.get("tutorial") or {}
-    guaranteed = bool(t) and not t.get("done") and t.get("step") == 2 and not t.get("guaranteed") and user["stats"].get("catches", 0) == 0
+    guaranteed = not pond and bool(t) and not t.get("done") and t.get("step") == 2 and not t.get("guaranteed") and user["stats"].get("catches", 0) == 0
     if guaranteed: updates["$set"]["tutorial.guaranteed"] = True
     await db.pending.delete_many({"user_id": str(user["_id"])})
     r = await db.users.update_one({"_id": user["_id"], **({"tutorial.guaranteed": {"$ne": True}} if guaranteed else {})}, updates)
@@ -1352,7 +1358,7 @@ async def cast(user=Depends(get_current_user)):
     if not free_cast: user["energy"] -= CAST_COST
     qd = await quest_event(user["_id"], "cast")
     if qd: user = await db.users.find_one({"_id": user["_id"]})
-    ev_win = None if guaranteed else await random_events.on_cast(user, water["key"])
+    ev_win = None if guaranteed or pond else await random_events.on_cast(user, water["key"])
     if ev_win:
         user = await db.users.find_one({"_id": user["_id"]})
         await mark_free(user["_id"], "miss")
@@ -1360,7 +1366,7 @@ async def cast(user=Depends(get_current_user)):
     if not guaranteed and random.randint(1, 100) > 72 + bite:
         await mark_free(user["_id"], "miss")
         if random.random() < enhance.TRASH_CHANCE * (2 if water.get("premium") else 1):
-            t = enhance.roll_trash(water["key"])
+            t = enhance.roll_trash(user["water"])
             await db.users.update_one({"_id": user["_id"]}, {"$inc": {f"salvage.{t['id']}": 1, "stats.trash": 1}})
             user = await db.users.find_one({"_id": user["_id"]})
             return {"result": "nothing", "encounter": None, "trash": {"id": t["id"], "name": t["name"], "scrap": t["scrap"]},
@@ -1368,7 +1374,9 @@ async def cast(user=Depends(get_current_user)):
         return {"result": "nothing", "encounter": None, "message": random.choice([
             "The line drifts. Nothing bites.", "A nibble... then nothing.", "Your bait comes back untouched.",
             "Ripples spread and fade. The water keeps its secrets."]), "user": public_user(user), "quests_done": qd}
-    if guaranteed:
+    if pond:
+        f = crew_pond.pick(pond, luck, bait["id"] if bait else None)
+    elif guaranteed:
         plain = [x for x in FISH_BY_WATER[water["key"]] if x["rarity"] == "common" and not x.get("bait_only")]
         f = random.choice(plain) if plain else pick_species(water["key"], 0, cond["period"], None)
     else:
@@ -4129,6 +4137,7 @@ import wiki  # noqa: E402,F401
 import admin_tools  # noqa: E402,F401
 from boosters import xp_multiplier, sell_multiplier, luck_bonus  # noqa: E402
 import tutorial  # noqa: E402,F401
+import crew_pond  # noqa: E402
 import crew_extras  # noqa: E402,F401
 import paypal_ipn  # noqa: E402,F401  (registers /api/paypal/ipn)
 import cosmetics  # noqa: E402,F401

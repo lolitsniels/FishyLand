@@ -16,7 +16,7 @@ const STEPS = [
   { title: "Better gear, bigger fish", text: "Gold buys better rods, reels and bait in the Tackle Shop at the harbour. Better gear means bigger and rarer fish!", target: "menu-inventory", next: "Next" },
   { title: "Secret fish", text: "Some fish are secret! My friends at the harbour tell riddles about where and when to find them. Walk up to them and listen closely.", next: "Ooh, secrets!" },
   { title: "Fish with friends", text: "Chat with other anglers here, join a Crew and get your own island, or race a friend at the Duel Pier. The world is full of real players!", target: "chat-box", next: "Awesome" },
-  { title: "You're ready!", text: "That's everything, angler! Here's a starter gift to get you going: 10 worms and 10 bread crusts. Tight lines, and have fun!", finish: true },
+  { title: "You're ready!", text: "That's everything, angler! Here's a starter gift to get you going: 10 Pearls, 10 worms and 10 bread crusts. Tight lines, and have fun!", finish: true },
 ];
 
 export function WorldTutorial({ mode }) {
@@ -49,29 +49,29 @@ export function WorldTutorial({ mode }) {
   useEffect(() => {
     if (!s.target) return undefined;
     const el = document.querySelector(`[data-testid="${s.target}"]`);
-    el?.classList.add("tut-glow");
-    return () => el?.classList.remove("tut-glow");
+    el?.classList.add("wtut-glow");
+    return () => el?.classList.remove("wtut-glow");
   }, [step]); // eslint-disable-line
 
   if (!t || t.done) return null;
   const finish = async () => {
-    try { const r = await api.post("/tutorial/complete"); if (r.data.user) setUser(r.data.user); toast.success(r.data.reward ? "Starter gift added: 10 worms and 10 bread crusts!" : "Tutorial complete. Tight lines!"); }
+    try { const r = await api.post("/tutorial/complete"); if (r.data.user) setUser(r.data.user); toast.success(r.data.reward ? "Starter gift added: 10 Pearls, 10 worms and 10 bread crusts!" : "Tutorial complete. Tight lines!"); }
     catch (e) { toast.error(errMsg(e)); }
   };
   const skip = async () => { try { const r = await api.post("/tutorial/skip"); if (r.data.user) setUser(r.data.user); } catch (e) { toast.error(errMsg(e)); } };
   const text = s.harbour ? (mode === "harbour" ? s.harbour : s.water) : s.text;
   return (
-    <div className={`tut-card pointer-events-auto ${s.wait === "close" ? "tut-low" : ""}`} data-testid="tutorial-card" data-step={step}>
-      <img src="/art/hud/mascot.webp" alt="Harbourmaster" className="tut-mascot" />
-      <div className="tut-body">
-        <div className="tut-step" data-testid="tutorial-progress">Step {step + 1} of {STEPS.length}</div>
-        <div className="tut-title" data-testid="tutorial-title">{s.title}</div>
-        <p className="tut-text" data-testid="tutorial-text">{text}</p>
+    <div className={`wtut-card pointer-events-auto ${s.wait === "close" ? "wtut-low" : ""}`} data-testid="tutorial-card" data-step={step}>
+      <img src="/art/hud/mascot.webp" alt="Harbourmaster" className="wtut-mascot" />
+      <div className="wtut-body">
+        <div className="wtut-step" data-testid="tutorial-progress">Step {step + 1} of {STEPS.length}</div>
+        <div className="wtut-title" data-testid="tutorial-title">{s.title}</div>
+        <p className="wtut-text" data-testid="tutorial-text">{text}</p>
         <div className="flex gap-2 justify-end items-center mt-2">
-          {!s.finish && <button type="button" className="tut-skip" onClick={skip} data-testid="tutorial-skip">Skip tutorial</button>}
+          {!s.finish && <button type="button" className="wtut-skip" onClick={skip} data-testid="tutorial-skip">Skip tutorial</button>}
           {s.next && <button type="button" className="img-pill-dark !min-w-[120px] !min-h-[40px] px-5" onClick={() => go(step + 1)} data-testid="tutorial-next">{s.next}</button>}
           {s.finish && <button type="button" className="img-pill-dark !min-w-[150px] !min-h-[40px] px-5" onClick={finish} data-testid="tutorial-finish">Collect my gift!</button>}
-          {s.wait && <span className="tut-wait" data-testid="tutorial-waiting">{s.wait === "walk" ? "Walk around..." : s.wait === "catch" ? "Catch a fish..." : "Close the card..."}</span>}
+          {s.wait && <span className="wtut-wait" data-testid="tutorial-waiting">{s.wait === "walk" ? "Walk around..." : s.wait === "catch" ? "Catch a fish..." : "Close the card..."}</span>}
         </div>
       </div>
     </div>

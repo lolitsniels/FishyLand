@@ -588,3 +588,23 @@ for _g in RODS + REELS + LINES + BAITS:
     _g.pop("pearls", None)
 GEAR_BY_ID = {g["id"]: g for g in RODS + REELS + LINES}
 BAIT_BY_ID = {b["id"]: b for b in BAITS}
+
+# Crew Pond species: only live in a crew island's pond, stocked one by one with crew bank gold at the Pond Keeper.
+POND_WATER = "crew_pond"
+_POND = [
+    # (id, name, rarity, min_kg, max_kg, behaviour, value_mod, stock cost, blurb)
+    (950, "Islet Rudd", "C", 0.1, 1.5, "runner", 1.4, 2500, "A bright little rudd with blood-red fins. The first fish every crew tips into its pond."),
+    (951, "Rope-Striped Bream", "C", 0.3, 3.0, "steady", 1.4, 5000, "A bronze bream with a navy stripe down its side, like a mooring line."),
+    (952, "Lantern Goldfish", "U", 0.2, 2.5, "jumper", 1.7, 9000, "Its veil tail glows warm orange at dusk, like a paper lantern on the clubhouse porch."),
+    (953, "Captain's Koi", "U", 1.0, 12.0, "sluggish", 1.8, 15000, "A white and red koi with a black patch shaped exactly like a captain's cap."),
+    (954, "Deckhand Tench", "R", 1.0, 8.0, "steady", 2.0, 25000, "An olive tench that works the pond floor all day without a single complaint."),
+    (955, "Pennant Trout", "R", 1.0, 9.0, "runner", 2.2, 40000, "A rainbow trout whose dorsal fin flies like a crew's red and white pennant."),
+    (956, "Brass-Scaled Carp", "E", 5.0, 30.0, "diver", 2.6, 65000, "A mirror carp with scales like polished ship's brass. The crew polishes the pond rails to match."),
+    (957, "Moonpool Sturgeon", "E", 10.0, 60.0, "diver", 2.8, 90000, "A pale sturgeon marked with crescent moons. It only rises when the island is quiet."),
+    (958, "The Commodore", "L", 40.0, 120.0, "sluggish", 2.8, 140000, "A vast old catfish with a moustache of white whiskers. It has outranked every captain the crew ever had."),
+    (959, "Crown Koi of the Crew", "M", 30.0, 90.0, "jumper", 3.1, 220000, "A pearl and gold koi with a glowing crown crest. Only the proudest crews ever see it leap."),
+]
+POND_FISH = [{"id": i, "name": n, "water": POND_WATER, "rarity": RARITY[r], "min_kg": mn, "max_kg": mx, "behavior": b, "value_mod": vm,
+              "blurb": bl, "baitable": False, "pond": True, "stock_cost": cost} for (i, n, r, mn, mx, b, vm, cost, bl) in _POND]
+FISH_BY_ID.update({f["id"]: f for f in POND_FISH})
+SAME_SPECIES.update({f["id"]: {f["id"]} for f in POND_FISH})

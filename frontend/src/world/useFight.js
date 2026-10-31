@@ -24,13 +24,13 @@ export function useFight() {
 
   const cast = useCallback(async () => {
     const st = useGame.getState();
-    if (fx.phase !== "idle" || (fx.mode !== "water" && fx.mode !== "duel") || !fx.atSpot || st.result) return;
+    if (fx.phase !== "idle" || !["water", "duel", "crew"].includes(fx.mode) || !fx.atSpot || st.result) return;
     if (fx.mode === "duel" && fx.duelPhase === "countdown") { toast("Wait for the duel to start!"); return; }
     phase("cast"); sfx("cast");
     const sp = fx.fishSpot || { x: 560, y: 560 };
     fx.target = sp.cast ? { x: sp.cast[0] + (Math.random() - 0.5) * 60, y: sp.cast[1] + (Math.random() - 0.5) * 30 } : { x: Math.max(690, sp.x + 170 + Math.random() * 220), y: Math.min(760, Math.max(420, sp.y - 50 + Math.random() * 130)) };
     try {
-      const { data: r } = await api.post("/fish/cast");
+      const { data: r } = await api.post("/fish/cast", fx.mode === "crew" ? { spot: "crew_pond" } : {});
       if (r.user) setUser(r.user);
       later(() => phase("wait"), 650);
       if (r.result !== "hooked") {

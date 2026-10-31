@@ -5,6 +5,7 @@ from fastapi import Depends
 from server import api, db, get_current_user, public_user, apply_energy_live
 
 REWARD_BAIT = {"bait_worm": 10, "bait_bread": 10}
+REWARD_PEARLS = 10
 LAST_STEP = 10
 
 
@@ -36,8 +37,8 @@ async def tutorial_complete(user=Depends(get_current_user)):
     reward = None
     if not t.get("rewarded"):
         r = await db.users.update_one({"_id": user["_id"], "tutorial.rewarded": {"$ne": True}},
-                                      {"$set": {"tutorial.done": True, "tutorial.rewarded": True, "tutorial.step": LAST_STEP}, "$inc": {f"bait.{k}": v for k, v in REWARD_BAIT.items()}})
-        if r.modified_count: reward = REWARD_BAIT
+                                      {"$set": {"tutorial.done": True, "tutorial.rewarded": True, "tutorial.step": LAST_STEP}, "$inc": {"pearls": REWARD_PEARLS, **{f"bait.{k}": v for k, v in REWARD_BAIT.items()}}})
+        if r.modified_count: reward = {**REWARD_BAIT, "pearls": REWARD_PEARLS}
     else:
         await db.users.update_one({"_id": user["_id"]}, {"$set": {"tutorial.done": True, "tutorial.step": LAST_STEP}})
     return {"user": await _fresh(user), "reward": reward}

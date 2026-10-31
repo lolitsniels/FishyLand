@@ -116,8 +116,16 @@ export const MILLBROOK_MAP = {
   life: {},
 };
 
-// Every crew gets its own island: clubhouse, round pond (not stocked yet), dock with the boat back to the harbour.
+// Every crew gets its own island: clubhouse, round pond (stocked at the Pond Keeper), dock with the boat back to the harbour.
+const POND_NPCS = [
+  { id: "pondkeeper", name: "Pond Keeper Maud", x: 1640, y: 1150, lines: [
+    "Ahoy! I look after your crew's pond. Your captain or officers can buy new fish from me with crew bank gold.",
+    "Pond fish live nowhere else in FishyLand. Not in the rivers, not in the sea. Only right here!",
+    "Fill the whole pond and they say the Crown Koi of the Crew comes up to say hello.",
+  ] },
+];
 export const CREW_ISLAND_MAP = {
+  npcs: POND_NPCS, blocks: npcBlocks(POND_NPCS),
   tiled: true, W: 2400, H: 1800, scale: 0.74, spawn: { x: 1200, y: 1450 }, weather: "gulls",
   base: "grass",
   ground: [
@@ -137,7 +145,10 @@ export const CREW_ISLAND_MAP = {
   ],
   spots: [
     { id: "clubhouse", label: "Enter the Crew Clubhouse", img: "crew", x: 1200, y: 705 },
-    { id: "crew-pond", label: "Crew Pond · not stocked", img: "fishdex", x: 1200, y: 1215 },
+    { id: "pond-keeper", label: "Pond Keeper · Stock the pond", img: "fishdex", x: 1545, y: 1190 },
+    { id: "fish-1", fish: true, label: "Pond South", x: 1200, y: 1215, cast: [1200, 1090] },
+    { id: "fish-2", fish: true, label: "Pond West", x: 880, y: 1000, cast: [1010, 1000] },
+    { id: "fish-3", fish: true, label: "Pond East", x: 1520, y: 1000, cast: [1390, 1000] },
     { id: "harbour", label: "Boat to Harbour", img: "map", x: 1200, y: 1740 },
   ],
   sparkle: [0, 0, 2400, 1800], leap: null, life: {},

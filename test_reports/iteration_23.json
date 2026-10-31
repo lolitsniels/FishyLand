@@ -1,0 +1,37 @@
+{
+  "summary": "Tested the Harbourmaster tutorial, the harbour NPC patrons, patron portraits, fish_v2 art, the Back to Harbour pill, and a map-audit regression. Backend: 4/4 new pytest pass. Tutorial restart, step and skip work, and step 99 returns 422. /api/contracts gives portraits /art/npc/<id>.webp for all 4 patrons and every one returns 200. All 356 species in /api/game/data have /art/fish_v2/<id>.webp (HEAD 200, image/webp). UI at 1920x800: step 0 shows 'Welcome to FishyLand!' with the mascot, and Next goes to step 1. Walking more than 140px goes to step 2. In the harbour the text mentions SAIL and cast-fish-button gets tut-glow. In a water (Millbrook) the text changes to the fishing instructions. A real cast plus a mocked /api/fish/land success opens the catch popup, and the tutorial moves to step 3 (tut-low card, bottom-left). Closing the card goes to step 4, where energy-bar glows. Next goes through steps 5-8, with glows on menu-journal, menu-inventory and chat-box. tutorial-finish gives the toast 'Starter gift added: 10 worms and 10 bread crusts!', the card disappears, bait rises by 10 worms and 10 bread, and the tutorial ends as {step:10, done:true, rewarded:true}. tutorial-skip removes the card. More > Settings > set-replay-tutorial restarts at step 0. On mobile (390x844) the card does not cover the action bar, and at step 3 the tut-low card does not cover the catch popup buttons. The catch popup shows the species' own art (fish_v2/1.webp for common, fish_v2/331.webp mythic with the bigger w-[19rem] h-48 scale-110 size). NPCs: window.__npcs is ['harbourmaster','baitseller','sailor','cook']. All four stand on grass at the specified coordinates, with name labels, sized like the player. Walking up into each NPC is blocked. Coming within 160px shows a speech bubble with line 1. Tapping an NPC from far away shows the bubble without walking the player. Taping again cycles to the next line: I saw the Millbrook dawn riddle. The riddles match the secrets data: Dawnfire Carp 283 Millbrook, Vesper Eel 284 Blackwater, Starlight Ray 282 Coral. The Fishdex shows 30/30 plates from fish_v2, with no stand-ins and no broken images. Contracts patron cards and board cards show the npc portraits, none broken. The Back to Harbour button uses btn_dark.webp with transparent rounded ends, no box corners and no background colour. Map audit for harbour is clean. There were no page JS errors in any run.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "WorldTutorial card CSS", "issue": "Class name clash: tfl/tfl.css already defines .tut-card (border 1px solid var(--gold-dim), padding 12px 14px, border-radius 2px, and right:20px/width:400px at >=1024px). public/ui.css only overrides background, so a faint gold rectangle is drawn around the whole tutorial, mascot included. This is visible in every screenshot.", "selector": "[data-testid='tutorial-card']", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Replay tutorial from Settings", "issue": "/tutorial/restart keeps rewarded:true, so a replay pays no gift. Step 9 still says 'Here's a starter gift... 10 worms and 10 bread crusts', and the button still says 'Collect my gift!', but the toast says 'Tutorial complete. Tight lines!'. This misleads kids on a replay. Change the text and button when user.tutorial.rewarded is true.", "affected_selectors": ["tutorial-finish", "tutorial-text"]}
+    ],
+    "design_issues": [
+      {"screen": "Mobile 390x844 harbour/water", "issues": ["The tutorial card starts at y=111, which covers the bottom row of the player panel (gold and pearl counters, panel ends at y=134).", "In a water the card sits right under the Back to Harbour button, with the gold border touching it."]},
+      {"screen": "Desktop 1920x800", "issues": ["The card (y 110-400) partly covers the player character's name and head near the centre of the screen. A smaller top offset or a side position would keep the angler visible."]},
+      {"screen": "Tutorial step 3 (tut-low)", "issues": ["The tut-in keyframe starts at translate(-50%,-14px), but .tut-low uses left:12px and transform:none, so the low card jumps sideways when it appears."]},
+      {"screen": "Fishdex", "issues": ["The rarity filter is a native <select> with default browser styling, which does not match the game skin."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter23_tutorial_art.py", "/app/test_reports/pytest/pytest_iter23.xml"],
+  "action_items": [
+    "Rename the world tutorial classes (e.g. .wtut-card) or reset border, padding and border-radius in ui.css to remove the stray gold rectangle around the tutorial.",
+    "On a replay with rewarded:true, change the step 9 copy and button (no gift promise).",
+    "Mobile: move the tutorial card below the player panel (top about 140px at 390px wide) so the gold and pearl counters stay visible.",
+    "Optional: give .tut-low its own entry animation without translateX(-50%)."
+  ],
+  "critical_code_review_comments": [
+    "WorldTutorial: on reload at step 3 with no open catch card, the 'close' wait fires straight away and jumps to step 4. That is fine, but it means step 3 is never seen after a refresh.",
+    "/tutorial/step accepts any step up to 10 from the client (max-merged), so the client can jump straight to the finish. The reward is small and paid once, so the risk is low.",
+    "NPC tap hit area is ±45px times the depth scale. A tap slightly off the body counts as a ground click and walks the player instead of speaking. Consider a slightly bigger hitArea for kids on touch screens.",
+    "The Fishdex header says '/ 353 discovered' while game data has 356 species. This is probably the 3 secrets left out on purpose. Check that this is intended."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter23_tutorial_art.py"],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "seed_data_creation": "No seed data. Completing the tutorial gave TestAngler +10 bait_worm and +10 bait_bread (rewarded:true). The tutorial was restarted at the end and is now {step:0, done:false, rewarded:true}.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Login: set localStorage owo_token, and sessionStorage fr_mode='harbour' or 'water' (TestAngler water=millbrook), then reload /game. Teleport with window.__fx.me={x,y}, walk with window.__fx.keys.add('left'). A fishing spot at Millbrook is fish-1 (1520,1065). Dispatch pointerdown on cast-fish-button. With no input the fight ends after about 14s, and /api/fish/land can be mocked with page.route to force a success (catch popup). NPC positions: harbourmaster (1400,1560), baitseller (450,1240), sailor (2560,1470), cook (760,1225). At 1920x1080 with the player at (1000,1640), the Harbourmaster body is at about screen (1375,500). The camera moves with the player, so recompute positions after any walking. Run pytest with -n 0."
+}

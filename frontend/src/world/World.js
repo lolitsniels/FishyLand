@@ -20,6 +20,7 @@ import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
 import { GameSettings } from "./GameSettings";
 import { ClubhousePanel } from "./Clubhouse";
+import { PondKeeper } from "./PondKeeper";
 import { WorldTutorial } from "./WorldTutorial";
 import { lookFace } from "../game/look";
 
@@ -97,6 +98,7 @@ export default function World() {
   const [more, setMore] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [club, setClub] = useState(null);
+  const [pondOpen, setPondOpen] = useState(false);
   const prevWater = useRef(null);
   const page = loc.pathname.replace(/^\/game\/?/, "").split("/")[0];
   const water = data?.waters?.find((x) => x.key === user?.water);
@@ -136,7 +138,7 @@ export default function World() {
       else if (id === "clubhouse") goTo("clubhouse");
       else if (id === "crew-island") goTo("crew", { x: 1200, y: 790 });
       else if (id.startsWith("club-")) setClub(id);
-      else if (id === "crew-pond") toast("The crew pond has no fish yet. Your crew can stock it soon.", { id: "crew-pond" });
+      else if (id === "pond-keeper") setPondOpen(true);
       else nav(`/game/${id}`);
     };
     const iv = setInterval(() => { setNear(fx.near); setAtSpot(fx.atSpot); }, 150);
@@ -167,7 +169,7 @@ export default function World() {
   }, [w, s, user, data]);
   if (!user || !data) return <div className="fixed inset-0 grid place-items-center bg-[#04121c] gold-text font-deco text-2xl" data-testid="game-loading">Loading the harbour…</div>;
   const nearSpot = sceneFor(placeOf(mode, user)).spots.find((x) => x.id === near && !x.fish);
-  const wet = mode === "water" || mode === "duel";
+  const wet = mode === "water" || mode === "duel" || (mode === "crew" && !!atSpot);
   const canFish = wet && !!atSpot;
   const title = mode === "crew" && page === "crews" ? "Crew Clubhouse" : PAGES[page]?.[0] || page;
   const idle = ph === "idle" && !result && !fightEnc;
@@ -191,6 +193,7 @@ export default function World() {
         )}
         {mode === "harbour" && !nearSpot && idle && !page && <Hint>Tap to walk or use WASD · visit a signpost · board the Sea Serpent to travel</Hint>}
         {mode === "clubhouse" && !nearSpot && !club && <Hint testid="club-hint">Walk up to the notice board, portraits, trophy shelf, captain's desk or mailbox</Hint>}
+        {mode === "crew" && !wet && !nearSpot && idle && !page && <Hint testid="crew-hint">Fish from the glowing rings round the pond · the Pond Keeper stocks new fish</Hint>}
         {wet && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
@@ -222,6 +225,7 @@ export default function World() {
         </Modal>
       )}
       {settingsOpen && <GameSettings onClose={() => setSettingsOpen(false)} />}
+      {pondOpen && mode === "crew" && <PondKeeper onClose={() => setPondOpen(false)} />}
       {club && mode === "clubhouse" && <ClubhousePanel spot={club} onClose={() => setClub(null)} />}
       {page && page !== "fish" && (
         <Modal title={title} testid="page-modal" width={980} onClose={() => nav("/game")}>
