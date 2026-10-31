@@ -99,7 +99,11 @@ function baseProfile(tex, N = 48) {
   const H = Math.max(8, Math.round((N * tex.height) / tex.width)), c = document.createElement("canvas"); c.width = N; c.height = H;
   const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(tex.source.resource, 0, 0, N, H);
   const a = g.getImageData(0, 0, N, H).data, out = [];
-  for (let x = 0; x < N; x++) { let y = H - 1; while (y >= 0 && a[(y * N + x) * 4 + 3] < 140) y--; out.push(y < 0 ? -1 : (H - 1 - y) / H); }
+  for (let x = 0; x < N; x++) {
+    let y = H - 1; while (y >= 0 && a[(y * N + x) * 4 + 3] < 140) y--;
+    let t = 0; while (t < H && a[(t * N + x) * 4 + 3] < 140) t++;
+    out.push(y < 0 ? [-1, 0] : [(H - 1 - y) / H, (H - t) / H]);
+  }
   PROFILE.set(tex.uid, out);
   return out;
 }
@@ -107,7 +111,7 @@ function baseProfile(tex, N = 48) {
 function footColumns(o, def, tex) {
   const w = o.w || def.w, prof = baseProfile(tex); if (!prof) return null;
   const h = (tex.height * w) / tex.width, N = prof.length, cols = [];
-  prof.forEach((up, i) => { if (up < 0 || up * h > w * 0.22) return; const fx = (i + 0.5) / N - 0.5; cols.push({ x: o.x + (o.flip ? -fx : fx) * w, y: o.y - up * h, cw: w / N }); });
+  prof.forEach(([up, top], i) => { if (up < 0 || up * h > w * 0.22) return; const fx = (i + 0.5) / N - 0.5; cols.push({ x: o.x + (o.flip ? -fx : fx) * w, y: o.y - up * h, tall: (top - up) * h, cw: w / N }); });
   return cols.length ? cols : null;
 }
 
@@ -212,7 +216,8 @@ export function buildMap(map, img, objTex = {}) {
     if (!fw) continue;
     const rx = Math.max(16, (w * fw) / 2), ry = Math.max(14, (w * fh) / 2);
     const cols = def.rect && footColumns(o, def, objTex[o.k]);
-    if (cols) for (const c of cols) g.fillRect(c.x - c.cw / 2 - 3, c.y - 2 * ry, c.cw + 6, 2 * ry + 8);
+    // block the building's whole standing area: from its base up to most of its height, so nobody can stand "inside" the walls
+    if (cols) for (const c of cols) { const d = Math.max(2 * ry, c.tall * 0.78); g.fillRect(c.x - c.cw / 2 - 4, c.y - d, c.cw + 8, d + 10); }
     else if (def.rect) g.fillRect(o.x - rx, o.y - 2 * ry, 2 * rx, 2 * ry + 6);
     else { g.beginPath(); g.ellipse(o.x, o.y - ry, rx, ry, 0, 0, 7); g.fill(); }
   }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite, Text, DisplacementFilter, ColorMatrixFilter, Rectangle } from "pixi.js";
+import { Application, Assets, Sprite, Container, Graphics, Texture, TilingSprite, Text, NineSliceSprite, DisplacementFilter, ColorMatrixFilter, Rectangle } from "pixi.js";
 import { AdvancedBloomFilter, GodrayFilter, GlowFilter } from "pixi-filters";
 import { fx } from "./fx";
 import { useGame } from "../store";
@@ -385,15 +385,21 @@ function buildScene(app, tex, key, bgTex, mt) {
       c.addChild(glow, beam, base0, ring);
       c._ring = ring; c._beam = beam;
     } else {
+      // painted signboard: icon + building name on a navy and gold plank
       glow = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0xffd35a, alpha: 0.35 });
-      const ring = new Graphics().roundRect(-28, -68, 56, 56, 12).fill({ color: 0x0a1420, alpha: 0.72 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.28 });
-      ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.y = -42;
-      Assets.load(sp.img.includes("/") ? sp.img : `art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(52 / Math.max(t.width, t.height)); } }).catch(() => {});
-      const lb = new Text({ text: sp.label, style: { fontFamily: "Noto Sans", fontWeight: "800", fontSize: 12, fill: 0xffe9a3, stroke: { color: 0x1a0d03, width: 4 } } });
-      lb.anchor.set(0.5, 0); lb.y = -10;
-      c.addChild(glow, ring, ic, lb);
+      const lb = new Text({ text: sp.label, style: { fontFamily: "Lilita One, Noto Sans", fontSize: 17, fill: 0xffe9a3, stroke: { color: 0x0b1a33, width: 4 }, letterSpacing: 0.3 } });
+      const bw = Math.round(lb.width + 72), bh = 44;
+      const plank = new NineSliceSprite({ texture: Texture.EMPTY, leftWidth: 46, rightWidth: 46, topHeight: 20, bottomHeight: 20 });
+      plank.width = bw; plank.height = bh; plank.x = -bw / 2; plank.y = -bh - 14;
+      Assets.load("art/hud/sign_banner.webp").then((t) => { if (!plank.destroyed) { plank.texture = t; plank.width = bw; plank.height = bh; } }).catch(() => {});
+      const post = new Graphics().rect(-3, -16, 6, 16).fill({ color: 0x5a3a1a });
+      ic = new Sprite(Texture.EMPTY); ic.anchor.set(0.5); ic.x = -bw / 2 + 30; ic.y = -14 - bh / 2;
+      Assets.load(sp.img.includes("/") ? sp.img : `art/ui/${sp.img}.png`).then((t) => { if (!ic.destroyed) { ic.texture = t; ic.scale.set(30 / Math.max(t.width, t.height)); } }).catch(() => {});
+      lb.anchor.set(0, 0.5); lb.x = -bw / 2 + 50; lb.y = -14 - bh / 2;
+      c.addChild(glow, post, plank, ic, lb);
+      c._bw = bw;
     }
-    c.hitArea = sp.fish ? new Rectangle(-40, -16, 80, 32) : new Rectangle(-34, -70, 68, 80);
+    c.hitArea = sp.fish ? new Rectangle(-40, -16, 80, 32) : new Rectangle(-c._bw / 2, -64, c._bw, 74);
     c.on("pointertap", (e) => { e.stopPropagation(); walkTo(sp.x, sp.y + (sp.fish ? 0 : 12), sp.fish ? null : sp.id); });
     if (cfg.tiled) { c.zIndex = sp.fish ? sp.y - 60 : sp.y + 4; actors.addChild(c); } else spotLayer.addChild(c);
     return { sp, c, glow, ic };
@@ -605,7 +611,7 @@ function buildScene(app, tex, key, bgTex, mt) {
         if (on) { fx.atSpot = sp.id; fx.fishSpot = sp; }
         return;
       }
-      if (ic) ic.y = -42 + Math.sin(time * 2 + sp.x) * 4;
+      if (ic) ic.rotation = Math.sin(time * 2 + sp.x) * 0.06;
       const near = dist < 75;
       glow.alpha = near ? 0.75 : 0.3;
       if (near) fx.near = sp.id;
