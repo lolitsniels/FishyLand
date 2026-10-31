@@ -52,12 +52,12 @@ export function makeHarbour(ctx) {
   }
   function event(ev, e = {}) {
     const done = [], amount = (q) => ((q.measure || q.objective?.measure) === "gold" ? e.gold || 0 : (q.measure || q.objective?.measure) === "kg" ? e.weight || 0 : e.count || 1);
-    for (const kind of ["daily", "weekly"]) for (const q of roll(kind).quests) if (advance(q, ev, e, amount(q))) { q.status = "done"; q.done_at = new Date().toISOString(); grant(q.reward); done.push(q.name); }
+    for (const kind of ["daily", "weekly"]) for (const q of roll(kind).quests) if (advance(q, ev, e, amount(q))) { q.status = "done"; q.done_at = new Date().toISOString(); grant(q.reward); done.push({ name: q.name, kind, reward: q.reward }); }
     H.story.forEach((q) => {
       const s = st().story[q.id];
       if (!s || s.status !== "active") return;
       const tmp = { status: "active", objective: q.objective, target: q.target, progress: s.progress || 0 };
-      if (advance(tmp, ev, e, amount(tmp))) { s.status = "done"; s.done_at = new Date().toISOString(); grant(q.reward); done.push(q.name); }
+      if (advance(tmp, ev, e, amount(tmp))) { s.status = "done"; s.done_at = new Date().toISOString(); grant(q.reward); done.push({ name: q.name, kind: "story", reward: q.reward }); }
       s.progress = tmp.progress;
     });
     st().done += done.length;
@@ -108,9 +108,9 @@ export function makeHarbour(ctx) {
     const mult = { common: 1, uncommon: 2.2, rare: 6 }[f.rarity], L = lvl();
     return { id: `k${Math.floor(r() * 1e9)}`, patron: p.id, patron_name: p.name, patron_short: p.short, portrait: p.portrait, kind: "count", species_id: f.id, species_name: f.name, rarity: f.rarity,
       water: w.key, water_name: w.name, qty, target: qty, target_kg: null, min_kg: null, min_rarity: null, tier: 1, special: false, gold: Math.round((20 + L * 4) * qty * mult), xp: Math.round((6 + L) * qty * mult),
-      pearls: f.rarity === "rare" ? 1 : 0, favour: 4 * qty, status: "offered", progress: 0, text: `Deliver ${qty}× ${f.name}`, flavour: `${p.short} wants ${p.wants}.`, expires_at: endOf(1), deadline: null, accepted_at: null, done_at: null, delivered: [], paid_gold: null };
+      pearls: f.rarity === "rare" ? 1 : 0, favour: 4 * qty, status: "offered", progress: 0, text: `Deliver ${qty}× ${f.name}`, flavour: `${p.short} wants ${p.wants}.`, expires_at: endOf(1), deadline: endOf(1), accepted_at: null, done_at: null, delivered: [], paid_gold: null };
   }
-  const have = (k) => { const n = S().catches.filter((x) => x.species_id === k.species_id).length; return { count: n, kg: 0, ready: n >= k.qty }; };
+  const have = (k) => { const n = S().catches.filter((x) => x.species_id === k.species_id).length; return { count: n, kg: 0, ready: n >= k.qty - (k.progress || 0) }; };
   function contractsOut() {
     const c = offers(), favour = (id) => c.favour[id] || 0;
     const rankOf = (f) => [0, 100, 300, 700, 1500].filter((x) => f >= x).length;
@@ -128,15 +128,17 @@ export function makeHarbour(ctx) {
     if (act === "abandon") { c.accepted = c.accepted.filter((k) => k !== a); save(); return { state: contractsOut(), favour_lost: 0 }; }
     if (!a) fail("No such contract");
     if (c.done_today >= DAILY_CAP) fail("The patrons have enough for today. Come back tomorrow");
-    const fish = S().catches.filter((x) => x.species_id === a.species_id).slice(0, a.qty);
-    if (fish.length < a.qty) fail(`You need ${a.qty - fish.length} more ${a.species_name} in your keepnet`);
+    const left = a.qty - (a.progress || 0), fish = S().catches.filter((x) => x.species_id === a.species_id).slice(0, left);
+    if (!fish.length) fail(`You need ${left} more ${a.species_name} in your keepnet`);
     const ids = new Set(fish.map((x) => x.id)), old = lvl();
     S().catches = S().catches.filter((x) => !ids.has(x.id));
+    a.progress = (a.progress || 0) + fish.length;
+    if (a.progress < a.qty) { save(); return { done: false, state: contractsOut(), user: pub() }; }
     c.accepted = c.accepted.filter((k) => k !== a); c.done_today += 1; c.total = (c.total || 0) + 1; c.favour[a.patron] = (c.favour[a.patron] || 0) + a.favour;
     grant({ gold: a.gold, xp: a.xp, pearls: a.pearls });
     const ev = event("contract", {});
     save();
-    return { done: true, state: contractsOut(), user: pub(), patron: a.patron_short, gold: a.gold, xp: a.xp, pearls: a.pearls, favour: a.favour, rank_ups: [], level_up: lvl() > old ? lvl() : null, new_achievements: ev.new_achievements };
+    return { done: true, state: contractsOut(), user: pub(), patron: a.patron_short, gold: a.gold, xp: a.xp, pearls: a.pearls, favour: a.favour, rank_ups: [], level_up: lvl() > old ? lvl() : null, new_achievements: ev.new_achievements, quests_done: ev.quests_done };
   }
 
   // ---- Almanac (your own log; market prices need the online version)

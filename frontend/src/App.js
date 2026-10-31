@@ -18,7 +18,8 @@ import Waters from "./tfl/pages/game/Waters";
 import Journal from "./tfl/pages/game/Journal";
 import Inventory from "./tfl/pages/game/Inventory";
 import Shop from "./tfl/pages/game/Shop";
-import PearlShop from "./world/PearlShopSoon";
+import PearlShopSoon from "./world/PearlShopSoon";
+import PearlShopFull from "./tfl/pages/game/PearlShop";
 import Profile from "./tfl/pages/game/Profile";
 import Quests from "./tfl/pages/game/Quests";
 import Contracts from "./tfl/pages/game/Contracts";
@@ -41,7 +42,7 @@ function Protected({ children }) {
 }
 
 const GAME_PAGES = [
-  ["waters", Waters], ["journal", Journal], ["inventory", Inventory], ["shop", Shop], ["pearl-shop", PearlShop], ["profile/:username?", Profile],
+  ["waters", Waters], ["journal", Journal], ["inventory", Inventory], ["shop", Shop], ["pearl-shop", OFFLINE ? PearlShopFull : PearlShopSoon], ["profile/:username?", Profile],
   ["quests", Quests], ["contracts", Contracts], ["market", Market], ["crews/:id?", Crews], ["tournaments", Tournaments], ["duel", DuelLive],
   ["leaderboards", Leaderboards], ["achievements", Achievements], ["crafting", Crafting], ["messages/:username?", Messages], ["almanac", Almanac], ["wiki", Wiki], ["admin", Admin],
 ];

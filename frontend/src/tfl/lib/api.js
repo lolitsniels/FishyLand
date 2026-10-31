@@ -29,6 +29,7 @@ api.interceptors.response.use((r) => {
     toast.success(`${q.kind === "streak" ? "Streak bonus" : "Quest complete"}: ${q.name}`, { description: bits.join(" · "), duration: 6000 });
     window.dispatchEvent(new CustomEvent("quests-changed"));
   });
+  if (process.env.REACT_APP_OFFLINE === "1") (r.data?.new_achievements || []).forEach((a) => toast.success(`Achievement unlocked: ${a.name}`, { description: `+${fmt(a.reward)} gold${a.pearls ? ` · +${a.pearls} Pearls` : ""}`, duration: 6000 }));
   return r;
 }, (e) => {
   if (isOutage(e) && !window.__leaving) window.dispatchEvent(new CustomEvent("server-down"));

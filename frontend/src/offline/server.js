@@ -196,9 +196,9 @@ function land(body) {
   if (first) u.stats.species += 1;
   if (f.rarity === "legendary" || f.rarity === "mythic") u.stats.legendary += 1;
   u.stats.by_rarity = { ...(u.stats.by_rarity || {}), [f.rarity]: ((u.stats.by_rarity || {})[f.rarity] || 0) + 1 };
+  if (enc.weight > (u.stats.heaviest_kg || 0)) { u.stats.heaviest_kg = enc.weight; u.stats.heaviest_name = f.name; }
   HB.logCatch(c, enc.period, enc.weather);
   const ev = HB.event("catch", { water: enc.water, rarity: f.rarity, weight: enc.weight, first, variant: enc.variant, period: enc.period });
-  if (enc.weight > (u.stats.heaviest_kg || 0)) { u.stats.heaviest_kg = enc.weight; u.stats.heaviest_name = f.name; }
   const lvl = levelOf(u.xp)[0];
   if (lvl > old) { energyTick(u); u.energy = Math.min(MAX_ENERGY * 2, u.energy + MAX_ENERGY); u.energy_at = nowIso(); }
   save();
