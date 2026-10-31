@@ -19,7 +19,7 @@ html body .panel-head, .sf-side-h { letter-spacing: .06em !important; font-weigh
 html body .btn, .fr-btn, .sf-tab, .g-tab { border: 12px solid transparent !important; border-image: url(/art/hud/btn_dark.webp) 162 140 fill / 50% 18px / 0 stretch !important; background: none !important; border-radius: 0 !important;
   color: #f4e6c4 !important; font-weight: 700 !important; text-shadow: 0 1px 2px #000 !important; padding: 0 8px !important; min-height: 34px; box-shadow: none !important; transition: filter .15s, transform .12s !important; }
 html body .btn { min-width: 76px; }
-html body .btn-sm { min-height: 30px; min-width: 64px; font-size: 12px !important; padding: 0 2px !important; border-width: 8px 13px !important; border-image-width: 8px 13px !important; }
+html body .btn-sm { min-height: 30px; min-width: 64px; font-size: 12px !important; padding: 0 2px !important; border-width: 8px 13px !important; border-image-width: 50% 13px !important; }
 html body .btn:hover:not(:disabled), .fr-btn:hover, .sf-tab:hover, .g-tab:hover { filter: brightness(1.18) drop-shadow(0 0 6px rgba(255, 200, 90, .45)); background: none !important; }
 html body .btn:active:not(:disabled), .fr-btn:active { transform: translateY(1px) scale(.97) !important; }
 html body .btn-gold, .sf-tab.on, .g-tab.on, .fr-btn:not(.fr-btn-dark) { border-image: url(/art/hud/btn_gold.webp) 191 140 fill / 50% 18px / 0 stretch !important; color: #2a1503 !important; text-shadow: 0 1px 0 rgba(255, 240, 200, .6) !important; }

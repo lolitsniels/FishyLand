@@ -808,7 +808,7 @@ const MAP_CACHE = new Map();
 const KEEP = 4;
 function cachedMap(key, cfg, mt) {
   let tm = MAP_CACHE.get(key);
-  if (!tm) tm = buildMap(cfg, mt.img);
+  if (!tm) tm = buildMap(cfg, mt.img, mt.obj);
   MAP_CACHE.delete(key); MAP_CACHE.set(key, tm);
   while (MAP_CACHE.size > KEEP) {
     const [old, otm] = MAP_CACHE.entries().next().value;

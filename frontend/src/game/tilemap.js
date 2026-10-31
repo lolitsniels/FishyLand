@@ -91,7 +91,27 @@ const shape = (ctx, s) => (s.invert ? (smoothPoly(ctx, s.invert), ctx.rect(-5000
 const paint = (ctx, s) => { shape(ctx, s); if (s.line) { ctx.lineWidth = s.width; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke(); } else ctx.fill("evenodd"); };
 
 // Paint the ground (land textures, sea/river cut-outs, docks) and build the walk grid.
-export function buildMap(map, img) {
+// Base contour of a sprite: for each of N columns, how far up from the bottom the lowest solid pixel sits (0..1), or -1 if empty.
+const PROFILE = new Map();
+function baseProfile(tex, N = 48) {
+  if (!tex?.source?.resource) return null;
+  if (PROFILE.has(tex.uid)) return PROFILE.get(tex.uid);
+  const H = Math.max(8, Math.round((N * tex.height) / tex.width)), c = document.createElement("canvas"); c.width = N; c.height = H;
+  const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(tex.source.resource, 0, 0, N, H);
+  const a = g.getImageData(0, 0, N, H).data, out = [];
+  for (let x = 0; x < N; x++) { let y = H - 1; while (y >= 0 && a[(y * N + x) * 4 + 3] < 140) y--; out.push(y < 0 ? -1 : (H - 1 - y) / H); }
+  PROFILE.set(tex.uid, out);
+  return out;
+}
+// columns of the sprite that touch the ground near its base (drops overhanging roofs and empty margins)
+function footColumns(o, def, tex) {
+  const w = o.w || def.w, prof = baseProfile(tex); if (!prof) return null;
+  const h = (tex.height * w) / tex.width, N = prof.length, cols = [];
+  prof.forEach((up, i) => { if (up < 0 || up * h > w * 0.22) return; const fx = (i + 0.5) / N - 0.5; cols.push({ x: o.x + (o.flip ? -fx : fx) * w, y: o.y - up * h, cw: w / N }); });
+  return cols.length ? cols : null;
+}
+
+export function buildMap(map, img, objTex = {}) {
   const { W, H } = map;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const ctx = cv.getContext("2d");
@@ -191,7 +211,9 @@ export function buildMap(map, img) {
     const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
     if (!fw) continue;
     const rx = Math.max(16, (w * fw) / 2), ry = Math.max(14, (w * fh) / 2);
-    if (def.rect) g.fillRect(o.x - rx, o.y - 2 * ry, 2 * rx, 2 * ry + 6);
+    const cols = def.rect && footColumns(o, def, objTex[o.k]);
+    if (cols) for (const c of cols) g.fillRect(c.x - c.cw / 2 - 3, c.y - 2 * ry, c.cw + 6, 2 * ry + 8);
+    else if (def.rect) g.fillRect(o.x - rx, o.y - 2 * ry, 2 * rx, 2 * ry + 6);
     else { g.beginPath(); g.ellipse(o.x, o.y - ry, rx, ry, 0, 0, 7); g.fill(); }
   }
   for (const b of map.blocks || []) { pathPoly(g, b); g.fill(); }
@@ -199,6 +221,22 @@ export function buildMap(map, img) {
   const px = g.getImageData(0, 0, gw, gh).data;
   const grid = new Uint8Array(gw * gh);
   for (let i = 0; i < grid.length; i++) grid[i] = px[i * 4] > 127 ? 1 : 0;
+
+  // contact shadows so buildings and props sit on the ground instead of floating on it
+  for (const o of objects) {
+    const def = OBJ[o.k], w = o.w || def.w, [fw, fh] = o.fp || def.fp;
+    if (!fw || def.wet || def.ground) continue;
+    const cols = def.rect ? footColumns(o, def, objTex[o.k]) : null;
+    const x0 = cols ? Math.min(...cols.map((c) => c.x - c.cw / 2)) : o.x - (w * fw) / 2, x1 = cols ? Math.max(...cols.map((c) => c.x + c.cw / 2)) : o.x + (w * fw) / 2;
+    const cx = (x0 + x1) / 2 + w * 0.03, rx = ((x1 - x0) / 2) * (def.rect ? 1.12 : 1.35), base = cols ? Math.max(...cols.map((c) => c.y)) : o.y;
+    const ry = Math.max(10, def.rect ? Math.min(w * fh * 0.55, 70) : w * Math.max(fh, 0.12) * 0.7);
+    for (const [k, a, sy] of [[1, 0.32, 0.45], [0.72, 0.28, 0.2]]) {
+      ctx.save(); ctx.translate(cx, base - ry * sy); ctx.scale(1, (ry * k) / (rx * k));
+      const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * k);
+      gr.addColorStop(0, `rgba(18,14,6,${a})`); gr.addColorStop(0.65, `rgba(18,14,6,${a * 0.55})`); gr.addColorStop(1, "rgba(18,14,6,0)");
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, rx * k, 0, 7); ctx.fill(); ctx.restore();
+    }
+  }
 
   const chunks = [];
   for (let y = 0; y < H; y += CHUNK) for (let x = 0; x < W; x += CHUNK) {
