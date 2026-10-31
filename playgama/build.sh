@@ -3,7 +3,7 @@
 set -euo pipefail
 FE=/app/frontend; PG=/app/playgama; W=/tmp/pg_build
 rm -rf "$W" && mkdir -p "$W"
-rsync -a --exclude node_modules --exclude build --exclude public/pgtest "$FE/" "$W/"
+rsync -a --exclude node_modules --exclude build --exclude public/pgtest --exclude public/downloads "$FE/" "$W/"
 ln -s "$FE/node_modules" "$W/node_modules"
 cp "$PG/index.html" "$W/public/index.html"
 rm -f "$W/public/robots.txt" "$W/public/sitemap.xml" "$W/public/manifest.json" "$W/public/art/og.jpg"

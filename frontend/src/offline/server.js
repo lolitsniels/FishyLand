@@ -285,8 +285,7 @@ function progress() {
 }
 function profile() {
   const u = pub();
-  const best = [...S.catches].sort((a, b) => b.weight - a.weight).slice(0, 6);
-  return { ...u, username: u.username, online: true, friends: [], trophies: best, badges: [], recent: S.catches.slice(0, 10), species_count: u.stats.species, guestbook: [], is_self: true,
+  return { ...u, username: u.username, online: true, friends: [], trophies: [], unlocked_waters: u.unlocked_waters.length, badges: [], recent: S.catches.slice(0, 10), species_count: u.stats.species, guestbook: [], is_self: true,
     contest_wins: [], boss_trophies: [], max_boss_mounts: 0, last_seen: nowIso(), supporter: false, name_colour_hex: null, avatar_name: null };
 }
 

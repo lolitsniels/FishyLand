@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 25: retested the offline Playgama build at /pgtest/index.html (frontend only, served statically). All 7 requested items PASS. (1) My Angler opens without crashing on desktop and at 390x844. It shows level (Lv.1, GREENHORN), the Record stats (fish landed 1 and heaviest are correct after a catch) and Tackle (Cane Pole, Basic Spool, Cotton Line). profile-open-pearl-shop, profile-badges-hint and title-picker-panel are in the DOM but display:none. (2) The tutorial runs end to end offline. Step 9 'Coming soon: friends!' has a 'Can't wait!' button. Step 10 'Collect my gift!' takes HUD pearls from 0 to 10 and bait from 14 to 24, shows the toast 'Starter gift added...' and removes the card. After a reload: pearls 10, gold 120, no card. (3) The Tackle Shop signpost icon renders the green tackle box, and there are 0 requests to art/ui/art. (4) All listed controls are hidden offline: list/mount/link-chat on fish, link-chat on gear and bait, sell-bait, bait-selected-button, inventory-use-filter, Ingredients/Other tabs, keepnet trophy link, shop-to-market, shop-tab-enhance, journal-tab-leviathans and journal-tab-bosses. Visible tabs are only Fish/Bait/Tackle, Rods/Reels/Lines/Bait and Species. (5) 'Let's go!' moved to step 2 on the first real mouse click 1.5 s after the loading overlay cleared, in 3/3 fresh contexts (plus 2 more with a fixed delay after the HUD appeared). (6) At 390x844 the card (x6-334, y141-299) no longer overlaps quick-tackle (x350-384, y263-412) or the player panel. (7) No /api/ requests to the app origin; the only /api/ URL is the Playgama SDK's own api.playgama.com/api/bridge/v1/timestamp/now. A fish was caught at Millbrook in every run (1-2 casts). localStorage fishyland_save keeps progress across reload. I found 2 new minor offline profile bugs, listed below.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "My Angler > Record > Waters unlocked (offline)", "issue": "Shows 'millbrook / 12' instead of '1 / 12'. offline/server.js profile() spreads pub(), whose unlocked_waters is an array. The online /api/players/{u} returns len(unlocked_waters) (server.py:2493). Fix: in profile() return unlocked_waters: u.unlocked_waters.length.", "selector": "[data-testid='profile-page']", "priority": "MEDIUM"},
+      {"component": "My Angler > Trophy wall (offline)", "issue": "profile() sets trophies to the 6 heaviest catches. After one catch the wall shows '1 / 6 mounts' with that fish and a 'Take down' button (data-testid unmount-<id>). The button posts /inventory/unmount, which has no offline route, so it returns 404 'That's part of the online version'. When the wall is empty, its text says 'Use the Mount button in your Inventory', but Mount is hidden offline. Fix: return trophies: [] and hide [data-testid=trophy-wall] and unmount-* buttons offline (or keep the wall read-only and change the copy).", "selector": "[data-testid='trophy-wall'], [data-testid^='unmount-']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "My Angler (offline)", "issues": ["Online-only stats still show: Bosses slain, Mastery, Cheers received. Consider hiding them offline.", "At 390x844 the hero row cuts off the 'joined... last seen' line ('joine...'), and the Pearls figure is not shown in the hero."]},
+      {"screen": "First load", "issues": ["The harbour, the HUD and a clickable tutorial card render for about 0.5-2 s. Then the full-screen map-loading overlay ('Setting sail...', z-5, bg 90% opacity) attaches and captures pointer events on 'Let's go!' for several seconds. Clicks during that window are swallowed. Clicks after the overlay clears work every time. Consider showing the overlay before the HUD and tutorial mount, or adding pointer-events:none to the card until the map is ready."]},
+      {"screen": "Mobile step 4 (catch card)", "issues": ["The low tutorial card (y709-838) covers the action bar while the catch popup is open. This is expected while the modal is up, so minor."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/pg_helpers.py", "/app/tests/pg_bot.js"],
+  "action_items": [
+    "offline/server.js profile(): return unlocked_waters as a count (u.unlocked_waters.length)",
+    "offline/server.js profile(): return trophies: [] (or hide trophy-wall and unmount-* in playgama/index.html CSS); fix the 'Use the Mount button' copy offline",
+    "Optional: hide online-only profile stats offline (Bosses slain, Mastery, Cheers)",
+    "Optional: stop the map-loading overlay from appearing after the tutorial card is already interactive on first load"
+  ],
+  "critical_code_review_comments": [
+    "offline/server.js profile() spreads the raw pub() user, so fields whose online shape differs (unlocked_waters is a count online, an array offline) leak through. Map each field to the online /players response shape.",
+    "Unknown offline routes return 404 'That's part of the online version'. Any UI button that is not CSS-hidden will show this error toast. A dev-time console.warn listing unmatched paths would help catch these."
+  ],
+  "updated_files": ["/app/test_reports/iteration_25.json"],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% of requested retest items; 2 new medium profile bugs"},
+  "seed_data_creation": "None. Each browser context used a fresh localStorage save.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Offline build: {REACT_APP_BACKEND_URL}/pgtest/index.html. Wait for [data-testid=map-loading] to attach and then detach before clicking the tutorial. Use exec(open('/app/tests/pg_helpers.py').read()) for to_millbrook/fish_until_catch (one catch usually takes 1-2 casts). The catch popup uses catch-close-btn / catch-keep-btn. The offline CSS hide list is inline in /pgtest/index.html (built from /app/playgama/index.html). The api.playgama.com bridge timestamp request is expected."
+}

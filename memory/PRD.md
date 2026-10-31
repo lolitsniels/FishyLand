@@ -70,6 +70,14 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   3 fishing rings round the pond; POST /fish/cast {spot:"crew_pond"} rolls only stocked species (water "crew_pond"). Fishdex has a Crew Pond chip.
   Testing iteration_24: backend 12/12, frontend pass (tablet overlap fixed after).
 
+- 2026-06 (iter 25): PLAYGAMA OFFLINE BUILD. REACT_APP_OFFLINE=1 build of the same frontend: src/offline/server.js runs cast/land/sell/shop/travel/
+  tutorial/journal/profile in-browser (axios adapter, static gamedata.json dumped from backend), src/offline/bridge.js = Playgama Bridge 2.4.0 (local file,
+  first <head> script, storage-only saves + prefs, pause/audio, game_ready after first scene, interstitial on travel, rewarded "+30 energy" only on rewarded state).
+  localStorage/sessionStorage replaced app-wide by ls/ss shims. Multiplayer UI hidden offline (harbour signposts, chat, market, crews, duels, bosses...). Esc blocked.
+  Build: /app/playgama/build.sh -> fishyland-playgama.zip (68MB, local fonts, relative paths). Promo: /app/playgama/promo (3 covers + 6 screenshots).
+  Preview copies: /pgtest/index.html and /downloads/*. SFX now real recorded files (public/audio/sfx, ElevenLabs via fal). Art fixes: building white gaps,
+  reeds at water edge, new cook + harbourmaster sprites, tab tiles, button seams. Testing iteration_25 all pass.
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
