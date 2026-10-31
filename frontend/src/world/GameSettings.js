@@ -4,6 +4,8 @@ import { setPref, usePrefs } from "../tfl/lib/prefs";
 import { lengthUnit, api, errMsg } from "../tfl/lib/api";
 import { useGame as useTfl } from "../tfl/context/GameContext";
 import { toast } from "sonner";
+import { ClaimAccount } from "./ClaimAccount";
+import { OFFLINE } from "../offline/bridge";
 
 function Choice({ label, value, options, onPick, testid }) {
   return (
@@ -29,6 +31,7 @@ export function GameSettings({ onClose }) {
   return (
     <Modal title="Settings" testid="settings-modal" width={460} onClose={onClose}>
       <div className="px-2 py-1">
+        {!OFFLINE && <ClaimAccount />}
         <Choice label="Music" value={!!settings.music} options={onOff} onPick={(v) => setSetting("music", v)} testid="set-music" />
         <Choice label="Sound effects" value={!!settings.sound} options={onOff} onPick={(v) => setSetting("sound", v)} testid="set-sound" />
         <Choice label="Weight" value={p.weight_unit} options={[["kg", "kg"], ["lb", "lb"]]} onPick={(v) => setPref("weight_unit", v)} testid="set-weight" />

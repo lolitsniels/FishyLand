@@ -81,6 +81,9 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - 2026-06 (iter 26): Ad rate for Playgama (>=0.30 ad shows/play): interstitials on travel, every 3rd closed catch card and tutorial completion,
   never before tutorial done (offline/bridge.adBreak, 60s min delay in config). New rewarded "double gold" sell on catch card. Zip rebuilt.
 
+- 2026-06 (iter 27): itch.io: /app/itch (index.html iframes https://fishyland.com/?src=itch, store kit). Framed + ?src=itch -> pages/ItchStart.js
+  start screen (Play = guest, Log in). Guests claim account in Settings (world/ClaimAccount.js) -> complete-signup grants CLAIM_REWARD 500 gold + 25 pearls once.
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)

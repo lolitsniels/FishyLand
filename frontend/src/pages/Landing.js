@@ -9,6 +9,7 @@ import { CharacterPicker } from "../world/CharacterPicker";
 import { DEFAULT_LOOK } from "../game/look";
 import Seo from "../tfl/components/Seo";
 import { ls } from "../offline/bridge";
+import ItchStart, { ITCH } from "./ItchStart";
 
 const HOME_LD = { "@context": "https://schema.org", "@type": "VideoGame", name: "FishyLand", url: window.location.origin, image: `${window.location.origin}/art/og.jpg`,
   description: "Free online fishing MMO in your browser: walk the harbour with real players, fish 12 waters, catch hundreds of species and win live fishing duels.",
@@ -111,6 +112,11 @@ const icon = (i) => (i.includes("/") ? `art/${i}` : `art/ui/${i}.png`);
 const HOME_SHOTS = [["harbour", "Walk the harbour with other anglers"], ["river", "Fish rivers, ponds and the open sea"], ["map", "Sail to new waters"], ["shop", "Upgrade your tackle"]];
 
 export default function Landing() {
+  if (ITCH) return <ItchStart />;
+  return <Home />;
+}
+
+function Home() {
   const { user } = useGame();
   const nav = useNavigate();
   const [stats, setStats] = useState(null);

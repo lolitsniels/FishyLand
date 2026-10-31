@@ -279,3 +279,25 @@ html body .panel.fl-card, html body .panel.fl-login { padding: 16px 18px !import
 html body .g-tab { border: 11px solid transparent !important; border-image: url(/art/hud/tile.webp) 150 fill / 11px / 0 stretch !important; background: none !important; box-shadow: none !important; border-radius: 0 !important; color: #f4e6c4 !important; }
 html body .g-tab.on { border-image: url(/art/hud/tile.webp) 150 fill / 11px / 0 stretch !important; color: #ffe9a3 !important; filter: drop-shadow(0 0 8px rgba(255, 205, 80, .75)) brightness(1.12); }
 html body .g-tab.on img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .7)) !important; transform: scale(1.08); }
+
+/* itch.io start screen: fills the embed frame (1280x720 and smaller) */
+.itch-start { position: fixed; inset: 0; background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.5vh; overflow: hidden; }
+.itch-start::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(5, 25, 45, .15), rgba(5, 25, 45, .6)); }
+.itch-start > * { position: relative; }
+.itch-logo { width: min(520px, 62vw, 70vh); filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .5)); animation: itch-bob 4s ease-in-out infinite; }
+.itch-actions { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.itch-play { min-width: 240px; padding: 16px 56px; font: 400 clamp(28px, 4.6vh, 40px)/1 "Lilita One", sans-serif; letter-spacing: .02em; color: #1a2a5a;
+  background: linear-gradient(#ffe680, #ffb81f); border: 4px solid #fff3c2; border-radius: 999px; box-shadow: 0 6px 0 #b56b00, 0 12px 26px rgba(0, 0, 0, .45);
+  cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
+.itch-play:hover { transform: translateY(-2px) scale(1.03); }
+.itch-play:active { transform: translateY(4px); box-shadow: 0 2px 0 #b56b00, 0 6px 14px rgba(0, 0, 0, .45); }
+.itch-play:disabled { opacity: .8; cursor: wait; }
+.itch-note { margin: 0; max-width: 420px; text-align: center; font-size: 13px; font-weight: 700; color: #fdf1cf; text-shadow: 0 2px 4px rgba(0, 0, 0, .8); }
+.itch-login { width: min(340px, 86vw); }
+.itch-mascot { position: absolute !important; left: 2vw; bottom: 0; height: min(46vh, 340px); pointer-events: none; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
+@media (max-width: 700px), (max-height: 480px) { .itch-mascot { display: none; } }
+@keyframes itch-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.fl-input { width: 100%; box-sizing: border-box; padding: 9px 12px; border-radius: 10px; border: 2px solid #7a5a22; background: #0b1c33; color: #fdf1cf; font: 600 14px/1.2 "Noto Sans", sans-serif; outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
+.fl-input::placeholder { color: rgba(253, 241, 207, .45); }
+.fl-input:focus { border-color: #ffd35a; box-shadow: 0 0 0 3px rgba(255, 211, 90, .25); }
+.itch-login { background: rgba(10, 28, 52, .92); border: 3px solid #c99a3a; border-radius: 16px; box-shadow: 0 14px 34px rgba(0, 0, 0, .5); }

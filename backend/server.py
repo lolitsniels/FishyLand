@@ -646,6 +646,9 @@ async def guest_register(request: Request, response: Response, body: Optional[Gu
     return {"token": token, "user": public_user(doc), "resumed": False, "referral": referral}
 
 
+CLAIM_REWARD = {"gold": 500, "pearls": 25}  # one-time thank-you when a guest claims a full account
+
+
 @api.post("/auth/complete-signup")
 async def complete_signup(body: CompleteSignupIn, response: Response, user=Depends(get_current_user)):
     if not user.get("is_guest"):
@@ -684,6 +687,11 @@ async def complete_signup(body: CompleteSignupIn, response: Response, user=Depen
     op = {"$set": upd}
     if unset:
         op["$unset"] = unset
+    reward = None
+    if not user.get("claim_rewarded"):
+        upd["claim_rewarded"] = True
+        op["$inc"] = {"gold": CLAIM_REWARD["gold"], "pearls": CLAIM_REWARD["pearls"]}
+        reward = CLAIM_REWARD
     await db.users.update_one({"_id": user["_id"]}, op)
     # rewrite the display name on catches/chat/feed/listings so history follows the angler
     old_name = user["username"]
@@ -697,7 +705,7 @@ async def complete_signup(body: CompleteSignupIn, response: Response, user=Depen
         asyncio.create_task(emails.send_welcome(fresh, await ensure_referral_code(fresh)))
     token = make_token(str(user["_id"]), new_name)
     set_auth(response, token)
-    return {"token": token, "user": public_user(await apply_energy_live(fresh))}
+    return {"token": token, "user": public_user(await apply_energy_live(fresh)), "reward": reward}
 
 
 async def rename_user(user, new_name):
