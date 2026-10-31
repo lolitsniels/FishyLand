@@ -1,0 +1,28 @@
+{
+  "summary": "Iteration 29: frontend-only retest of the offline Playgama build at /pgtest/index.html. The build is from 14:43:16, after the CatchCard.js edit at 14:42:57, and the bundle contains the new toast in catch-sell-btn and catch-double-gold-btn. Tested at 1920x1080 in fresh contexts with seeded saves. FIX VERIFIED: seeded stats.sold=99 (pg_seed28b), caught a fish and pressed catch-sell-btn. The toasts were exactly ['Achievement unlocked: Market Regular', 'Sold for 86 gold'], each once. After a reload the save has sold_100 in ach, gold 11026 and pearls 32. REGRESSION OK: (a) the catch popup showed with 'Quest complete: Casting Off | +60 gold · +40 XP · +2 Pearls' and 'Achievement unlocked: First Blood' once each. With seed28b, the first cast showed 'Quest complete: Patience', 'Comfortable' and 'Something Special' once each. (b) A full contract hand-in with contracts.total=9 showed 'Achievement unlocked: Reliable Hands' x1, plus the Honest Work quest toast and the 'Contract filled for Nettie' toast. Total became 10 and contracts_10 is in the save. (c) There were no /api/ requests to the app origin. The only /api/ calls went to api.playgama.com bridge timestamp and analytics, which are SDK calls. There were 0 page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "tfl Fishing page catch-sell-button (code review only, not exercised in the world build)", "issue": "tfl/pages/game/Fishing.js:75 posts to /inventory/sell but does not toast data.new_achievements. The api.js:32 interceptor still skips /inventory/sell, so achievements are silent offline if this page is reachable. LOW.", "affected_selectors": ["[data-testid=catch-sell-button]"]}
+    ],
+    "design_issues": [
+      {"screen": "Catch popup sell toast", "issues": ["The CatchCard achievement toast has no reward description (e.g. '+500 gold · +1 Pearl'). The interceptor and other paths show one. This is a minor inconsistency."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/pg_seed28b.js", "/app/tests/pg_seed28.js", "/app/tests/pg_setup.py", "/app/tests/pg_harbour.py", "/app/tests/pg_helpers.py"],
+  "action_items": [
+    "Optional (LOW): toast new_achievements in tfl/pages/game/Fishing.js catch-sell-button too, or switch to sonner toast ids ('ach-'+id) and drop the URL exclusion in tfl/lib/api.js:32.",
+    "Optional (LOW): add the reward description to the CatchCard achievement toast to match the interceptor."
+  ],
+  "critical_code_review_comments": [
+    "tfl/lib/api.js:32: the URL-regex exclusion is still fragile. Every new caller of /inventory/sell or /contracts/ must remember to toast achievements itself. A sonner id per achievement would de-dupe every path at once."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend only)", "frontend": "100% (requested fix + regression)"},
+  "seed_data_creation": "Browser-local saves only, via pg_seed28b.js (sold 99) and pg_seed.js + pg_seed28.js (contracts total 9).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "In browser_automation, exec the helpers with exec(open(f).read(), g) where g=globals(), and call them as g['boot'] etc. A plain exec puts the functions out of scope. For the seed28b flow: boot, skip_tut, open the quests and contracts spots, run the seed, reload, OBS, to_millbrook, then fish_until_catch. After a reload the player is at the harbour, so open contracts directly with open_spot.",
+  "rca of the issue": "Iteration 28 silent achievement: fixed by toasting data.new_achievements in CatchCard.js sell() and sellDouble(). Verified in the browser."
+}

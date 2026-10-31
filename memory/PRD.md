@@ -84,6 +84,10 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - 2026-06 (iter 27): itch.io: /app/itch (index.html iframes https://fishyland.com/?src=itch, store kit). Framed + ?src=itch -> pages/ItchStart.js
   start screen (Play = guest, Log in). Guests claim account in Settings (world/ClaimAccount.js) -> complete-signup grants CLAIM_REWARD 500 gold + 25 pearls once.
 
+- 2026-06 (iter 29): Offline harbour buildings (src/offline/harbour.js + harbour.json dumped from backend): Quest Board (story minus list/craft
+  chapters, seeded daily/weekly), Achievements (simple counter ones), Pearl Shop (frames + chat colours, pearls only), Anchor Café contracts (partial
+  hand-ins, favour ranks), Almanac (own log). Tests iteration_26-29 pass. Deferred: Duel Pier vs computer angler.
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)
