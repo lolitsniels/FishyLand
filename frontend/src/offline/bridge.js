@@ -57,6 +57,16 @@ export const ss = OFFLINE ? mk(sessionData, false) : window.sessionStorage;
 
 let readySent = false;
 export function gameReady() { if (readySent || !b()) return; readySent = true; b().platform.sendMessage("game_ready").catch?.(() => {}); }
+// ad breaks only at natural pauses and never before the Harbourmaster tutorial is finished
+let catches = 0;
+export function adBreak(kind) {
+  if (!OFFLINE) return;
+  import("./server").then((m) => {
+    if (!m.tutorialDone()) return;
+    if (kind === "catch" && ++catches % 3 !== 0) return;
+    interstitial(kind);
+  });
+}
 export function interstitial(placement) { try { b()?.advertisement.showInterstitial(placement); } catch { /* ads unavailable */ } }
 export const rewardedSupported = () => !!b()?.advertisement?.isRewardedSupported;
 // resolves true only when the ad reached the "rewarded" state

@@ -78,6 +78,9 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   Preview copies: /pgtest/index.html and /downloads/*. SFX now real recorded files (public/audio/sfx, ElevenLabs via fal). Art fixes: building white gaps,
   reeds at water edge, new cook + harbourmaster sprites, tab tiles, button seams. Testing iteration_25 all pass.
 
+- 2026-06 (iter 26): Ad rate for Playgama (>=0.30 ad shows/play): interstitials on travel, every 3rd closed catch card and tutorial completion,
+  never before tutorial done (offline/bridge.adBreak, 60s min delay in config). New rewarded "double gold" sell on catch card. Zip rebuilt.
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)

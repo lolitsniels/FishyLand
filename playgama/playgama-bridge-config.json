@@ -3,12 +3,15 @@
         "minimumDelayBetweenInterstitial": 60,
         "interstitial": {
             "placements": [
-                { "id": "travel" }
+                { "id": "travel" },
+                { "id": "catch" },
+                { "id": "tutorial_done" }
             ]
         },
         "rewarded": {
             "placements": [
-                { "id": "energy" }
+                { "id": "energy" },
+                { "id": "double_gold" }
             ]
         }
     }

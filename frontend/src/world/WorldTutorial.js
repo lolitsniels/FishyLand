@@ -4,6 +4,7 @@ import { api, errMsg } from "../tfl/lib/api";
 import { useGame as useTfl } from "../tfl/context/GameContext";
 import { useGame } from "../store";
 import { fx } from "../game/fx";
+import { adBreak } from "../offline/bridge";
 
 // The Harbourmaster's guided first steps for new anglers. Progress lives on the account (user.tutorial).
 const STEPS = [
@@ -58,7 +59,7 @@ export function WorldTutorial({ mode }) {
 
   if (!t || t.done) return null;
   const finish = async () => {
-    try { const r = await api.post("/tutorial/complete"); if (r.data.user) setUser(r.data.user); toast.success(r.data.reward ? "Starter gift added: 10 Pearls, 10 worms and 10 bread crusts!" : "Tutorial complete. Tight lines!"); }
+    try { const r = await api.post("/tutorial/complete"); if (r.data.user) setUser(r.data.user); toast.success(r.data.reward ? "Starter gift added: 10 Pearls, 10 worms and 10 bread crusts!" : "Tutorial complete. Tight lines!"); adBreak("tutorial_done"); }
     catch (e) { toast.error(errMsg(e)); }
   };
   const skip = async () => { try { const r = await api.post("/tutorial/skip"); if (r.data.user) setUser(r.data.user); } catch (e) { toast.error(errMsg(e)); } };

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { api, errMsg, fmt, wt, ln, lengthUnit } from "../tfl/lib/api";
 import { standInArt } from "./useFight";
 import { useGame as useTfl } from "../tfl/context/GameContext";
+import { OFFLINE, rewardedSupported, showRewarded } from "../offline/bridge";
 
 const STARS = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, mythic: 5 };
 
@@ -39,6 +40,14 @@ export default function CatchCard({ res, onClose }) {
   const sell = async () => {
     setBusy(true);
     try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id] }); if (data.user) setUser(data.user); toast.success(`Sold for ${fmt(data.gold)} gold`); onClose(); }
+    catch (e) { toast.error(errMsg(e)); setBusy(false); }
+  };
+  // opt-in rewarded ad: this catch sells for double gold, only if the ad was watched to the end
+  const sellDouble = async () => {
+    setBusy(true);
+    const ok = await showRewarded("double_gold");
+    if (!ok) { setBusy(false); toast("No bonus this time. The ad didn't finish."); return; }
+    try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id], double: true }); if (data.user) setUser(data.user); toast.success(`Double gold! Sold for ${fmt(data.gold)} gold`); onClose(); }
     catch (e) { toast.error(errMsg(e)); setBusy(false); }
   };
   const dex = () => { onClose(); nav("/game/journal"); };
@@ -91,6 +100,11 @@ export default function CatchCard({ res, onClose }) {
           <button type="button" className="fr-btn flex-1 py-2 whitespace-nowrap" disabled={busy} onClick={sell} data-testid="catch-sell-btn">Sell {fmt(c.vendor ?? Math.round((c.value || 0) * 0.7))} g</button>
           </>}
         </div>
+        {OFFLINE && !res.duel && rewardedSupported() && (
+          <button type="button" className="fr-btn w-full py-2 mt-2 whitespace-nowrap" disabled={busy} onClick={sellDouble} data-testid="catch-double-gold-btn">
+            Watch an ad: sell for {fmt(2 * (c.vendor ?? Math.round((c.value || 0) * 0.7)))} g (double)
+          </button>
+        )}
       </div>
     </div>
   );

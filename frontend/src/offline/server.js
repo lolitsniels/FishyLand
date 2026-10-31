@@ -203,7 +203,7 @@ function land(body) {
 function sell(body) {
   const u = U(), ids = new Set(body.catch_ids || []), rows = S.catches.filter((c) => ids.has(c.id));
   if (!rows.length) fail(404, "Nothing to sell");
-  const total = rows.reduce((a, c) => a + vendor(u, c).vendor, 0);
+  const total = rows.reduce((a, c) => a + vendor(u, c).vendor, 0) * (body.double && rows.length === 1 ? 2 : 1);
   S.catches = S.catches.filter((c) => !ids.has(c.id));
   u.gold += total; u.stats.gold_earned += total; u.stats.sold += rows.length;
   save();
@@ -270,6 +270,7 @@ function tutorial(kind, body) {
   }
   save(); return { user: pub(), reward };
 }
+export const tutorialDone = () => !!S?.user?.tutorial?.done;
 export function adEnergy() { const u = U(); energyTick(u); u.energy = Math.min(MAX_ENERGY * 2, u.energy + AD_ENERGY); save(); return pub(); }
 
 function species(id) {

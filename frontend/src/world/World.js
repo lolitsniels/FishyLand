@@ -16,7 +16,7 @@ import CatchCard from "./CatchCard";
 import { fishArt } from "./useFight";
 import { toast } from "sonner";
 import { ChatBox } from "./ChatBox";
-import { OFFLINE, interstitial } from "../offline/bridge";
+import { OFFLINE, adBreak } from "../offline/bridge";
 import { AdEnergy } from "./AdEnergy";
 import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
@@ -109,7 +109,7 @@ export default function World() {
   useEffect(() => { setMusicPlace(placeOf(mode, user)); }, [mode, user?.water]);
   useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
 
-  const goTo = (m, at) => { if (OFFLINE && m !== fx.mode) interstitial("travel"); fx.mode = m; ss.setItem("fr_mode", m); fx.me = { ...(at || sceneFor(placeOf(m, user)).spawn) }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
+  const goTo = (m, at) => { if (m !== fx.mode) adBreak("travel"); fx.mode = m; ss.setItem("fr_mode", m); fx.me = { ...(at || sceneFor(placeOf(m, user)).spawn) }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => {
     if (mode === "duel" && page && page !== "inventory" && page !== "journal") { nav("/game", { replace: true }); return; }
@@ -199,7 +199,7 @@ export default function World() {
         {mode === "crew" && !wet && !nearSpot && idle && !page && <Hint testid="crew-hint">Fish from the glowing rings round the pond · the Pond Keeper stocks new fish</Hint>}
         {wet && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
-        {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
+        {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={() => { if (result.success) adBreak("catch"); closeResult(); }} /></div>}
         {!OFFLINE && <ChatBox />}
         {OFFLINE && idle && !page && <AdEnergy u={user} />}
         {mode === "duel" && <DuelHud />}
