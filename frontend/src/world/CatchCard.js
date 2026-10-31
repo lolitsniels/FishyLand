@@ -39,7 +39,7 @@ export default function CatchCard({ res, onClose }) {
   const c = res.catch || {};
   const sell = async () => {
     setBusy(true);
-    try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id] }); if (data.user) setUser(data.user); toast.success(`Sold for ${fmt(data.gold)} gold`); onClose(); }
+    try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id] }); if (data.user) setUser(data.user); (data.new_achievements || []).forEach((a) => toast.success(`Achievement unlocked: ${a.name}`)); toast.success(`Sold for ${fmt(data.gold)} gold`); onClose(); }
     catch (e) { toast.error(errMsg(e)); setBusy(false); }
   };
   // opt-in rewarded ad: this catch sells for double gold, only if the ad was watched to the end
@@ -47,7 +47,7 @@ export default function CatchCard({ res, onClose }) {
     setBusy(true);
     const ok = await showRewarded("double_gold");
     if (!ok) { setBusy(false); toast("No bonus this time. The ad didn't finish."); return; }
-    try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id], double: true }); if (data.user) setUser(data.user); toast.success(`Double gold! Sold for ${fmt(data.gold)} gold`); onClose(); }
+    try { const { data } = await api.post("/inventory/sell", { catch_ids: [c.id], double: true }); if (data.user) setUser(data.user); (data.new_achievements || []).forEach((a) => toast.success(`Achievement unlocked: ${a.name}`)); toast.success(`Double gold! Sold for ${fmt(data.gold)} gold`); onClose(); }
     catch (e) { toast.error(errMsg(e)); setBusy(false); }
   };
   const dex = () => { onClose(); nav("/game/journal"); };
