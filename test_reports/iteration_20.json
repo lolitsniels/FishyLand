@@ -1,0 +1,41 @@
+{
+  "summary": "Tested the Crew HQ / Crew Clubhouse split and the removal of crew tournaments. Backend: 9/10 pytest pass. The one failure is minor: GET /api/contests still lists a weekly crew contest under 'upcoming'. UI: harbour Crew HQ list works. It has no Wins/Weekly/contest/rank items and shows the level-30 create gate, Join/Request, the invites inbox (accept works), 'You sail with' and the go-crew-island button. Harbour crew detail shows only the public card (no tabs, no leave, no manage). Crew island: the clubhouse modal is titled 'Crew Clubhouse' and shows Home/Members tabs, plus Manage for the leader (invite-only toggle, invite angler, broadcast, emblem colour, join request approve). Leave works here. Crew chat tab works, and /game/tournaments works. Wiki 18 is titled 'Tournaments'. Problems found: join requests (Approve/Decline) still show in the harbour HQ; after leaving a crew on the island the player stays on that crew's island; some wiki text still mentions crew challenges.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/contests", "issue": "'upcoming' still returns [{kind:'weekly', category:'crew_species', label:'Crew Species', ...}] even though crew contests are retired (server.py ~2629-2630). current=[] works and open contests get cancelled. The frontend does not call /contests, so this is dead data. Return upcoming: [] or remove the endpoint."},
+      {"endpoint": "ensure_contests (server.py 2608-2609)", "issue": "Expired open contests still go through close_contest(), which pays out prizes, before the rest are cancelled. The comment says 'closed without prizes'. This only matters for leftover old docs; all are 'cancelled' in the preview DB now."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Crews.js harbour list (CrewInbox)", "issue": "The harbour Crew HQ shows the leader/officer panel 'Join requests to your crew' with Approve/Decline buttons. That is a crew-management function, and the user asked for all crew functions to be on the crew island (Manage tab already shows the same requests). Fix: in the harbour, render <CrewInbox inbox={{invites: inbox?.invites||[], requests: []}} />.", "selector": "[data-testid='crew-requests-panel']", "priority": "MEDIUM"},
+      {"component": "Crews.js island leave flow", "issue": "After 'Leave crew' on the island the user stays in mode 'crew' on the ex-crew's island. The modal shows their old crew page with 'Request to join' and a Members tab (non-member can see the member list). Expected: dispatch fr-mode 'harbour' (or nav back) after leaving.", "selector": "[data-testid='leave-crew-button']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Wiki / guides", "issues": ["wikiSections.js line 413 (Crews section) still says crews 'compete in a rotating weekly crew challenge ... pays gold ... Pearls'", "wikiSections.js line 90 mentions 'crew contest', line 78 says crates come from 'crew challenges'", "Guide pages RussianFishing4Alternatives.js:38 and CotwAnglerAlternatives.js:37 still mention 'weekly crew challenges'"]},
+      {"screen": "Harbour All crews table", "issue_note": "Open crews that are full show nothing in the action column; the 'full' label only shows for invite-only crews (Crews.js line 242)", "issues": ["'full' label missing for open+full crews"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter20_crew_hq_no_contests.py", "/app/test_reports/pytest/pytest_iter20.xml"],
+  "action_items": [
+    "Hide join-requests (Approve/Decline) from the harbour Crew HQ; keep them only in Clubhouse > Manage",
+    "After leaving a crew while on the crew island, send the player back to the harbour (window.dispatchEvent(new CustomEvent('fr-mode',{detail:'harbour'})))",
+    "Remove the crew contest from GET /api/contests 'upcoming' (or drop the endpoint)",
+    "Update the wiki Crews section (line 413) and lines 78/90, plus the guide pages, to remove crew challenge/contest text",
+    "Optional: show 'full' for open crews at capacity"
+  ],
+  "critical_code_review_comments": [
+    "Crews.js reads fx.mode once per render (onIsland = fx.mode === 'crew'). It is not reactive state, so it only works because World re-navigates on mode change. Consider passing mode through context.",
+    "TABS in CrewTabs.js still includes contest/contract/hall/leviathan entries that are filtered out in two places (CrewTabs and Crews.js). This is dead config; remove them from TABS so the filter is not duplicated.",
+    "The Members tab has no 'member' requirement, so non-members on another crew's island page can see the member list."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter20_crew_hq_no_contests.py"],
+  "success_rate": {"backend": "90%", "frontend": "88%"},
+  "test_credentials": "TestAngler / TestAngler2 (Angler#2026), Niels (Niels112233!) from /app/memory/test_credentials.md. Niels is the only level>=30 account.",
+  "seed_data_creation": "Created 'TEST UI Crew' [TUI] and 'TEST Iter20 Crew' with Niels; both were removed (all members left), so the crews list is empty again.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use window.__fx.openSpot('crews') while in island mode to open the Clubhouse. Set sessionStorage fr_mode='harbour' before goto to force the harbour. Click [data-testid=go-crew-island] to sail. Applying to an invite-only crew when a pending invite exists auto-joins (backend behaviour). Recheck: crew-requests-panel absent in the harbour, and the mode returns to harbour after leave."
+}

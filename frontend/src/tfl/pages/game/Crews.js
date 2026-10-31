@@ -150,7 +150,7 @@ export default function Crews() {
   useEffect(() => { load(); loadInbox(); }, []);
   useEffect(() => { setCrew(null); loadCrew(); setTab((id && localStorage.getItem(`owo_crew_tab_${id}`)) || "home"); }, [id]); // eslint-disable-line
   const refreshAll = () => { load(); loadCrew(); loadInbox(); window.dispatchEvent(new CustomEvent("crew-inbox-changed")); };
-  const act = async (path, msg) => { try { const r = await api.post(path); if (r.data.username) setUser(r.data); toast.success(msg); refreshAll(); } catch (e) { toast.error(errMsg(e)); } };
+  const act = async (path, msg) => { try { const r = await api.post(path); if (r.data.username) setUser(r.data); toast.success(msg); refreshAll(); return true; } catch (e) { toast.error(errMsg(e)); return false; } };
   const apply = async (c) => { try { const r = await api.post(`/crews/${c.id}/apply`); toast.success(r.data.joined ? `You joined ${c.name}` : `Request sent to ${c.name}`); if (r.data.joined) { const me = await api.get("/auth/me"); setUser(me.data); } refreshAll(); } catch (e) { toast.error(errMsg(e)); } };
   const mine = user.crew;
   const onIsland = fx.mode === "crew";
@@ -181,7 +181,7 @@ export default function Crews() {
           <div className="font-display text-[16px] text-[#f4ead2] truncate"><CrewName crew={crew} /></div>
           <CrewTabs tab={cur} setTab={pick} member={member} canManage={canManage} />
         </div>
-        {cur === "home" && <CrewHome island crew={crew} member={member} mine={mine} onJoin={() => act(`/crews/${crew.id}/join`, `You joined ${crew.name}`)} onRequest={() => apply(crew)} onLeave={() => act(`/crews/${crew.id}/leave`, `You left ${crew.name}`)} />}
+        {cur === "home" && <CrewHome island crew={crew} member={member} mine={mine} onJoin={() => act(`/crews/${crew.id}/join`, `You joined ${crew.name}`)} onRequest={() => apply(crew)} onLeave={async () => { if (await act(`/crews/${crew.id}/leave`, `You left ${crew.name}`)) { nav("/game"); window.dispatchEvent(new CustomEvent("fr-mode", { detail: "harbour" })); } }} />}
         {cur === "members" && (
           <Panel icon="angler" title={tt("Members · this week's contribution")} bodyClass="!p-0" testId="crew-members">
             <table className="table">
@@ -228,7 +228,7 @@ export default function Crews() {
         {mine ? <div className="mt-2 text-[13px]">{tt("You sail with")} <button className="text-[var(--gold)] underline" onClick={() => nav(`/game/crews/${mine.id}`)} data-testid="my-crew-link">[{mine.tag}] {mine.name}</button>. {tt("Members, settings and crew tools are in the clubhouse on your crew island.")}</div>
           : <div className="mt-3"><CreateCrew cost={d.cost} minLevel={d.min_level} onCreated={async (cid) => { const r = await api.get("/auth/me"); setUser(r.data); load(); nav(`/game/crews/${cid}`); }} /></div>}
       </Panel>
-      <CrewInbox inbox={inbox} onChange={refreshAll} />
+      <CrewInbox inbox={inbox && { ...inbox, requests: [] }} onChange={refreshAll} />
       <Panel icon="crews" title={tt("All crews")} bodyClass="!p-0" testId="crew-standings">
         {d.crews.length === 0 ? <Empty>{tt("No crews yet. Found the first one.")}</Empty> : (
           <table className="table">
@@ -239,7 +239,7 @@ export default function Crews() {
               <td className="r">
                 {!mine && c.open && c.member_count < c.max_members && <button className="btn btn-sm btn-gold" onClick={() => act(`/crews/${c.id}/join`, `You joined ${c.name}`)} data-testid={`join-${c.id}`}>{tt("Join")}</button>}
                 {!mine && !c.open && c.member_count < c.max_members && <button className="btn btn-sm" onClick={() => apply(c)} data-testid={`request-${c.id}`}>{tt("Request")}</button>}
-                {!c.open && c.member_count >= c.max_members && <span className="text-[11px] text-[var(--muted)]">{tt("full")}</span>}
+                {c.member_count >= c.max_members && <span className="text-[11px] text-[var(--muted)]">{tt("full")}</span>}
               </td>
             </tr>)}</tbody>
           </table>

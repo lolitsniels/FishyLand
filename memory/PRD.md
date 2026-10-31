@@ -99,3 +99,5 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - Favicon set (Harbourmaster), SEO title/description/og:image (art/og.jpg), VideoGame JSON-LD
 - Water texture no longer scrolls (corals stay still); only the ripple displacement drifts
 
+- Crews split: harbour Crew HQ = list of all crews + join/request/create + invites only; island Crew Clubhouse = own crew Home/Members/Manage (settings, requests, emblem, leave). Weekly crew challenge retired (no new contests, /contests upcoming empty, wiki text updated)
+

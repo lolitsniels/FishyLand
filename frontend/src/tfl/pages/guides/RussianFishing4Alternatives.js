@@ -35,7 +35,7 @@ export default function RussianFishing4Alternatives() {
         ["Learning curve", "Very steep: rigs, line test, drag, depth", "One minute: cast, then keep the needle in the green"],
         ["Economy", "Sell fish, buy tackle", "Live player market where you trade fish, gear and crates"],
         ["Trophy hunting", "Trophy and unique fish", "Legendary and mythic fish, bosses and crew Leviathans"],
-        ["Social", "Chat and shared spots", "Crews, crew halls, duels and weekly crew challenges"],
+        ["Social", "Chat and shared spots", "Crews, crew halls, duels"],
         ["Devices", "PC", "PC, Mac, tablet and phone"],
       ]} />
 

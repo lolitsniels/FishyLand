@@ -2625,9 +2625,7 @@ async def contests(user=Depends(get_current_user)):
     current = [{**contest_meta(c), "start": c["start"], "end": c["end"],
                 "standings": await cached(f"contest:{c['category']}:{c['start']}", 15, lambda c=c: contest_standings(c["category"], c["start"], c["end"]))} for c in open_]
     current.sort(key=lambda c: (c["kind"] != "daily", c["category"]))
-    t = now()
-    _, end = period_bounds("weekly", t)
-    upcoming = [{"kind": "weekly", "category": crew_contest_category(end), "label": CONTEST_LABEL[crew_contest_category(end)], "start": iso(end)}]
+    upcoming = []
     past = await db.contests.find({"status": "closed"}).sort("end", -1).limit(12).to_list(12)
     return {"current": current, "upcoming": upcoming, "past": [{**contest_meta(c), "end": c["end"], "winners": c["winners"]} for c in past]}
 

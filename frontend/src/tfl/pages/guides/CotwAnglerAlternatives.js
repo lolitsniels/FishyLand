@@ -34,7 +34,7 @@ export default function CotwAnglerAlternatives() {
         ["World", "Open-world reserves, co-op sessions", "One shared world for every player"],
         ["Goals", "Explore, collect and complete missions", "Collect 340+ species, quests, bosses, crews and rankings"],
         ["Economy", "Sell fish for cash", "Live player market: fish, tackle, crates and rare rods"],
-        ["Events", "Competitions", "Boss sightings, tournaments, duels, weekly crew challenges"],
+        ["Events", "Competitions", "Boss sightings, tournaments, duels"],
         ["Devices", "PC, PlayStation, Xbox", "Anything with a browser, including phones"],
       ]} />
 
