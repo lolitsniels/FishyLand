@@ -1,0 +1,30 @@
+{
+  "summary": "Iteration 30 (frontend only, live preview, logged in as TestAngler). (1) Small buttons PASS: I audited every .btn-sm on /game/contracts, inventory and shop at 1920x800 and 390x844. contract-reroll 'Swap' renders as one dark pill, 89x34 on desktop and 89x36 on mobile, with gold trim and the end ornaments attached; nothing floats above or below. All 12/54/17 small buttons have the border image, no content overflow, and heights of 30-36px. Accept, Buy, Select all, Sell to vendor, Mount and the chat-link buttons all look clean. Pearl Shop has no .btn-sm, because the outfits list is empty ('Outfits arrive soon'), and its sf-tabs look fine. (2) Contact shadows PASS: they are soft and natural, not black blobs. Measured luminance under the shadows vs nearby ground: Guild Hall grass 146 vs 170 and 142 vs 163, Pearl Shop paving under the base 122 vs 164, fountain paving 126 vs 160, so roughly 15-25% darker with a soft falloff. (3) Crew Island PASS: walking with WASD around the pond reaches the 'clubhouse' spot (prompt 'Enter the Crew Clubhouse [E]') and 'pond-keeper' (prompt shown; E opens the Pond Keeper modal: 1/10 stocked, crew bank 197,500). Clubhouse collision: sweeping up from the front stops at y=660 (base 650); walking north from the door stops at y=641 (bottom stair); sweeping down from behind never enters; sides stop at x=964/1425 (walls at 980/1420). Not walkable inside. (4) Millbrook PASS for reachability: WASD reached fish-1 Bridge (atSpot fish-1), fish-2 North Bank, fish-3 Pond Pier and fish-4 South Bank. Millbrook has no NPCs (window.__npcs=[], MILLBROOK_MAP has no npcs), so nothing to reach there. In about 470 /api/world/pos calls during normal walking all were 200 with 0 console errors. BUT the claimed client clamp is NOT in the code: World.js:75 still sends raw fx.me.x/fx.me.y, and forcing __fx.me.x=-3 gives repeated 422s every 600ms ([200,422,422,422]).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Presence /api/world/pos", "issue": "The client clamp described in the review request does not exist. usePresence in frontend/src/world/World.js:75 posts x: fx.me.x, y: fx.me.y unclamped. The backend PosIn requires 0<=x,y<=6000, so any out-of-range or NaN position gives a 422 every 600ms (reproduced by forcing __fx.me.x=-3). Normal WASD walking on Millbrook did not trigger it.", "affected_selectors": []}
+    ],
+    "design_issues": [
+      {"screen": "Millbrook bridge, NW end", "issues": ["Low confidence: when walking diagonally up-right just off the NW bridge end, the angler stops at about (1275,1091). That point is on the walk mask's bank strip, but visually her feet are over the river water next to the reeds. The walk-mask river is only slightly narrower than the painted water there."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/walk_helpers.py", "/app/tests/collide_helpers.py", "/app/tests/collide_sweep.py", "/app/tests/collide_click.py"],
+  "action_items": [
+    "Actually add the clamp in World.js usePresence: x: Math.max(0, Math.min(6000, Number.isFinite(fx.me.x) ? fx.me.x : 0)) and the same for y. Optionally skip the send when !Number.isFinite.",
+    "Minor: the usePresence comment says 'every 1.5 s' but the interval is 600ms",
+    "Minor: ui.css repeats the 'html body .btn-sm { padding: 0 6px }' rule and several .fr-modal blocks twice (around lines 137 and 150). This dead duplication also overrides line 22's padding: 0 2px."
+  ],
+  "critical_code_review_comments": [
+    "World.js:75: the /world/pos payload is unclamped (see above). This contradicts the change notes.",
+    "ui.css lines ~131-150 contain a duplicated block (panel/.btn-sm/modal rules), so the .btn-sm padding from line 22 is always overridden to 0 6px."
+  ],
+  "updated_files": ["/app/tests/walk_helpers.py"],
+  "success_rate": {"backend": "n/a (skipped)", "frontend": "90% (4/4 requested checks pass visually and functionally; the presence clamp claim is not implemented)"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "In browser_automation, exec /app/tests/collide_helpers.py and /app/tests/walk_helpers.py with g=globals(), then call g['boot'](page, mode) and g['walk'](page, pts, 6000, fine=True). Modes: 'harbour', 'crew' (crew island), 'water' (Millbrook). fine=True subdivides routes into 28px steps so keyboard steering stays on bridges. fx.keys uses 'up/down/left/right'. Headless movement is slow (low FPS), so allow 6+ seconds per few hundred px. Working routes: Millbrook fish-1 [[800,1225],[1170,1215],[1520,1065]]; fish-4 then [[1830,925],[2150,1100],[2290,1520],[2290,1560]]; fish-3 [[800,1225],[720,1480],[700,1600],[700,1740]]; fish-2 via bridge then [[1900,600],[1500,560],[1150,480]]. Crew island clubhouse [[1200,1420],[1460,1300],[1520,1000],[1380,780],[1200,712]].",
+  "rca of the issue": "The 422s come from FastAPI PosIn validation (x,y Field ge=0 le=6000) in backend/world_presence.py. The client sends fx.me.x/y raw. No clamp was added despite the notes. Repro: on /game in Millbrook, run __fx.me.x=-3 in the console and watch /api/world/pos return 422 every 600ms. Fix: clamp or skip in usePresence send()."
+}

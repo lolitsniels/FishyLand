@@ -72,7 +72,7 @@ function usePresence(loc) {
   const [here, setHere] = useState(1);
   useEffect(() => {
     let alive = true;
-    const send = () => api.post("/world/pos", { loc, x: fx.me.x, y: fx.me.y, phase: fx.phase }).then((r) => { if (alive) { fx.others = r.data.players; setHere(r.data.here); } }).catch(() => {});
+    const send = () => api.post("/world/pos", { loc, x: Math.max(0, Math.min(6000, fx.me.x)), y: Math.max(0, Math.min(6000, fx.me.y)), phase: String(fx.phase || "idle").slice(0, 12) }).then((r) => { if (alive) { fx.others = r.data.players; setHere(r.data.here); } }).catch(() => {});
     fx.others = [];
     send();
     const iv = OFFLINE ? null : setInterval(send, 600);
