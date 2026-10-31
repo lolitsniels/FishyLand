@@ -23,6 +23,7 @@ import { QuickTackle } from "./QuickTackle";
 import { GameSettings } from "./GameSettings";
 import { ClubhousePanel } from "./Clubhouse";
 import { PondKeeper } from "./PondKeeper";
+import { StarterGoals } from "./StarterGoals";
 import { WorldTutorial } from "./WorldTutorial";
 import { lookFace } from "../game/look";
 import { ss } from "../offline/bridge";
@@ -202,6 +203,7 @@ export default function World() {
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={() => { if (result.success) adBreak("catch"); closeResult(); }} /></div>}
         {!OFFLINE && <ChatBox />}
         {OFFLINE && idle && !page && <AdEnergy u={user} />}
+        {OFFLINE && !page && <StarterGoals />}
         {mode === "duel" && <DuelHud />}
         <QuickTackle />
         <WorldTutorial mode={mode} />

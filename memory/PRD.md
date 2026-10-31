@@ -92,6 +92,9 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   (o.sortY), contact shadows; vector signboard banners for building spots; modern fishing icons (art/ui/*.png, hud/tackle, hud/sail; old in /app/promo_src/icons/old),
   modern blue .fr-tile; clubhouse furniture ~2/3 size; harbour ship moved into water. Debug hooks window.__walk/__objs.
 
+- 2026-06 (iter 34): Offline Starter Goals (8 goals, +100 gold each, gift chest 1500 gold/25 pearls/400 xp) - harbour.js starter*, world/StarterGoals.js;
+  Playgama zip rebuilt with all new art/icons/collision.
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)

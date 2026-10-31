@@ -26,7 +26,8 @@ api.interceptors.response.use((r) => {
     const bits = [`+${fmt(q.reward.gold)} gold`, `+${fmt(q.reward.xp)} XP`];
     if (q.reward.pearls) bits.push(`+${q.reward.pearls} Pearl${q.reward.pearls > 1 ? "s" : ""}`);
     if (q.reward.title) bits.push(`title "${q.reward.title}"`);
-    toast.success(`${q.kind === "streak" ? "Streak bonus" : "Quest complete"}: ${q.name}`, { description: bits.join(" · "), duration: 6000 });
+    if (q.kind === "starter") toast.success(`Starter goal done: ${q.name}`, { description: `+${fmt(q.reward.gold)} gold`, duration: 5000 });
+    else toast.success(`${q.kind === "streak" ? "Streak bonus" : "Quest complete"}: ${q.name}`, { description: bits.join(" · "), duration: 6000 });
     window.dispatchEvent(new CustomEvent("quests-changed"));
   });
   if (process.env.REACT_APP_OFFLINE === "1" && !/\/contracts\/|\/inventory\/sell/.test(r.config?.url || "")) (r.data?.new_achievements || []).forEach((a) => toast.success(`Achievement unlocked: ${a.name}`, { description: `+${fmt(a.reward)} gold${a.pearls ? ` · +${a.pearls} Pearls` : ""}`, duration: 6000 }));

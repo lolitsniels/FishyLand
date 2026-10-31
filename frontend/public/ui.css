@@ -303,3 +303,22 @@ html body .g-tab.on img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .7)) !impo
 .fl-input::placeholder { color: rgba(253, 241, 207, .45); }
 .fl-input:focus { border-color: #ffd35a; box-shadow: 0 0 0 3px rgba(255, 211, 90, .25); }
 .itch-login { background: rgba(10, 28, 52, .92); border: 3px solid #c99a3a; border-radius: 16px; box-shadow: 0 14px 34px rgba(0, 0, 0, .5); }
+
+/* Starter goals (offline build) */
+.starter-goals { position: absolute; left: 12px; top: 190px; width: 250px; z-index: 30; pointer-events: auto; background: rgba(9, 28, 56, .9); border: 2px solid rgba(255, 255, 255, .85); border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45); color: #f4f8ff; font-family: var(--ui-font); animation: wtut-rise .4s ease-out; }
+.starter-goals.is-ready { border-color: #ffd35a; box-shadow: 0 0 0 3px rgba(255, 211, 90, .35), 0 6px 18px rgba(0, 0, 0, .45); }
+.sg-head { width: 100%; display: flex; align-items: center; gap: 7px; padding: 8px 10px 6px; font-weight: 800; font-size: 14px; color: #fff; background: none; border: 0; cursor: pointer; }
+.sg-head b { margin-left: auto; color: #ffd35a; }
+.sg-gift { color: #ffd35a; }
+.sg-bar { height: 5px; margin: 0 10px 6px; border-radius: 9px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.sg-bar i { display: block; height: 100%; background: linear-gradient(90deg, #39d98a, #ffd35a); transition: width .4s ease; }
+.sg-list { list-style: none; margin: 0; padding: 0 10px 4px; display: flex; flex-direction: column; gap: 4px; }
+.sg-list li { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: #dbe7ff; }
+.sg-list li.done { color: #8fe3b4; }
+.sg-list li.done .sg-label { text-decoration: line-through; opacity: .8; }
+.sg-tick { width: 16px; height: 16px; flex: none; border-radius: 5px; border: 2px solid rgba(255, 255, 255, .6); display: grid; place-items: center; }
+.sg-list li.done .sg-tick { background: #39d98a; border-color: #39d98a; color: #06301a; }
+.sg-prog { margin-left: auto; color: #ffd35a; font-size: 11.5px; }
+.sg-foot { padding: 4px 10px 8px; font-size: 11px; color: rgba(219, 231, 255, .7); }
+.sg-claim { margin: 4px 10px 10px; width: calc(100% - 20px); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: 999px; border: 2px solid #fff3c2; background: linear-gradient(#ffe680, #ffb81f); color: #1a2a5a; font-weight: 900; font-size: 14px; cursor: pointer; animation: itch-bob 1.6s ease-in-out infinite; }
+@media (max-width: 640px) { .starter-goals { top: 186px; left: 8px; width: 200px; } }

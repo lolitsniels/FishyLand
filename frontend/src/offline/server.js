@@ -233,7 +233,8 @@ function buyBait(body) {
   const cost = Math.max(1, b.price) * qty;
   if (u.gold < cost) fail(400, "Not enough gold");
   u.gold -= cost; u.bait[b.id] = (u.bait[b.id] || 0) + qty * (b.pack || 1);
-  save(); return pub();
+  const ev = HB.event("buy_bait", {});
+  save(); return { ...pub(), quests_done: ev.quests_done };
 }
 function equip(body) {
   const u = U();

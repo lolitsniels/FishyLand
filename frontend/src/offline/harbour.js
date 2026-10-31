@@ -54,6 +54,8 @@ export function makeHarbour(ctx) {
     return q.progress >= q.target;
   }
   function event(ev, e = {}) {
+    if (ev === "buy_bait") sg().bait = true;
+    if (ev === "travel") sg().travels += 1;
     const done = [], amount = (q) => ((q.measure || q.objective?.measure) === "gold" ? e.gold || 0 : (q.measure || q.objective?.measure) === "kg" ? e.weight || 0 : e.count || 1);
     for (const kind of ["daily", "weekly"]) for (const q of roll(kind).quests) if (advance(q, ev, e, amount(q))) { q.status = "done"; q.done_at = new Date().toISOString(); grant(q.reward); done.push({ name: q.name, kind, reward: q.reward }); }
     STORY.forEach((q) => {
@@ -64,7 +66,7 @@ export function makeHarbour(ctx) {
       s.progress = tmp.progress;
     });
     st().done += done.length;
-    return { quests_done: done, new_achievements: checkAch() };
+    return { quests_done: [...done, ...starterCheck()], new_achievements: checkAch() };
   }
 
   // ---- achievements
@@ -159,9 +161,31 @@ export function makeHarbour(ctx) {
   }
   const logCatch = (c, period, weather) => { const L = (S().log = S().log || []); L.push({ species_id: c.species_id, name: c.name, rarity: c.rarity, weight: c.weight, water: c.water, at: c.caught_at, period, weather }); if (L.length > 3000) L.shift(); };
 
+  // ---- Starter goals: a first-session checklist, 100 gold per goal and a gift chest when all are done
+  const GOALS = [["catch5", "Catch 5 fish", (c) => c.catches, 5], ["species3", "Discover 3 different species", (c) => c.species, 3], ["sell3", "Sell 3 fish for gold", (c) => c.sold, 3],
+    ["bait", "Buy bait at the Tackle Shop", () => (st().starter?.bait ? 1 : 0), 1], ["travel", "Sail to a different water", () => st().starter?.travels || 0, 1],
+    ["quest", "Finish a daily quest", () => st().done, 1], ["contract", "Fill an Anchor Café contract", () => st().contracts.total || 0, 1], ["level5", "Reach level 5", (c) => c.level, 5]];
+  const CHEST = { gold: 1500, pearls: 25, xp: 400 };
+  const sg = () => (st().starter = st().starter || { done: [], claimed: false, bait: false, travels: 0 });
+  const starterOut = () => { const c = counters(), d = sg();
+    const goals = GOALS.map(([id, label, f, n]) => ({ id, label, progress: Math.min(n, f(c) || 0), target: n, done: d.done.includes(id) }));
+    return { goals, done: d.done.length, total: GOALS.length, claimed: d.claimed, ready: !d.claimed && d.done.length === GOALS.length, chest: CHEST, goal_gold: 100 }; };
+  function starterCheck() {
+    if (!U().tutorial?.done) return [];
+    const c = counters(), d = sg(), fresh = [];
+    for (const [id, label, f, n] of GOALS) if (!d.done.includes(id) && (f(c) || 0) >= n) { d.done.push(id); U().gold += 100; fresh.push({ name: label, kind: "starter", reward: { gold: 100, xp: 0, pearls: 0 } }); }
+    return fresh;
+  }
+  function claimChest() {
+    const d = sg(); if (d.claimed) fail("You already opened the gift chest"); if (d.done.length < GOALS.length) fail("Finish all starter goals first");
+    d.claimed = true; grant(CHEST); save(); return { ...starterOut(), reward: CHEST, user: pub() };
+  }
+
   const ok = (fn) => (b, m) => { const r = fn(b, m); save(); return r; };
   const routes = [
     ["get", /^\/quests$/, () => questsOut()],
+    ["get", /^\/starter$/, () => { const f = starterCheck(); if (f.length) save(); return { ...starterOut(), quests_done: f }; }],
+    ["post", /^\/starter\/claim$/, () => claimChest()],
     ["post", /^\/quests\/([^/]+)\/accept$/, ok((b, m) => { const i = STORY.findIndex((q) => q.id === m[1]); if (i < 0 || storyStatus(STORY[i], i) !== "available") fail("You can't take that quest yet"); st().story[m[1]] = { status: "active", progress: 0 }; return { story: storyOut() }; })],
     ["get", /^\/achievements$/, () => achOut()],
     ["get", /^\/cosmetics$/, () => cosOut()],
