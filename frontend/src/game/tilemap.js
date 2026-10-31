@@ -111,8 +111,13 @@ function baseProfile(tex, N = 48) {
 function footColumns(o, def, tex) {
   const w = o.w || def.w, prof = baseProfile(tex); if (!prof) return null;
   const h = (tex.height * w) / tex.width, N = prof.length, cols = [];
-  prof.forEach(([up, top], i) => { if (up < 0 || up * h > w * 0.22) return; const fx = (i + 0.5) / N - 0.5; cols.push({ x: o.x + (o.flip ? -fx : fx) * w, y: o.y - up * h, tall: (top - up) * h, cw: w / N }); });
-  return cols.length ? cols : null;
+  prof.forEach(([up, top], i) => { if (up < 0) return; const fx = (i + 0.5) / N - 0.5; cols.push({ x: o.x + (o.flip ? -fx : fx) * w, y: o.y - up * h, top: o.y - top * h, over: up * h > w * 0.22, cw: w / N }); });
+  const grounded = cols.filter((c) => !c.over).map((c) => c.y).sort((a, b) => a - b);
+  if (!grounded.length) return null;
+  // awnings, balconies and roof overhangs: their columns stand on the building's main base line
+  const base = grounded[Math.floor(grounded.length / 2)];
+  for (const c of cols) { if (c.over) c.y = Math.max(c.y, base); c.tall = c.y - c.top; }
+  return cols;
 }
 
 export function buildMap(map, img, objTex = {}) {

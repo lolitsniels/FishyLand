@@ -5,7 +5,7 @@ import { fx } from "./fx";
 import { useGame } from "../store";
 import { gameReady } from "../offline/bridge";
 import { sceneFor, inPoly } from "./scenes";
-import { buildMap, placeObjects, auditMap } from "./tilemap";
+import { buildMap, placeObjects, auditMap, OBJ } from "./tilemap";
 import { TILED } from "./maps";
 import { lookSprite, handSprite, parseLook, HAND } from "./look";
 import ROD_META from "./rodMeta.json";
@@ -291,6 +291,7 @@ function buildScene(app, tex, key, bgTex, mt) {
   const tm = cfg.tiled ? cachedMap(key, cfg, mt) : null;
   if (tm && QS.has("mapcheck")) window.__mapAudit = { key, ...auditMap(cfg, tm) };
   const canWalk = (x, y) => (tm ? tm.nav.walk(x, y) : inPoly(x, y, cfg.walk));
+  window.__walk = canWalk; window.__objs = tm ? tm.objects.map((o) => ({ k: o.k, x: o.x, y: o.y, w: o.w || OBJ[o.k]?.w, flip: !!o.flip, sortY: o.sortY })) : [];
   const world = new Container();
   app.stage.addChild(world);
   const soft = softTex(), star = starTex();
