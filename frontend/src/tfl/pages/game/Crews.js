@@ -37,7 +37,7 @@ function CreateCrew({ cost, minLevel, onCreated }) {
   );
 }
 
-function CrewInbox({ inbox, onChange }) {
+export function CrewInbox({ inbox, onChange }) {
   const nav = useNavigate();
   const { refresh } = useGame();
   const respond = async (path, msg) => {
@@ -91,7 +91,7 @@ function CrewInbox({ inbox, onChange }) {
   );
 }
 
-function InviteAnglerBox({ crewId, onSent }) {
+export function InviteAnglerBox({ crewId, onSent }) {
   const [u, setU] = useState("");
   const [busy, setBusy] = useState(false);
   const send = async (e) => {
@@ -108,7 +108,7 @@ function InviteAnglerBox({ crewId, onSent }) {
   );
 }
 
-function BroadcastBox({ crew, onSent }) {
+export function BroadcastBox({ crew, onSent }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [, tick] = useState(0);

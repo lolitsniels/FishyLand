@@ -238,3 +238,7 @@ html body .panel.fl-card, html body .panel.fl-login { padding: 16px 18px !import
 .fl-foot { display: flex; gap: 16px; justify-content: center; padding: 16px; font-size: 12.5px; color: #a9c1e0; }
 .fl-foot a:hover { color: #ffd27a; }
 @media (max-width: 640px) { .fl-mascot { height: 170px; } .fl-mascot-row { margin-bottom: -44px; } .fl-bubble { margin-bottom: 100px; font-size: 12.5px; max-width: 200px; } .fl-shots { grid-template-columns: 1fr; } }
+.club-frame { width: 92px; height: 104px; padding: 6px; border-radius: 4px; background: linear-gradient(145deg, #f6d58a, #b07a26 55%, #f1cd7c); box-shadow: 0 0 0 2px #3a240f, 0 6px 12px rgba(0, 0, 0, .5); transition: transform .15s ease; }
+.club-frame img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 2px; background: #10294a; }
+.club-frame:hover { transform: translateY(-2px) scale(1.04); }
+

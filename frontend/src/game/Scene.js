@@ -69,7 +69,7 @@ const ROD_LEN = 150;
 const GRIP = 0.22; // the fist holds the rod this far up from the butt; ROD_LEN is grip -> tip
 // Rod angle (radians, 0 = pointing forward, negative = up) for a given activity.
 const rodAngle = (mode, phase, moving, time, extra = 0) => {
-  if (mode === "harbour") return -1.3 + (moving ? Math.sin(time * 11) * 0.05 : Math.sin(time * 1.3) * 0.02);
+  if (mode === "harbour" || mode === "clubhouse") return -1.3 + (moving ? Math.sin(time * 11) * 0.05 : Math.sin(time * 1.3) * 0.02);
   if (phase === "fight" || phase === "resolving") return -0.45 - extra;
   if (phase === "wait" || phase === "bite") return -0.62 + (phase === "bite" ? Math.sin(time * 30) * 0.04 : 0);
   return -0.95 + Math.sin(time * 1.3) * 0.02;
@@ -322,7 +322,7 @@ function buildScene(app, tex, key, bgTex, mt) {
   }
   const caustics = [];
   const [sx, sy, sw0, sh0] = cfg.sparkle;
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < (cfg.indoor ? 0 : 9); i++) {
     const c = new Sprite(soft);
     c.anchor.set(0.5); c.blendMode = "add"; c.tint = 0x9ff7ff; c.alpha = 0.18;
     c.scale.set(3 + Math.random() * 3, 1 + Math.random());
@@ -429,7 +429,7 @@ function buildScene(app, tex, key, bgTex, mt) {
     fxLayer.addChild(m); mists.push(m);
   }
   const clouds = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < (cfg.indoor ? 0 : 5); i++) {
     const c = new Sprite(soft);
     c.anchor.set(0.5); c.alpha = mode === "harbour" ? 0.14 : 0.22; c.scale.set(5 + Math.random() * 4, 1.6 + Math.random());
     c.x = Math.random() * BG_W; c.y = 40 + Math.random() * 200; c._s = 4 + Math.random() * 6;

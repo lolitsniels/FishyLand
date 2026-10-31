@@ -48,6 +48,14 @@ export const OBJ = {
   jungle_tree: { w: 300, fp: [0.18, 0.06] },
   statue: { rect: true, w: 130, fp: [0.8, 0.35] },
   pillar: { rect: true, w: 110, fp: [0.8, 0.3] },
+  club_notice: { rect: true, w: 300, fp: [0.9, 0.14] },
+  club_portraits: { rect: true, w: 300, fp: [0.92, 0.14] },
+  club_trophies: { rect: true, w: 210, fp: [0.95, 0.3] },
+  club_desk: { rect: true, w: 340, fp: [0.92, 0.42] },
+  club_mailbox: { w: 110, fp: [0.75, 0.3] },
+  club_sofa: { rect: true, w: 300, fp: [0.95, 0.3] },
+  club_plant: { w: 160, fp: [0.45, 0.2] },
+  club_rug: { w: 440, fp: [0, 0], ground: true },
   basalt: { w: 190, fp: [0.8, 0.35] },
   dead_tree: { w: 230, fp: [0.2, 0.08] },
   vent_hut: { rect: true, w: 320, fp: [0.9, 0.5] },
@@ -57,7 +65,7 @@ export const OBJ = {
 const CELL = 16;
 const CHUNK = 1024;
 
-const TEX_K = { grass: 0.45, sand: 0.4, dirt: 0.4, planks: 0.35, cobble: 0.26, flag: 0.3, rock: 0.25, cave: 0.3, mud: 0.32 };
+const TEX_K = { clubwall: 0.4, clubfloor: 0.2, grass: 0.45, sand: 0.4, dirt: 0.4, planks: 0.35, cobble: 0.26, flag: 0.3, rock: 0.25, cave: 0.3, mud: 0.32 };
 const pattern = (ctx, img, k = 0.4) => { const p = ctx.createPattern(img, "repeat"); p.setTransform(new DOMMatrix().scale(k)); return p; };
 const pathPoly = (ctx, pts) => { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.closePath(); };
 const pathLine = (ctx, pts) => { ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); };

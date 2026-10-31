@@ -19,6 +19,7 @@ import { ChatBox } from "./ChatBox";
 import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
 import { GameSettings } from "./GameSettings";
+import { ClubhousePanel } from "./Clubhouse";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
@@ -30,7 +31,7 @@ export const PAGES = {
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
 const BAR_R_WATER = ["quests", "profile"];
-const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
+const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "clubhouse" ? "clubhouse" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
 const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
@@ -94,6 +95,7 @@ export default function World() {
   const [atSpot, setAtSpot] = useState(null);
   const [more, setMore] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [club, setClub] = useState(null);
   const prevWater = useRef(null);
   const page = loc.pathname.replace(/^\/game\/?/, "").split("/")[0];
   const water = data?.waters?.find((x) => x.key === user?.water);
@@ -101,7 +103,7 @@ export default function World() {
   useEffect(() => { setMusicPlace(placeOf(mode, user)); }, [mode, user?.water]);
   useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
 
-  const goTo = (m) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...sceneFor(placeOf(m, user)).spawn }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
+  const goTo = (m, at) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...(at || sceneFor(placeOf(m, user)).spawn) }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
   useEffect(() => {
     if (mode === "duel" && page && page !== "inventory" && page !== "journal") { nav("/game", { replace: true }); return; }
@@ -129,6 +131,9 @@ export default function World() {
     fx.openSpot = (id) => {
       if (id === "boat") nav("/game/waters");
       else if (id === "harbour") goTo("harbour");
+      else if (id === "clubhouse") goTo("clubhouse");
+      else if (id === "crew-island") goTo("crew", { x: 1200, y: 790 });
+      else if (id.startsWith("club-")) setClub(id);
       else if (id === "crew-pond") toast("The crew pond has no fish yet. Your crew can stock it soon.", { id: "crew-pond" });
       else nav(`/game/${id}`);
     };
@@ -171,7 +176,7 @@ export default function World() {
     <div className="fixed inset-0 overflow-hidden select-none" data-testid="game-page" data-mode={mode} onPointerDown={() => startMusic()}>
       <Scene place={placeOf(mode, user)} />
       <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: w / s, height: h / s, transform: `scale(${s})` }} data-testid="game-hud">
-        <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : mode === "duel" ? "Duel Pier" : mode === "crew" ? `${user.crew?.name || "Crew"} Island` : water?.name} here={here} /></div>
+        <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : mode === "duel" ? "Duel Pier" : mode === "crew" ? `${user.crew?.name || "Crew"} Island` : mode === "clubhouse" ? `${user.crew?.name || "Crew"} Clubhouse` : water?.name} here={here} /></div>
         {mode === "water" && idle && !page && (
           <button type="button" className="fr-btn fr-btn-dark absolute right-3 px-4 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
         )}
@@ -183,6 +188,7 @@ export default function World() {
           </div>
         )}
         {mode === "harbour" && !nearSpot && idle && !page && <Hint>Tap to walk or use WASD · visit a signpost · board the Sea Serpent to travel</Hint>}
+        {mode === "clubhouse" && !nearSpot && !club && <Hint testid="club-hint">Walk up to the notice board, portraits, trophy shelf, captain's desk or mailbox</Hint>}
         {wet && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={closeResult} /></div>}
@@ -213,6 +219,7 @@ export default function World() {
         </Modal>
       )}
       {settingsOpen && <GameSettings onClose={() => setSettingsOpen(false)} />}
+      {club && mode === "clubhouse" && <ClubhousePanel spot={club} onClose={() => setClub(null)} />}
       {page && page !== "fish" && (
         <Modal title={title} testid="page-modal" width={980} onClose={() => nav("/game")}>
           <div className="tfl-skin"><Outlet /></div>

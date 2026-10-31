@@ -111,7 +111,7 @@ export const CREW_ISLAND_MAP = {
     { k: "rocks", x: 380, y: 900, w: 150 }, { k: "rocks", x: 2000, y: 880, w: 150 }, { k: "barrels", x: 1330, y: 1540, w: 100 },
   ],
   spots: [
-    { id: "crews", label: "Crew Clubhouse", img: "crew", x: 1200, y: 705 },
+    { id: "clubhouse", label: "Enter the Crew Clubhouse", img: "crew", x: 1200, y: 705 },
     { id: "crew-pond", label: "Crew Pond · not stocked", img: "fishdex", x: 1200, y: 1215 },
     { id: "harbour", label: "Boat to Harbour", img: "map", x: 1200, y: 1740 },
   ],
@@ -119,6 +119,30 @@ export const CREW_ISLAND_MAP = {
 };
 
 // Duel Pier arena: one round pond, a pier from each side, scoreboard stand at the top.
+// Inside the crew clubhouse (yacht club): every crew function is a piece of furniture to walk up to.
+export const CLUBHOUSE_MAP = {
+  tiled: true, indoor: true, W: 2000, H: 1300, scale: 0.74, spawn: { x: 1000, y: 1160 }, weather: null,
+  base: "clubfloor",
+  ground: [{ tex: "clubwall", poly: [0, 0, 2000, 0, 2000, 410, 0, 410] }],
+  water: [],
+  blocks: [[0, 0, 2000, 0, 2000, 440, 0, 440]],
+  objects: [
+    { k: "club_rug", x: 1000, y: 1040, w: 360 },
+    { k: "club_notice", x: 520, y: 520 }, { k: "club_portraits", x: 1000, y: 530 }, { k: "club_trophies", x: 1480, y: 530 },
+    { k: "club_desk", x: 1600, y: 920 }, { k: "club_mailbox", x: 360, y: 920 },
+    { k: "club_sofa", x: 560, y: 1200 }, { k: "club_plant", x: 170, y: 540 }, { k: "club_plant", x: 1830, y: 540 }, { k: "club_plant", x: 1860, y: 1200, w: 140 },
+  ],
+  spots: [
+    { id: "club-notice", label: "Notice Board", img: "quests", x: 520, y: 590 },
+    { id: "club-portraits", label: "Member Portraits", img: "crew", x: 1000, y: 600 },
+    { id: "club-trophies", label: "Trophy Shelf", img: "rankings", x: 1480, y: 600 },
+    { id: "club-desk", label: "Captain's Desk · Settings", img: "settings", x: 1600, y: 980 },
+    { id: "club-mail", label: "Mailbox · Join requests", img: "pass", x: 360, y: 980 },
+    { id: "crew-island", label: "Back to the island", img: "map", x: 1000, y: 1240 },
+  ],
+  sparkle: [0, 0, 0, 0], leap: null, life: {},
+};
+
 export const DUEL_MAP = {
   tiled: true, W: 2200, H: 1500, scale: 0.74, spawn: { x: 1100, y: 1230 }, weather: "gulls", water_tex: "river",
   base: "grass",
@@ -486,7 +510,7 @@ export const CINDER_MAP = {
 };
 
 export const TILED = {
-  harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP, duel_pier: DUEL_MAP,
+  harbour: HARBOUR_MAP, millbrook: MILLBROOK_MAP, crew_island: CREW_ISLAND_MAP, clubhouse: CLUBHOUSE_MAP, duel_pier: DUEL_MAP,
   willow: WILLOW_MAP, greyfell: GREYFELL_MAP, saltmarsh: SALTMARSH_MAP, harrow: HARROW_MAP, coral: CORAL_MAP, blackwater: BLACKWATER_MAP,
   frozen: FROZEN_MAP, sunken: SUNKEN_MAP, ghostlight: GHOSTLIGHT_MAP, temple: TEMPLE_MAP, cinder: CINDER_MAP,
 };

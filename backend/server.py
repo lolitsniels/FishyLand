@@ -3146,13 +3146,18 @@ async def crew_detail(crew_id: str, user=Depends(get_current_user)):
     members = []
     officer_ids = set(c.get("officer_ids", []))
     for m in c["members"]:
-        u = await db.users.find_one({"_id": ObjectId(m["user_id"])}, {"xp": 1, "last_seen": 1})
-        members.append({**m, "role": "leader" if m["user_id"] == c["leader_id"] else "officer" if m["user_id"] in officer_ids else "member",
+        u = await db.users.find_one({"_id": ObjectId(m["user_id"])}, {"xp": 1, "last_seen": 1, "avatar": 1})
+        members.append({**m, "avatar": (u or {}).get("avatar"), "role": "leader" if m["user_id"] == c["leader_id"] else "officer" if m["user_id"] in officer_ids else "member",
                         "level": level_from_xp(u["xp"])[0] if u else 1, "last_seen": u["last_seen"] if u else None,
                         "week_kg": round(contrib.get(m["user_id"], {}).get("kg", 0), 2), "week_catches": contrib.get(m["user_id"], {}).get("catches", 0)})
     members.sort(key=lambda m: -m["week_kg"])
     out = crew_out(c, round(sum(m["week_kg"] for m in members), 2))
     out["members"] = members
+    # trophy shelf: all-time crew totals and the heaviest fish landed for the crew
+    tot = await db.catch_log.aggregate([{"$match": {"crew_id": crew_id}}, {"$group": {"_id": None, "n": {"$sum": 1}, "kg": {"$sum": "$weight"}, "sp": {"$addToSet": "$species_id"}}}]).to_list(1)
+    best = await db.catch_log.find({"crew_id": crew_id}, {"name": 1, "weight": 1, "caught_by_name": 1, "username": 1, "rarity": 1}).sort("weight", -1).limit(3).to_list(3)
+    out["trophies"] = {"catches": tot[0]["n"] if tot else 0, "kg": round(tot[0]["kg"], 2) if tot else 0, "species": len(tot[0]["sp"]) if tot else 0,
+                       "best": [{"name": b.get("name"), "weight": b.get("weight"), "rarity": b.get("rarity"), "by": b.get("caught_by_name") or b.get("username")} for b in best]}
     return out
 
 
