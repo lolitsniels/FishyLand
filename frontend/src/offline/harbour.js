@@ -118,11 +118,10 @@ export function makeHarbour(ctx) {
   const have = (k) => { const n = S().catches.filter((x) => x.species_id === k.species_id).length; return { count: n, kg: 0, ready: n >= k.qty - (k.progress || 0) }; };
   function contractsOut() {
     const c = offers(), favour = (id) => c.favour[id] || 0;
-    const rankOf = (f) => [0, 100, 300, 700, 1500].filter((x) => f >= x).length;
-    const ranks = ["Stranger", "Acquaintance", "Trusted", "Friend", "Confidant"];
-    return { patrons: H.patrons.map((p) => { const f = favour(p.id), rk = rankOf(f); return { ...p, favour: f, rank: rk, rank_name: ranks[rk - 1], rank_at: [0, 100, 300, 700, 1500][rk - 1], next_at: [100, 300, 700, 1500, null][rk - 1], perks: [], milestones: [] }; }),
+    const AT = [0, 100, 300, 650, 1200], ranks = ["Stranger", "Acquaintance", "Trusted", "Partner", "Old Friend"], rankOf = (f) => AT.filter((x) => f >= x).length;
+    return { patrons: H.patrons.map((p) => { const f = favour(p.id), rk = rankOf(f); return { ...p, favour: f, rank: rk, rank_name: ranks[rk - 1], rank_at: AT[rk - 1], next_at: AT[rk] ?? null, perks: [] }; }),
       accepted: c.accepted.map((k) => ({ ...k, have: have(k), on_market: 0 })), offers: c.offers.map((k) => ({ ...k, have: have(k), on_market: 0 })), slots: { used: c.accepted.length, max: SLOTS },
-      reroll_available: (c.rerolls || 0) > 0, rerolls_left: c.rerolls || 0, rerolls_max: 2, gold_mult: 1, recent: [], ranks, rank_at: [0, 100, 300, 700, 1500], done_today: c.done_today, daily_cap: DAILY_CAP, day_resets_at: endOf(1) };
+      reroll_available: (c.rerolls || 0) > 0, rerolls_left: c.rerolls || 0, rerolls_max: 2, gold_mult: 1, recent: [], ranks, rank_at: AT, done_today: c.done_today, daily_cap: DAILY_CAP, day_resets_at: endOf(1) };
   }
   const fail = (d) => { throw Object.assign(new Error(d), { status: 400, detail: d }); };
   function contractAct(id, act) {
@@ -139,11 +138,14 @@ export function makeHarbour(ctx) {
     S().catches = S().catches.filter((x) => !ids.has(x.id));
     a.progress = (a.progress || 0) + fish.length;
     if (a.progress < a.qty) { save(); return { done: false, state: contractsOut(), user: pub(), delivered: fish.length, progress: a.progress, target: a.qty }; }
-    c.accepted = c.accepted.filter((k) => k !== a); c.done_today += 1; c.total = (c.total || 0) + 1; c.favour[a.patron] = (c.favour[a.patron] || 0) + a.favour;
+    c.accepted = c.accepted.filter((k) => k !== a); c.done_today += 1; c.total = (c.total || 0) + 1;
+    const before = c.favour[a.patron] || 0; c.favour[a.patron] = before + a.favour;
+    const rankUps = (H.patrons.find((p) => p.id === a.patron)?.milestones || []).filter((m) => before < m.at && c.favour[a.patron] >= m.at);
+    rankUps.forEach((m) => grant({ gold: m.gold, pearls: m.pearls }));
     grant({ gold: a.gold, xp: a.xp, pearls: a.pearls });
     const ev = event("contract", {});
     save();
-    return { done: true, state: contractsOut(), user: pub(), patron: a.patron_short, gold: a.gold, xp: a.xp, pearls: a.pearls, favour: a.favour, rank_ups: [], level_up: lvl() > old ? lvl() : null, new_achievements: ev.new_achievements, quests_done: ev.quests_done };
+    return { done: true, state: contractsOut(), user: pub(), patron: a.patron_short, gold: a.gold, xp: a.xp, pearls: a.pearls, favour: a.favour, rank_ups: rankUps.map((m) => ({ patron: a.patron_short, rank: m.name, gold: m.gold, pearls: m.pearls, title: null })), level_up: lvl() > old ? lvl() : null, new_achievements: ev.new_achievements, quests_done: ev.quests_done };
   }
 
   // ---- Almanac (your own log; market prices need the online version)

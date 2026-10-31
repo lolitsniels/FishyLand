@@ -40,7 +40,7 @@ const BAR_R_WATER = ["quests", "profile"];
 const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "clubhouse" ? "clubhouse" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
-const MORE = OFFLINE ? [] : ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
+const MORE = OFFLINE ? ["pearl-shop", "quests", "contracts", "achievements", "almanac"] : ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
 
 function useScale() {
   const calc = () => { const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight; return { s: Math.max(w < 600 ? 0.74 : 0.55, Math.min(1.15, w / 1000, h / 640)), w, h }; };
