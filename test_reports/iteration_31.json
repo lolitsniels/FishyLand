@@ -1,0 +1,15 @@
+{
+  "summary": "Focused frontend check of building depth sort fix (o.sortY = median of footColumns base y, used in placeObjects zIndex). Crew Island Yacht Club (x=1200,y=650,w=440): angler pushed with WASD from left (stops x=1011), right (stops x=1378), front-left/front-right walking up beside the stairs (stops y=631), mid side-depth (y=560, stops x=988) and click-to-walk to left of stairs (1105,676) - angler drawn fully IN FRONT in all cases, head/body no longer hidden by dark base band, no wall penetration. Back side (y=380 walking south) - building correctly covers angler (only name tag/rod tip visible above roof). Harbour: Crew HQ guild_hall (2000,945) left/right of steps -> angler in front, blocked at x=1801/2200. Pearl Shop (2120,1585) left/right/front -> in front, back (y=1342) -> covered. All checks pass.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/tests/collide_helpers.py"],
+  "action_items": [],
+  "critical_code_review_comments": ["sortY loop calls footColumns a second time per rect object (already computed for shadows) - minor duplicate work at map build, could reuse the cols."],
+  "updated_files": [],
+  "success_rate": {"backend": "skipped", "frontend": "100%"},
+  "test_credentials": "TestAngler / Angler#2026",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Use collide_helpers boot(page,'crew'|'harbour') + push(page,x,y,key). Lamp posts in front of the Yacht Club stairs legitimately overlap the angler when standing beside the steps (they are at a lower y) - not a bug."
+}

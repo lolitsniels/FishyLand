@@ -48,7 +48,7 @@ export const HARBOUR_MAP = {
     { k: "guild_hall", x: 2000, y: 945, w: 470, fp: [0.92, 0.72] }, { k: "house", x: 2440, y: 945, flip: true },
     { k: "fountain", x: 1550, y: 1310, w: 250, plaza: true }, { k: "quest_board", x: 1830, y: 1175, w: 140 }, { k: "quest_board", x: 1270, y: 1175, w: 140 },
     { k: "tavern", x: 900, y: 1585, w: 400 }, { k: "pearl_shop", x: 2120, y: 1585, w: 350 }, { k: "house", x: 300, y: 1585, w: 260 },
-    { k: "ship", x: 3060, y: 1590, w: 620, flip: true }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
+    { k: "ship", x: 3140, y: 1590, w: 620, flip: true }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
     ...[400, 900, 1350, 1750, 2200, 2650].map((x) => ({ k: "lantern", x, y: 1125 })),
     ...[500, 1150, 1750, 2350].map((x) => ({ k: "lantern", x, y: 1785 })),
     { k: "lantern", x: 2640, y: 1560 },
@@ -166,10 +166,10 @@ export const CLUBHOUSE_MAP = {
   water: [],
   blocks: [[0, 0, 2000, 0, 2000, 465, 0, 465]],
   objects: [
-    { k: "club_rug", x: 1000, y: 930, w: 290 },
+    { k: "club_rug", x: 1000, y: 930, w: 230 },
     { k: "club_notice", x: 520, y: 520 }, { k: "club_portraits", x: 1000, y: 530 }, { k: "club_trophies", x: 1480, y: 530 },
     { k: "club_desk", x: 1600, y: 920 }, { k: "club_mailbox", x: 360, y: 920 },
-    { k: "club_sofa", x: 600, y: 1090 }, { k: "club_plant", x: 170, y: 540 }, { k: "club_plant", x: 1830, y: 540 }, { k: "club_plant", x: 1860, y: 1100, w: 140 },
+    { k: "club_sofa", x: 600, y: 1090 }, { k: "club_plant", x: 170, y: 540 }, { k: "club_plant", x: 1830, y: 540 }, { k: "club_plant", x: 1860, y: 1100, w: 100 },
   ],
   spots: [
     { id: "club-notice", label: "Notice Board", img: "quests", x: 520, y: 590 },
