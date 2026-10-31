@@ -88,6 +88,10 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
   chapters, seeded daily/weekly), Achievements (simple counter ones), Pearl Shop (frames + chat colours, pearls only), Anchor Café contracts (partial
   hand-ins, favour ranks), Almanac (own log). Tests iteration_26-29 pass. Deferred: Duel Pier vs computer angler.
 
+- 2026-06 (iter 33): Collision from sprite silhouettes (full width incl. overhangs, base up to 78% height, down to sort line), draw order by wall line
+  (o.sortY), contact shadows; vector signboard banners for building spots; modern fishing icons (art/ui/*.png, hud/tackle, hud/sail; old in /app/promo_src/icons/old),
+  modern blue .fr-tile; clubhouse furniture ~2/3 size; harbour ship moved into water. Debug hooks window.__walk/__objs.
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)

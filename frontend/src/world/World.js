@@ -31,7 +31,7 @@ export const PAGES = {
   inventory: ["Inventory", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "/art/hud/tackle.webp"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
   quests: ["Quests", "quests"], contracts: ["Contracts", "daily"], market: ["Market", "market"], crews: ["Crew HQ", "crew"], tournaments: ["Tournaments", "rankings"],
   duel: ["Duel Pier", "guild"], leaderboards: ["Leaderboards", "rankings"], achievements: ["Achievements", "daily"], crafting: ["Bait Crafting", "craft"],
-  messages: ["Messages", "pass"], almanac: ["Almanac", "fishdex"], wiki: ["Wiki", "skills"], "pearl-shop": ["Pearl Shop", "pass"], admin: ["Admin", "settings"],
+  messages: ["Messages", "mail"], almanac: ["Almanac", "almanac"], wiki: ["Wiki", "wiki"], "pearl-shop": ["Pearl Shop", "pearl"], admin: ["Admin", "settings"],
 };
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
