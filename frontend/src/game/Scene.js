@@ -116,15 +116,15 @@ function makeFigure() {
 }
 
 // Chat speech bubble above an angler's head.
-function makeBubble() {
+function makeBubble(maxLen = 90, wrap = 220) {
   const c = new Container(), bg = new Graphics();
-  const t = new Text({ text: "", style: { fontFamily: "Noto Sans", fontWeight: "700", fontSize: 14, fill: 0x2a1a08, wordWrap: true, wordWrapWidth: 220, align: "center" } });
+  const t = new Text({ text: "", style: { fontFamily: "Noto Sans", fontWeight: "700", fontSize: 14, fill: 0x2a1a08, wordWrap: true, wordWrapWidth: wrap, align: "center" } });
   t.anchor.set(0.5, 1); c.addChild(bg, t); c.visible = false; c._txt = "";
   c.show = (txt) => {
     if (!txt) { c.visible = false; return; }
     c.visible = true;
     if (txt === c._txt) return;
-    c._txt = txt; t.text = txt.length > 90 ? `${txt.slice(0, 88)}…` : txt; t.y = -12;
+    c._txt = txt; t.text = txt.length > maxLen ? `${txt.slice(0, maxLen - 2)}…` : txt; t.y = -12;
     const w = t.width + 22, h = t.height + 12;
     bg.clear().roundRect(-w / 2, -h - 6, w, h, 10).fill({ color: 0xfff6dc, alpha: 0.96 }).stroke({ width: 2, color: 0xb98a35 })
       .poly([-7, -7, 7, -7, 0, 2]).fill({ color: 0xfff6dc });
@@ -355,6 +355,23 @@ function buildScene(app, tex, key, bgTex, mt) {
   const groundLayer = new Container();
   base.addChild(groundLayer);
   const objViews = tm ? placeObjects(tm.objects, mt.obj, groundLayer, actors) : [];
+  // Harbour patrons: walk close or tap them and they share a hint in a speech bubble.
+  const npcViews = (cfg.npcs || []).map((n) => {
+    const c = new Container(); c.x = n.x; c.y = n.y; c.zIndex = n.y;
+    const sh = new Graphics().ellipse(0, 0, 34, 10).fill({ color: 0x000000, alpha: 0.25 });
+    const s = new Sprite(Texture.EMPTY); s.anchor.set(0.5, 1);
+    Assets.load(`art/npc/body_${n.id}.webp`).then((t) => { if (!s.destroyed) { s.texture = t; s.scale.set((ANGLER_H * 1.02) / t.height); } }).catch(() => {});
+    const name = new Text({ text: n.name, style: { ...NAME_STYLE, fontSize: 13, fill: 0xffe7a8 } }); name.anchor.set(0.5, 1); name.y = -ANGLER_H - 8;
+    const bubble = makeBubble(170, 270); bubble.y = -ANGLER_H - 30;
+    c.addChild(sh, s, name, bubble);
+    c.eventMode = "static"; c.cursor = "pointer"; c.hitArea = new Rectangle(-45, -ANGLER_H, 90, ANGLER_H + 10);
+    const v = { c, s, bubble, n, i: -1, until: 0, near: false };
+    v.say = () => { v.i = (v.i + 1) % n.lines.length; v.until = Date.now() + 8000; };
+    c.on("pointertap", (e) => { e.stopPropagation(); v.say(); });
+    actors.addChild(c);
+    return v;
+  });
+  window.__npcs = npcViews.map((v) => v.n.id);
   const leapTex = [];
   if (tm) [...new Set(fx.leapArt || [])].slice(0, 8).forEach((u) => Assets.load(u).then((t) => leapTex.push(t)).catch(() => {}));
   const spotViews = cfg.spots.map((sp) => {
@@ -631,6 +648,14 @@ function buildScene(app, tex, key, bgTex, mt) {
 
     // actors
     hero.setLook(fx.look); hero.setRod(fx.rod || "rod_cane");
+    for (const v of npcViews) {
+      v.c.scale.set(depth(v.n.y));
+      const near = Math.hypot(fx.me.x - v.n.x, fx.me.y - v.n.y) < 160;
+      if (near && !v.near) v.say();
+      v.near = near;
+      v.bubble.show(Date.now() < v.until ? v.n.lines[v.i] : "");
+      if (v.s.texture !== Texture.EMPTY) v.s.scale.x = Math.abs(v.s.scale.x) * (fx.me.x < v.n.x ? -1 : 1);
+    }
     { const b = fx.bubbles?.[fx.username]; myBubble.show(b && b.until > Date.now() ? b.text : ""); myBubble.x = nameplate.x; myBubble.y = nameplate.y - 24; }
     nameplate.text = fx.username; titleplate.text = fx.title ? `« ${fx.title} »` : "";
 

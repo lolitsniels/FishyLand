@@ -20,6 +20,7 @@ import { DuelHud } from "./DuelLive";
 import { QuickTackle } from "./QuickTackle";
 import { GameSettings } from "./GameSettings";
 import { ClubhousePanel } from "./Clubhouse";
+import { WorldTutorial } from "./WorldTutorial";
 import { lookFace } from "../game/look";
 
 export const PAGES = {
@@ -101,7 +102,7 @@ export default function World() {
   const water = data?.waters?.find((x) => x.key === user?.water);
   const here = usePresence(placeOf(mode, user));
   useEffect(() => { setMusicPlace(placeOf(mode, user)); }, [mode, user?.water]);
-  useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
+  useEffect(() => { fx.leapArt = mode === "water" && data ? data.fish.filter((f) => f.water === user?.water).map((f) => fishArt(f.rarity, f.species_id ?? f.id, f.species_id ?? f.id)) : []; }, [mode, data, user?.water]);
 
   const goTo = (m, at) => { fx.mode = m; sessionStorage.setItem("fr_mode", m); fx.me = { ...(at || sceneFor(placeOf(m, user)).spawn) }; fx.dest = null; fx.path = []; fx.autoOpen = null; fx.flip = false; setMode(m); };
 
@@ -179,7 +180,7 @@ export default function World() {
       <div className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: w / s, height: h / s, transform: `scale(${s})` }} data-testid="game-hud">
         <div className="absolute top-3 left-3"><TopBar u={user} place={mode === "harbour" ? "The Harbour" : mode === "duel" ? "Duel Pier" : mode === "crew" ? `${user.crew?.name || "Crew"} Island` : mode === "clubhouse" ? `${user.crew?.name || "Crew"} Clubhouse` : water?.name} here={here} /></div>
         {mode === "water" && idle && !page && (
-          <button type="button" className="fr-btn fr-btn-dark absolute right-3 px-4 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
+          <button type="button" className="img-pill-dark absolute right-3 px-6 py-2 pointer-events-auto text-sm" style={{ top: w < 700 ? 120 : 12 }} onClick={() => goTo("harbour")} data-testid="back-harbour-button">Back to Harbour</button>
         )}
         {nearSpot && idle && !page && (
           <div className="absolute inset-x-0 bottom-[150px] flex justify-center">
@@ -196,6 +197,7 @@ export default function World() {
         <ChatBox />
         {mode === "duel" && <DuelHud />}
         <QuickTackle />
+        <WorldTutorial mode={mode} />
         <div ref={barRef} className="absolute bottom-2 left-1/2 pointer-events-auto fr-panel flex items-end gap-2.5 px-3 pt-1.5 pb-1" style={{ transform: `translateX(-50%) scale(${barK})`, transformOrigin: "50% 100%" }} data-testid="action-bar">
           {BAR_L.map((k) => <Ring key={k} img={PAGES[k][1]} label={PAGES[k][0]} size={w < 600 ? 36 : 46} testid={`menu-${k}`} onClick={() => nav(`/game/${k}`)} />)}
           <button type="button" data-testid="cast-fish-button" disabled={wet && (!canFish || !idle)}

@@ -1,0 +1,42 @@
+{
+  "summary": "Tested Clubhouse Upgrades (Crew Vault and bank cap), harbour lantern placement and house/HQ collision. Backend: 13/13 new pytest pass. GET /hall returns bank_cap 250000 and the vault def ('Crew Vault', next 'the bank holds up to 500,000 gold', cost 20000) plus luck, energy, hall, market and repair. A deposit past the cap returns 400 that names the Crew Vault, and no gold is taken. An exact fill to the cap works. A plain member gets 403 on buy. The leader can buy the vault (cap goes to 500000, bank drops 20000), and an officer can buy too. The luck perk shows in /fish/odds parts as {key:'crew', luck:1}. The energy perk lowers energy_regen_sec by 1.1x. Not enough bank and an unknown perk both return 400. The iter21 and iter12 regressions pass (17/17). Map audit (/game?mapview=1&mapcheck=1) is clean (moved, dropped, onPath, wetBad and spots all empty, spawn true) for harbour, crew_island, duel_pier and clubhouse. Collision: walking with WASD from below, left, right and above into houses (800,945), (2440,945), (300,1585) and the HQ (2000,945) always stops at the footprint edge. Clicking the walls or roof sends the player to a walkable cell outside the footprint, and walking to a point behind the building goes around it without entering the footprint (0 samples inside). UI: Captain's Desk shows the 'Clubhouse upgrades' panel with bank '30,000 / 250,000', all 6 perk rows, Build buttons for the leader, the deposit form, and no hall-banner or motd inside the panel. Leader Build on the vault updates the cap to '/ 500,000' and the ledger. Deposit gives a success toast. A member on mobile (390x844) sees 0 Build buttons, and a deposit past the cap shows the Crew Vault error toast.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "crew_orders.payout / crew_boss bank $inc", "issue": "Weekly-order payouts (crew_orders.py:209) and Leviathan payouts (crew_boss.py:270) still $inc the bank with no cap check, so the bank can go past bank_cap. This may be on purpose (rewards should not be lost), but then a deposit will 400 with a negative 'space left' clamped to 0. Decide on the rule: clamp with $min, or document that the cap applies to deposits only."},
+      {"endpoint": "POST /crews/{id}/hall/deposit", "issue": "The cap check is read-then-write, not atomic. Two deposits at the same time can push the bank past the cap. Put the room check in the update filter (bank <= cap - amount), as hall_buy already does with bank $gte."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "CrewHall deposit input", "issue": "The input max is user.gold, not the room left in the bank (bank_cap - bank). The user can only find out the bank is full from the error toast. Clamp max and the quick buttons to the space left, or show 'X space left'.", "selector": "[data-testid='deposit-input']", "priority": "LOW"},
+      {"component": "Deposit error text", "issue": "The message 'Upgrade the Crew Vault at the Captain's Desk' is shown while the user is already at the Captain's Desk, including to plain members who cannot build.", "selector": "[data-sonner-toast]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Captain's Desk Clubhouse upgrades", "issues": [
+        "The perk order is luck, market, energy, repair, vault, hall. Crew Vault is the new upgrade and is tied to the bank cap, but it sits near the bottom, below the fold of the 760px modal. Consider putting it first, next to the bank/cap header.",
+        "The Crew Hall perk text still says '+5 member capacity, hall banner & notice board'. In the clubhouse (compact) the banner is hidden and the Notice Board is a separate piece of furniture, so the text is misleading.",
+        "The footer copy 'Perks apply to all 20-max members.' reads awkwardly."
+      ]},
+      {"screen": "Harbour HQ collision", "issues": ["Clicking the HQ roof or upper floor sends the player to the nearest walkable cell, which can be the right side at mid-depth (2232,745). There the sprite looks like it is standing against the balcony corner. It does not overlap the footprint, but a front cell (y >= 945) would look better as the fallback when the target is inside a building."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter22_crew_vault.py", "/app/backend/tests/seed_iter22_ui.py", "/app/test_reports/pytest/pytest_iter22.xml"],
+  "action_items": [
+    "Decide whether order and boss payouts respect bank_cap (clamp them or document it), and make the deposit cap check atomic",
+    "Optional UX: clamp the deposit input to the space left, change the 'at the Captain's Desk' wording, move Crew Vault to the top of the perk list, and update the Crew Hall perk text"
+  ],
+  "critical_code_review_comments": [
+    "crew_hall.py deposit: the read-then-write cap check is not atomic (see minor issue).",
+    "crew_hall.py bank_cap uses `perk_value(...) or BANK_BASE`, which is correct. Vault tiers 2 and 3 need 5 or 10 members plus orders, so small crews stay capped at 500k.",
+    "server.regen_sec uses the tier index (1 + 0.1*t) and not PERKS['energy']['per']. It matches today (10/20/30%), but if the per values change the two will drift apart. Use perk_value(...)/100."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter22_crew_vault.py", "/app/backend/tests/seed_iter22_ui.py"],
+  "success_rate": {"backend": "100% (13/13 new + 17/17 regression)", "frontend": "100% of requested flows (minor UX notes only)"},
+  "test_credentials": "Niels/Niels112233! (leader), TestAngler2/Angler#2026 (member/officer) from /app/memory/test_credentials.md",
+  "seed_data_creation": "The pytest fixture creates and removes 'TEST Iter22 Vault' [TV22]. seed_iter22_ui.py creates 'TEST Vault UI' [TVU] (Niels leader, TestAngler2 member, bank 30000). It was cleaned up with `python tests/seed_iter22_ui.py cleanup`. 0 TEST crews remain. Niels gold was set via $max to at least 2,000,000 and TestAngler2 to at least 50,000.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest with -n 0 (pytest.ini adds xdist). The bank is seeded directly through pymongo db.crews bank. In the UI, set localStorage owo_token plus sessionStorage fr_mode='clubhouse', reload, then window.__fx.openSpot('club-desk'). For collision tests, teleport with window.__fx.me.x/y and walk with window.__fx.keys.add('up'|'down'|'left'|'right'). The camera scale at 1920x1080 is 1.1 and centred on the player unless clamped at the map edge."
+}

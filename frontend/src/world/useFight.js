@@ -10,7 +10,9 @@ const FISH_ART = {
   common: ["glimmer_minnow", "azure_perch"], uncommon: ["lagoon_carp", "coral_snapper"], rare: ["moonfin_trout", "prism_koi"],
   epic: ["stormscale_pike", "crystal_angelfish"], legendary: ["golden_sunray"], mythic: ["starwhale"],
 };
-export const fishArt = (rarity, seed = 0) => { const a = FISH_ART[rarity] || FISH_ART.rare; return `art/fish/${a[Math.abs(seed) % a.length]}.png`; };
+export const standInArt = (rarity, seed = 0) => { const a = FISH_ART[rarity] || FISH_ART.rare; return `art/fish/${a[Math.abs(seed) % a.length]}.png`; };
+// every species has its own painting in art/fish_v2; the stand-ins cover hidden bites and missing files
+export const fishArt = (rarity, seed = 0, speciesId = null) => (speciesId != null ? `art/fish_v2/${speciesId}.webp` : standInArt(rarity, seed));
 const phase = (p) => { setFxPhase(p); useGame.getState().setPhase(p); };
 
 // Cast -> bite -> TensionGame (FishyLand rules) -> land, all decided by the FishyLand server.
@@ -55,7 +57,7 @@ export function useFight() {
       if (r.user) setUser(r.user);
       if (r.success) {
         const c = r.catch || {};
-        fx.speciesImg = fishArt(c.rarity, (c.species_id || 0));
+        fx.speciesImg = fishArt(c.rarity, (c.species_id || 0), c.species_id);
         phase("landed"); sfx("land");
         useGame.setState({ result: { ...r, img: fx.speciesImg } });
       } else {

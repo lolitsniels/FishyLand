@@ -12,12 +12,13 @@ const STAND_IN = ["azure_perch", "coral_snapper", "crystal_angelfish", "glimmer_
 // Illustrated species plate (transparent PNG); silhouette mode for undiscovered journal entries.
 export const FishPlate = ({ speciesId, name, silhouette = false, className = "" }) => {
   const [failed, setFailed] = useState(false);
+  const [own, setOwn] = useState(true);
   if (failed) return <div className={`bg-[var(--bg-2)] border border-[var(--border)] flex items-center justify-center text-[var(--muted)] text-[10px] ${className}`}>{silhouette ? "?" : tt("no plate")}</div>;
   return (
     <div className={`border border-[var(--border)] bg-[var(--bg-2)] flex items-center justify-center p-1 ${className}`} style={{ backgroundImage: "radial-gradient(ellipse at center, #221e1b 0%, #121110 75%)" }}>
-      <img src={`/art/fish/${STAND_IN[speciesId % STAND_IN.length]}.png`} alt={silhouette ? tt("Undiscovered species") : name} data-silhouette={silhouette ? "1" : undefined} onError={() => setFailed(true)} loading="lazy"
+      <img src={own ? `/art/fish_v2/${speciesId}.webp` : `/art/fish/${STAND_IN[speciesId % STAND_IN.length]}.png`} alt={silhouette ? tt("Undiscovered species") : name} data-silhouette={silhouette ? "1" : undefined} onError={() => (own ? setOwn(false) : setFailed(true))} loading="lazy"
         className="max-w-full max-h-full object-contain"
-        style={silhouette ? { filter: "brightness(0) invert(0.35) blur(0.8px)", opacity: 0.6 } : { filter: `hue-rotate(${(speciesId * 47) % 360}deg) drop-shadow(0 2px 3px rgba(0,0,0,.6))` }} data-testid={`fish-plate-${speciesId}`} />
+        style={silhouette ? { filter: "brightness(0) invert(0.35) blur(0.8px)", opacity: 0.6 } : { filter: own ? "drop-shadow(0 2px 3px rgba(0,0,0,.6))" : `hue-rotate(${(speciesId * 47) % 360}deg) drop-shadow(0 2px 3px rgba(0,0,0,.6))` }} data-testid={`fish-plate-${speciesId}`} />
     </div>
   );
 };

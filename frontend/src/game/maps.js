@@ -2,7 +2,32 @@
 const posts = (x0, x1, y, step = 140) => { const o = []; for (let x = x0; x <= x1; x += step) o.push([x, y]); return o; };
 
 // Town row faces the high street; tavern + pearl shop face the beach promenade; piers run off the promenade.
+export const HARBOUR_NPCS = [
+  { id: "harbourmaster", name: "Harbourmaster Crane", x: 1400, y: 1560, lines: [
+    "Ahoy, young angler! Every fish you land goes in my big ledger. Fill your Fishdex and you'll be famous!",
+    "A riddle for you: before the baker lights his ovens, the quiet pond catches fire, but no smoke rises. Be at Millbrook when it burns.",
+    "Some fish only come out at special times. Watch the clock, not just the water!",
+  ] },
+  { id: "baitseller", name: "Nettie the Bait Seller", x: 450, y: 1240, lines: [
+    "Worms for the pond, shiny lures for the sea! Better bait means bigger bites, sweetie.",
+    "Riddle time! When the sky blushes red and the frogs start to sing, something long and slippery slides through Blackwater's roots.",
+    "Mix bait at the Workshop. The Angler's Secret recipe makes fish go wild!",
+  ] },
+  { id: "sailor", name: "Old Tobias", x: 2560, y: 1470, lines: [
+    "Back in my day I hooked a fish as big as a boat! The mythic ones are out there, I promise you.",
+    "Listen close: when the sun goes to bed and the stars blink awake, a ray made of night glides over the coral. Few have seen it.",
+    "Take the Sea Serpent to new waters. Each one hides fish you've never seen!",
+  ] },
+  { id: "cook", name: "Cook Marisol", x: 760, y: 1225, lines: [
+    "Bring me fish for my contracts and I'll pay you well! Check the Contracts page.",
+    "Did you know? Rare fish sell for loads more at the Market than to the vendor.",
+    "A little secret: luck from your rod, bait and crew stacks up. More luck, more shiny fish!",
+  ] },
+];
+const npcBlocks = (list) => list.map(({ x, y }) => [x - 30, y - 18, x + 30, y - 18, x + 30, y + 4, x - 30, y + 4]);
+
 export const HARBOUR_MAP = {
+  npcs: HARBOUR_NPCS, blocks: npcBlocks(HARBOUR_NPCS),
   tiled: true, W: 3600, H: 2400, scale: 0.74, spawn: { x: 1550, y: 1460 }, weather: "gulls",
   base: "grass",
   ground: [
