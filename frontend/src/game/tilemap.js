@@ -244,6 +244,11 @@ export function buildMap(map, img, objTex = {}) {
     c.getContext("2d").drawImage(cv, -x, -y);
     chunks.push({ x, y, tex: Texture.from(c) });
   }
+  // draw order follows the main wall line, so an angler standing beside protruding steps or a porch is drawn in front
+  for (const o of objects) {
+    const cols = OBJ[o.k]?.rect && footColumns(o, OBJ[o.k], objTex[o.k]);
+    if (cols && cols.length > 4) { const ys = cols.map((c) => c.y).sort((a, b) => a - b); o.sortY = ys[Math.floor(ys.length / 2)]; }
+  }
   return { chunks, nav: { ...makeNav(grid, gw, gh), isWater }, objects, settled };
 }
 
@@ -335,7 +340,7 @@ export function placeObjects(objects, tex, ground, actors) {
     if (!t) continue;
     const s = new Sprite(t); s.anchor.set(0.5, 1);
     const w = o.w || def.w; s.scale.set(((o.flip ? -1 : 1) * w) / t.width, w / t.width);
-    s.x = o.x; s.y = o.y; s.zIndex = o.y + (o.z || 0);
+    s.x = o.x; s.y = o.y; s.zIndex = (o.sortY ?? o.y) + (o.z || 0);
     (def.ground ? ground : actors).addChild(s);
     views.push({ o, def, s, w, h: (t.height * w) / t.width });
   }
