@@ -46,7 +46,7 @@ const GAME_PAGES = [
   ["leaderboards", Leaderboards], ["achievements", Achievements], ["crafting", Crafting], ["messages/:username?", Messages], ["almanac", Almanac], ["wiki", Wiki], ["admin", Admin],
 ];
 // offline (portal) build: solo pages only, everything multiplayer waits for the online version
-const OFFLINE_PAGES = new Set(["waters", "journal", "inventory", "shop", "profile/:username?"]);
+const OFFLINE_PAGES = new Set(["waters", "journal", "inventory", "shop", "profile/:username?", "quests", "achievements", "pearl-shop", "contracts", "almanac"]);
 const PAGES = OFFLINE ? GAME_PAGES.filter(([p]) => OFFLINE_PAGES.has(p)) : GAME_PAGES;
 const Router = ({ children }) => (OFFLINE ? <MemoryRouter initialEntries={["/game"]}>{children}</MemoryRouter> : <BrowserRouter>{children}</BrowserRouter>);
 

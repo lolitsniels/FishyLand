@@ -79,7 +79,7 @@ export const HARBOUR_MAP = {
 };
 
 // Portal (offline) build: only the solo buildings keep their signposts; the rest stay as scenery for the online version.
-if (process.env.REACT_APP_OFFLINE === "1") HARBOUR_MAP.spots = HARBOUR_MAP.spots.filter((s) => ["shop", "boat"].includes(s.id));
+if (process.env.REACT_APP_OFFLINE === "1") HARBOUR_MAP.spots = HARBOUR_MAP.spots.filter((s) => ["shop", "boat", "quests", "achievements", "pearl-shop", "contracts", "almanac"].includes(s.id));
 
 export const MILLBROOK_MAP = {
   tiled: true, W: 3200, H: 2400, scale: 0.74, spawn: { x: 380, y: 1180 }, weather: "petals", water_tex: "river",

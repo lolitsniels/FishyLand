@@ -1,6 +1,7 @@
 // Offline build: the FishyLand server rules, run in the browser. State is saved through the Playgama Bridge storage.
 import G from "./gamedata.json";
 import { loadSave, saveSoon } from "./bridge";
+import { makeHarbour } from "./harbour";
 
 const C = G.c;
 const DATA = { ...G.data, fish: G.data.fish.filter((f) => !f.pond && f.water !== "hallow") };
@@ -152,6 +153,7 @@ function cast() {
   if (!(rnd() < (GEAR[u.gear.rod]?.free_cast || 0))) u.energy -= CAST_COST;
   u.stats.casts += 1;
   if (bait) u.bait[bait.id] -= 1;
+  HB.event("cast", {});
   const t = u.tutorial || {};
   const guaranteed = !t.done && t.step === 2 && !t.guaranteed && !u.stats.catches;
   if (guaranteed) t.guaranteed = true;
@@ -168,7 +170,7 @@ function cast() {
   const [variant, vmult] = guaranteed ? ["normal", 1] : rollVariant(1 + SIZE_VARIANT * (bait?.size || 0));
   const params = encounter(f, weight, u, variant, water.key);
   const id = `e${S.seq++}`;
-  S.pending = { id, species_id: f.id, weight, variant, vmult, water: water.key, created: Date.now(), params };
+  S.pending = { id, species_id: f.id, weight, variant, vmult, water: water.key, created: Date.now(), params, period, weather: conditions(water.key).weather };
   save();
   return { result: "hooked", encounter: { id, ...params }, message: "Fish on!", user: pub() };
 }
@@ -193,11 +195,14 @@ function land(body) {
   u.xp += xp; u.stats.catches += 1;
   if (first) u.stats.species += 1;
   if (f.rarity === "legendary" || f.rarity === "mythic") u.stats.legendary += 1;
+  u.stats.by_rarity = { ...(u.stats.by_rarity || {}), [f.rarity]: ((u.stats.by_rarity || {})[f.rarity] || 0) + 1 };
+  HB.logCatch(c, enc.period, enc.weather);
+  const ev = HB.event("catch", { water: enc.water, rarity: f.rarity, weight: enc.weight, first, variant: enc.variant, period: enc.period });
   if (enc.weight > (u.stats.heaviest_kg || 0)) { u.stats.heaviest_kg = enc.weight; u.stats.heaviest_name = f.name; }
   const lvl = levelOf(u.xp)[0];
   if (lvl > old) { energyTick(u); u.energy = Math.min(MAX_ENERGY * 2, u.energy + MAX_ENERGY); u.energy_at = nowIso(); }
   save();
-  return { success: true, catch: { ...c, ...vendor(u, c) }, xp, first_discovery: first, level_up: lvl > old ? lvl : null, blurb: f.blurb, baitable: f.baitable, user: pub(), new_achievements: [], quests_done: [] };
+  return { success: true, catch: { ...c, ...vendor(u, c) }, xp, first_discovery: first, level_up: lvl > old ? lvl : null, blurb: f.blurb, baitable: f.baitable, user: pub(), new_achievements: ev.new_achievements, quests_done: ev.quests_done };
 }
 
 function sell(body) {
@@ -206,8 +211,9 @@ function sell(body) {
   const total = rows.reduce((a, c) => a + vendor(u, c).vendor, 0) * (body.double && rows.length === 1 ? 2 : 1);
   S.catches = S.catches.filter((c) => !ids.has(c.id));
   u.gold += total; u.stats.gold_earned += total; u.stats.sold += rows.length;
+  const ev = HB.event("sell", { count: rows.length, gold: total });
   save();
-  return { gold: total, candles: 0, count: rows.length, user: pub(), new_achievements: [], quests_done: [] };
+  return { gold: total, candles: 0, count: rows.length, user: pub(), new_achievements: ev.new_achievements, quests_done: ev.quests_done };
 }
 
 function buyGear(body) {
@@ -256,7 +262,8 @@ function travel(body) {
     u.gold -= w.fee; u.unlocked_waters.push(w.key);
   }
   u.water = w.key; S.pending = null;
-  save(); return { ...pub(), quests_done: [] };
+  const ev = HB.event("travel", { water: w.key });
+  save(); return { ...pub(), quests_done: ev.quests_done };
 }
 function tutorial(kind, body) {
   const t = (U().tutorial = U().tutorial || { step: 0, done: false });
@@ -290,7 +297,10 @@ function profile() {
     contest_wins: [], boss_trophies: [], max_boss_mounts: 0, last_seen: nowIso(), supporter: false, name_colour_hex: null, avatar_name: null };
 }
 
+const HB = makeHarbour({ S: () => S, U, pub, save: () => save(), levelOf, WATERS, BY_WATER, WATER, FISH });
+
 const ROUTES = [
+  ...HB.routes,
   ["get", /^\/auth\/me$/, () => pub()],
   ["get", /^\/game\/data/, () => ({ ...DATA, waters: WATERS })],
   ["post", /^\/auth\/logout$/, () => ({ ok: true })],
@@ -326,7 +336,7 @@ export async function offlineAdapter(cfg) {
   for (const [m, re, fn] of ROUTES) {
     const mm = method === m && path.match(re);
     if (!mm) continue;
-    try { return reply(200, JSON.parse(JSON.stringify(fn(body, mm)))); }
+    try { return reply(200, JSON.parse(JSON.stringify(fn(body, mm, cfg)))); }
     catch (e) {
       if (!e.status) throw e;
       const err = new Error(e.detail); err.response = reply(e.status, { detail: e.detail }); err.config = cfg; err.isAxiosError = true;

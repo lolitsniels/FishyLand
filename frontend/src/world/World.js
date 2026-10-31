@@ -35,7 +35,7 @@ export const PAGES = {
 };
 const BAR_L = ["waters", "journal", "inventory"];
 const BAR_R = ["shop", "profile"];
-const BAR_R_WATER = OFFLINE ? ["profile"] : ["quests", "profile"];
+const BAR_R_WATER = ["quests", "profile"];
 const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "clubhouse" ? "clubhouse" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
