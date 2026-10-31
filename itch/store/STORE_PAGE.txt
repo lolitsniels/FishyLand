@@ -1,0 +1,51 @@
+FISHYLAND: itch.io STORE PAGE KIT
+=================================
+
+UPLOAD
+- File: fishyland-itch.zip  ->  Kind of project: HTML  ->  tick "This file will be played in the browser"
+- Embed options:
+  - Viewport dimensions: 1280 x 720
+  - Tick "Mobile friendly" (Orientation: Landscape)
+  - Tick "Fullscreen button"
+  - Leave "Automatically start on page load" ticked
+  - Frame options: leave "Enable scrollbars" unticked
+- Cover image: itch_cover_630x500.jpg
+- Screenshots: screenshot_1 ... screenshot_6 (in this order)
+- Theme banner (Edit theme > Banner): itch_banner_960x300.jpg
+- Theme colours that match the game: background #0b3a5c, text #fdf1cf, links #ffd35a, buttons #ffd35a
+
+TITLE
+FishyLand
+
+SHORT DESCRIPTION / TAGLINE
+Multiplayer fishing in your browser. Catch 350+ fish with friends!
+
+CLASSIFICATION
+- Kind: Game. Release status: In development
+- Genre: Simulation (secondary: Adventure)
+- Tags: fishing, multiplayer, mmo, casual, cute, collection, relaxing, pixi, browser, free
+- Pricing: No payments (free) or "Donate"
+
+DESCRIPTION (paste into the description box)
+---------------------------------------------
+Grab a rod, pick your angler and come fish with us!
+
+FishyLand is a free multiplayer fishing game you play right in your browser. Walk around a busy harbour, sail to 12 hand-painted waters and catch over 350 different fish, each with its own size, weight and rarity.
+
+WHAT YOU CAN DO
+- Catch 350+ fish: from tiny rudd to legendary sea monsters, every catch gets a card with its real length and weight
+- Play with friends: see other anglers walking around, chat live and join a Crew with its own island and clubhouse
+- Explore 12 waters: peaceful ponds, misty swamps, coral reefs, frozen lakes and the deep ocean, each with its own music
+- Fight every bite: hold and release to keep the line tense, and watch out for fish with tricks of their own
+- Upgrade your tackle: better rods, reels, lines and bait help you land bigger and rarer fish
+- Fill your Fishdex: discover secret fish with riddles from the harbour folk and collect rare colour variants
+- Duel other anglers: 3-minute live fishing duels at the Duel Pier
+
+HOW TO PLAY
+- Click or tap to walk, stand on a glowing ring and press FISH (or Space)
+- Hold the mouse, finger or Space to reel, let go when the line gets too tight
+- The Harbourmaster shows you everything in a short tutorial
+
+Play as a guest in one click, or make a free account to keep your angler on any device. Your progress is the same on itch.io and on fishyland.com.
+
+Made with love for anglers of all ages.
