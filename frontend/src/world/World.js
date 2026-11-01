@@ -25,6 +25,7 @@ import { ClubhousePanel } from "./Clubhouse";
 import { PondKeeper } from "./PondKeeper";
 import { StarterGoals } from "./StarterGoals";
 import { WorldTutorial } from "./WorldTutorial";
+import { MythicBanner } from "./MythicBanner";
 import { lookFace } from "../game/look";
 import { ss } from "../offline/bridge";
 
@@ -40,7 +41,7 @@ const BAR_R_WATER = ["quests", "profile"];
 const placeOf = (m, user) => (m === "harbour" ? "harbour" : m === "crew" ? "crew_island" : m === "clubhouse" ? "clubhouse" : m === "duel" ? "duel_pier" : user?.water || "millbrook");
 // Only reachable from harbour buildings, never from a water.
 const HARBOUR_ONLY = new Set(["shop", "market", "crews", "pearl-shop", "contracts", "crafting", "tournaments", "leaderboards", "achievements", "almanac", "duel", "crew", "bosses", "boss"]);
-const MORE = OFFLINE ? ["pearl-shop", "quests", "contracts", "achievements", "almanac"] : ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
+const MORE = ["pearl-shop", "quests", "contracts", "market", "crews", "tournaments", "duel", "leaderboards", "achievements", "crafting", "messages", "almanac", "wiki"];
 
 function useScale() {
   const calc = () => { const w = window.visualViewport?.width || window.innerWidth, h = window.visualViewport?.height || window.innerHeight; return { s: Math.max(w < 600 ? 0.74 : 0.55, Math.min(1.15, w / 1000, h / 640)), w, h }; };
@@ -201,7 +202,8 @@ export default function World() {
         {wet && idle && !nearSpot && !page && <Hint testid={canFish ? "cast-hint" : "walk-hint"}>{canFish ? "You're on a fishing spot · press FISH or Space" : "Walk onto a glowing fishing spot to cast"}</Hint>}
         {fightEnc && <div className="absolute left-1/2 -translate-x-1/2 bottom-[130px] w-[560px] max-w-[94%] pointer-events-auto tfl-skin" data-testid="fight-panel"><TensionGame enc={fightEnc} onFinish={finish} /></div>}
         {result && <div className="pointer-events-auto"><CatchCard res={result} onClose={() => { if (result.success) adBreak("catch"); closeResult(); }} /></div>}
-        {!OFFLINE && <ChatBox />}
+        <ChatBox />
+        <MythicBanner />
         {OFFLINE && idle && !page && <AdEnergy u={user} />}
         {OFFLINE && !page && <StarterGoals />}
         {mode === "duel" && <DuelHud />}

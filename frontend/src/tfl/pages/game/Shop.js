@@ -12,7 +12,7 @@ import { useGame } from "../../context/GameContext";
 import { repairPerPoint } from "../../components/Durability";
 import { Gold, Pearls, PearlIcon } from "../../components/ui-bits";
 import { RodInfoDialog } from "../../components/RodInfoDialog";
-import { EnhanceBench, enhName } from "../../components/EnhanceBench";
+const enhName = (n) => n;
 import { BaitInfoDialog, useBaitValue } from "../../components/BaitInfo";
 import { t as tt } from "../../i18n";
 import { tierRarity } from "../../components/GameUI";
@@ -23,10 +23,10 @@ const PERK_TITLE = { rod: "Bonus luck on every cast (rarer fish & variants): +1 
 const perkText = (slot, tier, extra = 0) => { const n = (tier || 1) - 1 + extra; return n === 0 ? "-" : slot === "rod" ? `+${n} luck` : `+${n * 2}%`; };
 
 const TABS = [
-  ["rod", "Rods", "gear/_rod_t5.webp"], ["reel", "Reels", "gear/_reel_t5.webp"], ["line", "Lines", "gear/_line_t3.webp"], ["bait", "Bait", "gear/bait_worm.webp"], ["enhance", "Enhance", "craft"],
+  ["rod", "Rods", "gear/_rod_t5.webp"], ["bait", "Bait", "gear/bait_worm.webp"],
 ];
 const INTRO = {
-  rod: "Rods set your power and control in the fight and add +1 luck per tier. Gear is permanent and swaps freely from your tackle box; match rod, reel and line of the same tier for +5% power and half the wear.",
+  rod: "Rods set your power and control in the fight and add +1 luck per tier. Rods are the heart of your tackle: a better rod lands bigger, rarer fish. Your reel and line are upgraded with Pearls from the tackle slots on the right of the screen.",
   reel: "Reels set how fast you recover line and add +2% vendor price per tier when you sell fish.",
   line: "Lines set how much tension you can take before it snaps and add +2% XP per tier.",
   bait: "Bait is used up one per cast. Better bait pulls rarer AND bigger fish, bites more often (fewer empty casts) and some species only take a specific bait. Click any bait for the full breakdown and what it earns you at your current water.",
@@ -106,7 +106,7 @@ function GearTable({ items, statKeys, slot }) {
 function UpgradeSide() {
   const { user, data } = useGame();
   const buy = useGearBuy();
-  const picks = [["rod", data.rods.filter((g) => !g.event && !g.crate), "power"], ["reel", data.reels, "recovery"], ["line", data.lines, "tolerance"]]
+  const picks = [["rod", data.rods.filter((g) => !g.event && !g.crate), "power"]]
     .map(([slot, items, key]) => [slot, nextUp(items, user, key)]).filter(([, g]) => g);
   return (
     <>
@@ -120,7 +120,6 @@ function UpgradeSide() {
           </SideDeal>
         );
       })}
-      <p className="sf-item-sub mt-3 px-1">{tt("Match rod, reel and line of the same tier for +5% power and half the wear.")}</p>
     </>
   );
 }
@@ -178,14 +177,11 @@ export default function Shop() {
   if (!data) return null;
   return (
     <div className="fade-in" data-testid="shop-page">
-      <ShopFrame testid="shop" tabs={TABS.map(([id, label]) => [id, tt(label)])} value={tab} onChange={setTab} side={tab === "enhance" ? null : <UpgradeSide />}
+      <ShopFrame testid="shop" tabs={TABS.map(([id, label]) => [id, tt(label)])} value={tab} onChange={setTab} side={<UpgradeSide />}
         wallet={{ gold: user.gold, pearls: user.pearls || 0 }} action={<Link to="/game/market" className="btn btn-sm" data-testid="shop-to-market">{tt("Player Market")}</Link>}>
         <p className="text-[12.5px] text-[var(--text-2)] mb-3" data-testid="shop-intro">{tt(INTRO[tab])}</p>
         {tab === "rod" && <GearTable items={data.rods.filter((g) => !g.event && !g.crate)} statKeys={["power", "control"]} slot="rod" />}
-        {tab === "reel" && <GearTable items={data.reels} statKeys={["recovery"]} slot="reel" />}
-        {tab === "line" && <GearTable items={data.lines} statKeys={["tolerance"]} slot="line" />}
         {tab === "bait" && <BaitTable />}
-        {tab === "enhance" && <EnhanceBench />}
       </ShopFrame>
     </div>
   );

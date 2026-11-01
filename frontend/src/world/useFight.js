@@ -5,6 +5,7 @@ import { useGame as useTfl } from "../tfl/context/GameContext";
 import { useGame } from "../store";
 import { fx, setPhase as setFxPhase } from "../game/fx";
 import { sfx } from "../game/sfx";
+import { announceMythic } from "./MythicBanner";
 
 const FISH_ART = {
   common: ["glimmer_minnow", "azure_perch"], uncommon: ["lagoon_carp", "coral_snapper"], rare: ["moonfin_trout", "prism_koi"],
@@ -17,7 +18,8 @@ const phase = (p) => { setFxPhase(p); useGame.getState().setPhase(p); };
 
 // Cast -> bite -> TensionGame (FishyLand rules) -> land, all decided by the FishyLand server.
 export function useFight() {
-  const { setUser } = useTfl();
+  const { setUser, user, data } = useTfl();
+  const who = useRef({}); who.current = { user, data };
   const encRef = useRef(null);
   const timers = useRef([]);
   const later = (fn, ms) => timers.current.push(setTimeout(fn, ms));
@@ -60,6 +62,7 @@ export function useFight() {
         fx.speciesImg = fishArt(c.rarity, (c.species_id || 0), c.species_id);
         phase("landed"); sfx("land");
         useGame.setState({ result: { ...r, img: fx.speciesImg } });
+        if (c.rarity === "mythic" && !r.duel) { const { user: u, data: d } = who.current; announceMythic(`${u?.username || "An angler"} landed the mythic ${c.name} (${c.weight} kg) at ${d?.waters?.find((w) => w.key === c.water)?.name || "the water"}!`); }
       } else {
         phase("lost"); sfx("snap");
         toast(why || r.message || "It got away.");

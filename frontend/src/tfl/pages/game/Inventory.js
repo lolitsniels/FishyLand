@@ -14,7 +14,7 @@ import { Panel, Rarity, Gold, Empty } from "../../components/ui-bits";
 import { GearIcon } from "../../components/GearIcon";
 import { FishPlate } from "../../components/FishPlate";
 import { Durability, RepairButton } from "../../components/Durability";
-import { enhName } from "../../components/EnhanceBench";
+const enhName = (n) => n;
 import { Recycle, Info } from "lucide-react";
 import { SizePips, BaitInfoDialog, useBaitValue } from "../../components/BaitInfo";
 import { t as tt } from "../../i18n";
@@ -49,7 +49,7 @@ export function ListDialog({ item, onClose, onListed }) {
 const PAGE_SIZE = 50;
 
 function Loadout({ user, lookups, onInfo, onBait }) {
-  const slots = ["rod", "reel", "line"].map((k) => [k, lookups?.gearById[user.gear?.[k]]]);
+  const slots = ["rod"].map((k) => [k, lookups?.gearById[user.gear?.[k]]]);
   const bait = lookups?.baitById[user.active_bait];
   return (
     <div className="g-hero !min-h-0 p-3 flex flex-wrap items-end justify-center gap-3 sm:gap-5" style={{ backgroundImage: `url(/art/waters/${user.water}_thumb.jpg)` }} data-testid="loadout-bar">
@@ -253,7 +253,6 @@ export default function Inventory() {
         <CratesBox onSell={(c) => setStack({ kind: "crate", id: c.id, name: c.name, owned: c.owned, hint: c.market?.avg || c.expected_value })} />
         <PassBox onSell={(p) => setStack({ kind: "pass", id: p.id, name: tt(p.name), owned: p.owned, hint: p.days >= 30 ? 250000 : 70000 })} />
         <PotionBox onSell={() => setStack({ kind: "potion", id: "potion_energy", name: tt("Energy Potion"), owned: user.potion?.have || 0, hint: 900 })} />
-        <SalvageBox onSell={() => setStack({ kind: "scrap", id: "scrap", name: tt("Tackle Scrap"), owned: user.scrap || 0, hint: 12 })} />
       </div>}
       {tab === "ingredients" && (
         <Panel icon="worm" title={tt("Crafting ingredients")} right={<Link to="/game/crafting" className="text-[11.5px] underline">{tt("Bait Crafting")}</Link>} testId="ingredients-box">
@@ -268,7 +267,7 @@ export default function Inventory() {
       {tab === "tackle" && (
         <Panel icon="inventory" title={tt("Tackle box")} right={<RepairButton />} testId="tackle-box">
           <div className="g-grid">
-            {user.owned_gear.flatMap((id) => { const g = lookups?.gearById[id]; const slot = id.split("_")[0]; const eq = user.gear[slot] === id; const rc = g?.legendary ? "legendary" : tierRarity(g?.tier); return [
+            {user.owned_gear.filter((id) => id.startsWith("rod_")).flatMap((id) => { const g = lookups?.gearById[id]; const slot = id.split("_")[0]; const eq = user.gear[slot] === id; const rc = g?.legendary ? "legendary" : tierRarity(g?.tier); return [
               <div key={id} className={`g-card rc-${rc}`} data-testid={`tackle-card-${id}`}>
                 <span className="tier">T{g?.tier}</span>{eq && <span className="badge">{tt("Equipped")}</span>}
                 <button type="button" className="art" onClick={g ? () => setRodInfo(g) : undefined} data-testid={`inv-rod-info-${id}`}><img src={`/art/gear/${id}.webp`} alt={g?.name} /></button>
@@ -287,7 +286,7 @@ export default function Inventory() {
               )),
             ]; })}
           </div>
-          <div className="text-[11px] text-[var(--muted)] mt-2">{tt("Every fish fought wears each equipped item by 1 point. Worn-out tackle (0/100) still works but at 70% strength. Repairs cost a flat amount per point by tier (5g at T2 up to 50g at T9); village starter gear is fixed for free.")} {tt("Tackle you no longer use can be sold to the vendor (40% of shop price, less when worn) or listed on the Market with its enhancement level. Unequip it first.")}</div>
+          <div className="text-[11px] text-[var(--muted)] mt-2">{tt("Every fish fought wears your rod by 1 point. A worn-out rod (0/100) still works but at 70% strength. Rods you no longer use can be sold or listed on the Market. Your reel and line never wear out: upgrade them with Pearls from the tackle slots on the right of the screen.")}</div>
         </Panel>
       )}
       {info && <BaitInfoDialog bait={info} value={baitValue} onClose={() => setInfo(null)} />}

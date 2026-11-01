@@ -26,10 +26,12 @@ export function ProfileTackle({ p, lookups, mine }) {
             {skin ? <span className="rod-skin-stage"><RodSkinArt skin={skin} /></span> : <GearIcon id={id} name={g?.name} />}
             <div className="min-w-0 flex-1">
               <div className="label">{slot}{skin && <span className="ml-1.5 text-[#b48cff]" data-testid="profile-rod-skin-name">· {ROD_SKINS[skin]} {tt("skin")}</span>}</div>
-              <div className="text-[13px] truncate">{g?.name}{p.enhance?.[slot] > 0 && <span className="num text-[var(--gold)] ml-1" data-testid={`profile-enhance-${slot}`}>+{p.enhance[slot]}</span>}</div>
+              <div className="text-[13px] truncate">{slot === "rod" ? g?.name : `${slot === "reel" ? "Reel" : "Line"} level ${p.tackle?.[slot]?.level || 1}`}</div>
             </div>
-            <span className="num text-[11.5px]" style={{ color: durColor(p.durability?.[slot] ?? 100) }} title={tt("Condition")}>{p.durability?.[slot] ?? 100}/100</span>
-            <span className="num text-[11.5px] text-[var(--muted)] w-7 text-right">T{g?.tier}</span>
+            {slot === "rod" ? <>
+              <span className="num text-[11.5px]" style={{ color: durColor(p.durability?.[slot] ?? 100) }} title={tt("Condition")}>{p.durability?.[slot] ?? 100}/100</span>
+              <span className="num text-[11.5px] text-[var(--muted)] w-7 text-right">T{g?.tier}</span>
+            </> : <span className="num text-[11.5px] text-[var(--gold)]" data-testid={`profile-tackle-${slot}-level`}>{p.tackle?.[slot]?.level || 1}/10</span>}
           </div>
         );
       })}

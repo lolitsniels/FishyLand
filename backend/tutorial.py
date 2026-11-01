@@ -6,7 +6,7 @@ from server import api, db, get_current_user, public_user, apply_energy_live
 
 REWARD_BAIT = {"bait_worm": 10, "bait_bread": 10}
 REWARD_PEARLS = 10
-LAST_STEP = 10
+LAST_STEP = 30
 
 
 class StepIn(BaseModel):

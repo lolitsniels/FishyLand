@@ -88,6 +88,7 @@ class RecycleIn(BaseModel):
 
 @api.post("/enhance/recycle")
 async def recycle(body: RecycleIn, user=Depends(get_current_user)):
+    raise HTTPException(410, "Tackle enhancement has been retired")
     have = {k: v for k, v in (user.get("salvage") or {}).items() if v > 0 and k in TRASH_BY_ID}
     if body.trash_id:
         if body.trash_id not in have: raise HTTPException(400, "You have none of that to recycle")
@@ -115,6 +116,7 @@ class UpgradeIn(BaseModel):
 
 @api.post("/enhance/upgrade")
 async def upgrade(body: UpgradeIn, user=Depends(get_current_user)):
+    raise HTTPException(410, "Tackle enhancement has been retired")
     g = GEAR_BY_ID.get(body.gear_id)
     if not g or body.gear_id not in user.get("owned_gear", []): raise HTTPException(404, "You don't own that tackle")
     lvl = level(user, body.gear_id)

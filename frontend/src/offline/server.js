@@ -2,6 +2,7 @@
 import G from "./gamedata.json";
 import { loadSave, saveSoon } from "./bridge";
 import { makeHarbour } from "./harbour";
+import { makeSocial, TACKLE_INFO, tackleStat, tacklePct, tackleView } from "./social";
 
 const C = G.c;
 const DATA = { ...G.data, fish: G.data.fish.filter((f) => !f.pond && f.water !== "hallow") };
@@ -37,7 +38,12 @@ function fresh() {
     },
   };
 }
-export async function boot() { S = (await loadSave()) || fresh(); }
+export async function boot() {
+  S = (await loadSave()) || fresh();
+  const u = S.user; // reels, lines and enhancement retired: base spool + cotton line, upgraded with Pearls
+  u.gear = { ...u.gear, reel: "reel_spool", line: "line_cotton" };
+  u.owned_gear = [...new Set([...u.owned_gear.filter((g) => !/^(reel|line)_/.test(g)), "reel_spool", "line_cotton"])];
+}
 const save = () => saveSoon(S);
 const U = () => S.user;
 
@@ -48,11 +54,11 @@ function energyTick(u) {
 }
 const dur = (u, g) => u.durability?.[g] ?? MAX_DUR;
 const tier = (u, s) => GEAR[u.gear[s]]?.tier || 1;
-const rareSet = (u) => { const t = new Set(Object.values(u.gear).map((g) => GEAR[g]?.tier)); return t.size === 1 && !t.has(undefined); };
+const rareSet = () => false;
 function bonuses(u) {
   const perk = (s, b) => (dur(u, u.gear[s]) <= 0 ? Math.floor(b * WORN) : b);
-  return { luck: perk("rod", tier(u, "rod") - 1 + (GEAR[u.gear.rod]?.luck_bonus || 0)), value_pct: perk("reel", (tier(u, "reel") - 1) * 2), xp_pct: perk("line", (tier(u, "line") - 1) * 2),
-    set: rareSet(u), worn: ["rod", "reel", "line"].filter((s) => dur(u, u.gear[s]) <= 0), enhance: { rod: 0, reel: 0, line: 0 } };
+  return { luck: perk("rod", tier(u, "rod") - 1 + (GEAR[u.gear.rod]?.luck_bonus || 0)), value_pct: tacklePct(u, "reel"), xp_pct: tacklePct(u, "line"),
+    set: false, worn: dur(u, u.gear.rod) <= 0 ? ["rod"] : [], enhance: { rod: 0, reel: 0, line: 0 } };
 }
 function title(l, st) {
   return l >= 250 ? "Living Myth" : l >= 200 ? "Fathom Lord" : l >= 150 ? "Tidecaller" : l >= 100 ? "Centurion of the Deep" : (st.legendary || 0) >= 3 ? "Living Legend"
@@ -64,7 +70,7 @@ export function pub() {
   return {
     ...u, level, xp_into_level: into, xp_next: xpFor(level), max_energy: MAX_ENERGY, energy_cap: MAX_ENERGY * 2, premium: false, energy_regen_sec: REGEN_SEC,
     energy_progress_sec: u.energy < MAX_ENERGY ? Math.max(0, (Date.now() - Date.parse(u.energy_at)) / 1000) : 0, cast_cost: CAST_COST, repair_discount: 0, bait_discount: 0, market_fee: 0.05,
-    durability: Object.fromEntries(u.owned_gear.map((g) => [g, dur(u, g)])), ingredients: {}, ingredient_buys: {}, title: title(level, u.stats), is_admin: false, is_mod: false,
+    durability: Object.fromEntries(u.owned_gear.map((g) => [g, dur(u, g)])), ingredients: u.ingredients || {}, ingredient_buys: u.ing_buys?.date === new Date().toISOString().slice(0, 10) ? u.ing_buys.counts : {}, tackle: tackleView(u), title: title(level, u.stats), is_admin: false, is_mod: false,
     test_water: false, duel_access: false, duel_level: 10, duel: { wins: 0, losses: 0, draws: 0, streak: 0, best_streak: 0 }, potion: { have: 0, next_at: null, energy: 0, cooldown_h: 0 },
     enhance: {}, scrap: 0, seals: 0, passes: 0, salvage_count: 0, is_guest: false, pending_setup: false, offline: true, rare_set: rareSet(u), gear_bonuses: bonuses(u),
     achievements: [], titles: [], active_title: null, crew: null, crates: {}, spare_copies: {}, share_reward: 0, seen_flags: u.seen_flags || [], owned_avatars: [], owned_rod_skins: [],
@@ -116,7 +122,7 @@ function encounter(f, weight, u, variant, key) {
   const ratio = (weight - f.min_kg) / Math.max(0.001, f.max_kg - f.min_kg), b = C.BEHAVIORS[f.behavior], p = pressure(key);
   const rm = { common: 0.72, uncommon: 0.88, rare: 1.12, epic: 1.35, legendary: 1.65, mythic: 1.95 }[f.rarity];
   const w = (g) => (dur(u, g.id) <= 0 ? WORN : 1);
-  const rod = GEAR[u.gear.rod], reel = GEAR[u.gear.reel], line = GEAR[u.gear.line];
+  const rod = GEAR[u.gear.rod];
   const power = rod.power * w(rod) * (rareSet(u) ? 1.05 : 1), control = rod.control * w(rod);
   const base = 6 + { common: 0, uncommon: 2, rare: 4, epic: 7, legendary: 11, mythic: 16 }[f.rarity] + ratio * 3, e = p * RP[f.rarity];
   const raw = base / power, floor = base * (0.3 + 0.25 * e), stamina = raw >= floor ? raw : floor - (floor - raw) * 0.4;
@@ -129,7 +135,7 @@ function encounter(f, weight, u, variant, key) {
   if (["legendary", "mythic"].includes(f.rarity) && !tricks.includes("second_wind")) tricks.push("second_wind");
   return {
     strength: r3(b.strength * (0.85 + ratio * 0.45) * rm * (1 + 0.3 * e)), erratic: r3(b.erratic * rm * (1 + 0.45 * e)), stamina: Math.round(stamina * 100) / 100,
-    zone_width: Math.round(softCap(30 * control, 58 - 22 * e + 8 * (control - 1)) * 10) / 10, recovery: r3(reel.recovery * w(reel)), tolerance: r3(line.tolerance * w(line)),
+    zone_width: Math.round(softCap(30 * control, 58 - 22 * e + 8 * (control - 1)) * 10) / 10, recovery: tackleStat(u, "reel"), tolerance: tackleStat(u, "line"),
     time_limit: Math.round((stamina * tk + tb) * 10) / 10, time_k: tk, time_base: tb, hint: `Something ${words[Math.max(0, Math.min(4, idx))]} is on the line. It ${b.desc}.`,
     size_note: ratio >= 0.85 ? "A giant of its kind." : ratio < 0.15 ? "A runt of its kind." : "", behavior: f.behavior,
     tricks, trick_score: score, tiring_min: score >= 6 ? 0.6 : 0.75, trick_repeat: score >= 5, trick_names: tricks.map((t) => C.TRICK_INFO[t].name),
@@ -181,7 +187,7 @@ function land(body) {
   const u = U(), enc = S.pending;
   if (!enc || enc.id !== body.encounter_id) fail(404, "No fish on the line");
   S.pending = null;
-  for (const g of Object.values(u.gear)) if (!GEAR[g]?.no_wear && dur(u, g) > 0 && !(rareSet(u) && rnd() < 0.5)) u.durability[g] = dur(u, g) - 1;
+  for (const g of [u.gear.rod]) if (!GEAR[g]?.no_wear && dur(u, g) > 0 && !(rareSet(u) && rnd() < 0.5)) u.durability[g] = dur(u, g) - 1;
   const f = FISH[enc.species_id];
   if (!body.success || (Date.now() - enc.created) / 1000 > enc.params.time_limit + 60) { u.stats.escaped += 1; save(); return { success: false, species: f.name, rarity: f.rarity, message: `The ${f.name} got away.` }; }
   const hard = 1 + 0.2 * pressure(enc.water), gb = bonuses(u);
@@ -222,6 +228,7 @@ function buyGear(body) {
   const u = U(), g = GEAR[body.gear_id];
   if (!g) fail(404, "Unknown item");
   if (g.event || g.crate || g.milestones || g.pearls) fail(400, "That item is only in the online version");
+  if (!g.id.startsWith("rod_")) fail(400, "Reels and lines are upgraded with Pearls from the tackle slots, not bought");
   if (u.owned_gear.includes(g.id)) fail(400, "You already own that");
   if (levelOf(u.xp)[0] < (g.level || 1)) fail(400, `The ${g.name} needs level ${g.level}`);
   if (u.gold < g.price) fail(400, "Not enough gold");
@@ -302,10 +309,12 @@ function profile() {
 
 const HB = makeHarbour({ S: () => S, U, pub, save: () => save(), levelOf, WATERS, BY_WATER, WATER, FISH });
 
+const SOCIAL = makeSocial({ S: () => S, U, pub, save: () => save(), fail, levelOf, FISH, BAIT, DATA, nowIso });
 const ROUTES = [
   ...HB.routes,
+  ...SOCIAL.routes,
   ["get", /^\/auth\/me$/, () => pub()],
-  ["get", /^\/game\/data/, () => ({ ...DATA, waters: WATERS })],
+  ["get", /^\/game\/data/, () => ({ ...DATA, waters: WATERS, tackle: TACKLE_INFO })],
   ["post", /^\/auth\/logout$/, () => ({ ok: true })],
   ["post", /^\/fish\/cast$/, () => cast()],
   ["post", /^\/fish\/land$/, (b) => land(b)],
@@ -325,7 +334,7 @@ const ROUTES = [
   ["post", /^\/tutorial\/(step|skip|restart|complete)$/, (b, m) => tutorial(m[1], b)],
   ["post", /^\/me\/look$/, (b) => { U().avatar = b.look || b.avatar || U().avatar; save(); return { user: pub(), ...pub() }; }],
   ["get", /^\/players\/[^/]+$/, () => profile()],
-  ["post", /^\/world\/pos$/, () => ({ peers: [] })],
+  ["post", /^\/world\/pos$/, () => ({ players: [], here: 1 })],
   ["get", /^\/world\/counts$/, () => ({})],
   ["get", /^\/npcs$/, () => []],
 ];

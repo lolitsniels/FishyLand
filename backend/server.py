@@ -383,7 +383,7 @@ def public_user(u):
         "duel_access": level >= DUEL_LEVEL, "duel_level": DUEL_LEVEL,
         "duel": {k: (u.get("duel") or {}).get(k, 0) for k in ("wins", "losses", "draws", "streak", "best_streak")},
         "potion": {"have": (u.get("items") or {}).get("potion_energy", 0), "next_at": potion_next_at(u), "energy": POTION_ENERGY, "cooldown_h": POTION_COOLDOWN_H},
-        "enhance": {k: v for k, v in (u.get("enhance") or {}).items() if v}, "scrap": int(u.get("scrap", 0)), "seals": int((u.get("items") or {}).get("seal", 0)), "passes": int((u.get("items") or {}).get("pass_month", 0)) + int((u.get("items") or {}).get("pass_week", 0)),
+        "tackle": tackle.view(u), "enhance": {}, "scrap": int(u.get("scrap", 0)), "seals": int((u.get("items") or {}).get("seal", 0)), "passes": int((u.get("items") or {}).get("pass_month", 0)) + int((u.get("items") or {}).get("pass_week", 0)),
         "salvage_count": sum(v for v in (u.get("salvage") or {}).values() if v > 0),
         "is_guest": bool(u.get("is_guest")), "pending_setup": bool(u.get("pending_setup")),
         "offerwall_url": None,
@@ -805,6 +805,10 @@ async def change_email(body: ChangeEmailIn, user=Depends(get_current_user)):
 
 
 # ---------- Static game data ----------
+TUTORIAL_MYTHIC = 294  # The Mill Giant: every new angler's first fish
+TUTORIAL_FIGHT = {"strength": 0.75, "erratic": 0.55, "stamina": 42, "zone_width": 50, "tolerance": 1.7, "recovery": 1.35, "time_limit": 160, "tricks": ["second_wind"],
+                  "trick_names": ["Second Wind"], "trick_score": 3, "tiring_min": 0.75, "trick_repeat": False, "time_k": 3.2, "time_base": 25.6,
+                  "hint": "Something ENORMOUS is on the line! Hold on tight, this is a legend of Millbrook!", "size_note": "A giant of its kind."}
 HARD_WATER_BONUS = 0.20  # extra gold & XP at the very hardest water, scaled by pressure
 
 
@@ -842,7 +846,7 @@ def localize(obj, request):
 async def game_data(response: Response):
     # Payload is static per deploy (fish, waters, gear, baits, recipes). Browsers may cache it; clients bust the cache with ?v=DATA_VERSION (from /shell/pulse).
     response.headers["Cache-Control"] = "public, max-age=600"
-    return {**_GAME_DATA, "version": DATA_VERSION}
+    return {**_GAME_DATA, "tackle": tackle.INFO, "version": DATA_VERSION}
 
 
 @api.get("/game/stats")
@@ -895,8 +899,7 @@ SET_POWER = 1.05
 
 def rare_set(user):
     """Matched set: rod, reel and line all of the same tier."""
-    tiers = {GEAR_BY_ID.get(g, {}).get("tier") for g in user["gear"].values()}
-    return len(tiers) == 1 and None not in tiers
+    return False  # retired with the reel/line upgrade tracks
 
 
 def gear_tier(user, slot):
@@ -912,10 +915,9 @@ def gear_bonuses(user):
     Worn-out (0 durability) gear keeps only WORN_PENALTY of its perk."""
     def perk(slot, base):
         return int(base * WORN_PENALTY) if gear_dur(user, user["gear"][slot]) <= 0 else base
-    worn = [s for s in ("rod", "reel", "line") if gear_dur(user, user["gear"][s]) <= 0]
-    e = {slot: enh_level(user, user["gear"][slot]) for slot in ("rod", "reel", "line")}
-    return {"luck": perk("rod", gear_tier(user, "rod") - 1 + e["rod"] // 2 + GEAR_BY_ID.get(user["gear"]["rod"], {}).get("luck_bonus", 0)), "value_pct": perk("reel", (gear_tier(user, "reel") - 1) * 2 + e["reel"]), "xp_pct": perk("line", (gear_tier(user, "line") - 1) * 2 + e["line"]),
-            "set": rare_set(user), "worn": worn, "enhance": e}
+    worn = ["rod"] if gear_dur(user, user["gear"]["rod"]) <= 0 else []
+    return {"luck": perk("rod", gear_tier(user, "rod") - 1 + GEAR_BY_ID.get(user["gear"]["rod"], {}).get("luck_bonus", 0)), "value_pct": tackle.perk_pct(user, "reel"), "xp_pct": tackle.perk_pct(user, "line"),
+            "set": False, "worn": worn, "enhance": {"rod": 0, "reel": 0, "line": 0}}
 
 
 async def vendor_quotes(user, rows, counts=None):
@@ -1117,9 +1119,9 @@ def encounter_params(f, weight, user, variant="normal", water_key=None):
     b = BEHAVIORS[f["behavior"]]
     p = water_pressure(water_key or user["water"])
     rmult = {"common": 0.72, "uncommon": 0.88, "rare": 1.12, "epic": 1.35, "legendary": 1.65, "mythic": 1.95}[f["rarity"]]
-    rod, reel, line = GEAR_BY_ID[user["gear"]["rod"]], GEAR_BY_ID[user["gear"]["reel"]], GEAR_BY_ID[user["gear"]["line"]]
-    worn = lambda g: (WORN_PENALTY if gear_dur(user, g["id"]) <= 0 else 1.0) * (1 + 0.02 * enh_level(user, g["id"]))  # noqa: E731
-    power, control, recovery, tolerance = rod["power"] * worn(rod), rod["control"] * worn(rod), reel["recovery"] * worn(reel), line["tolerance"] * worn(line)
+    rod = GEAR_BY_ID[user["gear"]["rod"]]
+    worn = WORN_PENALTY if gear_dur(user, rod["id"]) <= 0 else 1.0
+    power, control, recovery, tolerance = rod["power"] * worn, rod["control"] * worn, tackle.stat(user, "reel"), tackle.stat(user, "line")
     if rare_set(user): power *= SET_POWER
     base_stamina = 6 + {"common": 0, "uncommon": 2, "rare": 4, "epic": 7, "legendary": 11, "mythic": 16}[f["rarity"]] + ratio * 3
     # big rods shorten fights, but never below a floor that rises in harder water
@@ -1356,13 +1358,10 @@ async def cast(body: Optional[CastIn] = None, user=Depends(get_current_user)):
     # Tutorial first-cast guarantee: once per account, only while the tutorial waits for the first fish and nothing has ever been landed.
     # Yields a plain common of this water (no boss/secret/variant rolls), so there is nothing to farm.
     t = user.get("tutorial") or {}
-    guaranteed = not pond and bool(t) and not t.get("done") and t.get("step") == 2 and not t.get("guaranteed") and user["stats"].get("catches", 0) == 0
-    if guaranteed: updates["$set"]["tutorial.guaranteed"] = True
+    # Tutorial: every Millbrook cast hooks The Mill Giant (mythic) until the brand-new angler lands their first fish.
+    guaranteed = not pond and bool(t) and not t.get("done") and user["stats"].get("catches", 0) == 0 and water["key"] == "millbrook"
     await db.pending.delete_many({"user_id": str(user["_id"])})
-    r = await db.users.update_one({"_id": user["_id"], **({"tutorial.guaranteed": {"$ne": True}} if guaranteed else {})}, updates)
-    if guaranteed and not r.modified_count:  # raced with another cast that already used the guarantee
-        guaranteed = False
-        await db.users.update_one({"_id": user["_id"]}, updates)
+    await db.users.update_one({"_id": user["_id"]}, updates)
     if not free_cast: user["energy"] -= CAST_COST
     qd = await quest_event(user["_id"], "cast")
     if qd: user = await db.users.find_one({"_id": user["_id"]})
@@ -1373,20 +1372,13 @@ async def cast(body: Optional[CastIn] = None, user=Depends(get_current_user)):
         return {"result": "nothing", "encounter": None, "message": ev_win["message"], "event_win": ev_win, "user": public_user(user), "quests_done": qd}
     if not guaranteed and random.randint(1, 100) > 72 + bite:
         await mark_free(user["_id"], "miss")
-        if random.random() < enhance.TRASH_CHANCE * (2 if water.get("premium") else 1):
-            t = enhance.roll_trash(user["water"])
-            await db.users.update_one({"_id": user["_id"]}, {"$inc": {f"salvage.{t['id']}": 1, "stats.trash": 1}})
-            user = await db.users.find_one({"_id": user["_id"]})
-            return {"result": "nothing", "encounter": None, "trash": {"id": t["id"], "name": t["name"], "scrap": t["scrap"]},
-                    "message": random.choice(enhance.TRASH_LINES).format(name=t["name"]), "user": public_user(user), "quests_done": qd}
         return {"result": "nothing", "encounter": None, "message": random.choice([
             "The line drifts. Nothing bites.", "A nibble... then nothing.", "Your bait comes back untouched.",
             "Ripples spread and fade. The water keeps its secrets."]), "user": public_user(user), "quests_done": qd}
     if pond:
         f = crew_pond.pick(pond, luck, bait["id"] if bait else None)
     elif guaranteed:
-        plain = [x for x in FISH_BY_WATER[water["key"]] if x["rarity"] == "common" and not x.get("bait_only")]
-        f = random.choice(plain) if plain else pick_species(water["key"], 0, cond["period"], None)
+        f = FISH_BY_ID[TUTORIAL_MYTHIC]
     else:
         boss_hit = await try_hook_boss(user, water["key"])
         if boss_hit: return boss_hit
@@ -1399,7 +1391,8 @@ async def cast(body: Optional[CastIn] = None, user=Depends(get_current_user)):
     weight = min(round(f["max_kg"] * 1.1 * wb, 3), round(roll_weight(f, bait_size(bait)) * mp["weight_mult"] * wb, 3))
     variant, vmult = ("normal", 1.0) if guaranteed else roll_variant(mp["variant_mult"] * (1 + SIZE_VARIANT * bait_size(bait)))
     params = encounter_params(f, weight, user, variant, water["key"])
-    if mp["stamina_mult"] < 1:
+    if guaranteed: params.update(TUTORIAL_FIGHT)
+    elif mp["stamina_mult"] < 1:
         params["stamina"] = round(params["stamina"] * mp["stamina_mult"], 2); params["time_limit"] = round(params["stamina"] * params["time_k"] + params["time_base"], 1)
     if not guaranteed: botwatch.shift_fight(params, user)
     enc = {"user_id": str(user["_id"]), "species_id": f["id"], "weight": weight, "variant": variant, "vmult": vmult,
@@ -1426,7 +1419,7 @@ async def wear_gear(user):
     if rare_set(user) and random.random() < RARE_SET_WEAR_SKIP:
         return
     sets = {}
-    for gid in user["gear"].values():
+    for gid in [user["gear"]["rod"]]:
         if GEAR_BY_ID.get(gid, {}).get("no_wear"): continue
         d = gear_dur(user, gid)
         if d > 0:
@@ -1836,6 +1829,7 @@ async def buy_gear(body: BuyGearIn, user=Depends(get_current_user)):
     if not g: raise HTTPException(404, "Unknown item")
     if g.get("event"): raise HTTPException(400, "Only the Marsh Witch trades that, for Soul Candles")
     if g.get("crate"): raise HTTPException(400, "That rod only comes out of crates, or from another angler on the Market")
+    if not g["id"].startswith("rod_"): raise HTTPException(400, "Reels and lines are upgraded with Pearls from the tackle slots, not bought")
     dup = g["id"] in user["owned_gear"]
     if dup and (g.get("bound") or not g["price"]): raise HTTPException(400, "You already own that")
     level, _ = level_from_xp(user["xp"])
@@ -2498,7 +2492,7 @@ async def player_profile(username: str):
             "name_colour_hex": colour_hex(u), "frame": u.get("frame"), "rod_skin": u.get("rod_skin"),
             "pearls": u.get("pearls", 0), "durability": {slot: gear_dur(u, gid) for slot, gid in u["gear"].items()},
             "crew": u.get("crew"), "achievements": len(u.get("achievements", [])),
-            "unlocked_waters": len(u["unlocked_waters"]), "gear": u["gear"], "enhance": {slot: int((u.get("enhance") or {}).get(gid, 0)) for slot, gid in u["gear"].items()}, "created_at": u["created_at"], "last_seen": u["last_seen"],
+            "unlocked_waters": len(u["unlocked_waters"]), "gear": u["gear"], "enhance": {}, "tackle": tackle.view(u), "created_at": u["created_at"], "last_seen": u["last_seen"],
             "recent": [catch_out(c) for c in recent], "trophies": [catch_out(c) for c in trophies],
             "boss_trophies": [boss_kill_out(k) for k in boss_trophies], "max_boss_mounts": MAX_BOSS_MOUNTS,
             "contest_wins": [{"kind": "tournament", "category": c["category"], "label": TOURNAMENT_LABEL.get(c["category"], c["category"]), "unit": TOURNAMENT_UNIT.get(c["category"], ""), "end": c["end"], "currency": c["currency"],
@@ -2803,8 +2797,6 @@ ACHIEVEMENTS = [
     _ach("catches_10000", "Ten Thousand Casts Remembered", "Land 10,000 fish.", 30000, "Tidebound", lambda c: c["catches"] >= 10000),
     _ach("casts_1000", "Patience", "Cast 1,000 times.", 300, None, lambda c: c["casts"] >= 1000),
     _ach("recycled_100", "Harbour Cleaner", "Recycle 100 pieces of trash into Tackle Scrap.", 500, None, lambda c: c["recycled"] >= 100),
-    _ach("enhance_5", "Tempered", "Enhance any piece of tackle to +5.", 1500, None, lambda c: c["enhance_max"] >= 5),
-    _ach("enhance_10", "Forged in Salt", "Enhance any piece of tackle to +10.", 15000, "Tacklesmith", lambda c: c["enhance_max"] >= 10),
     _ach("escaped_100", "The Ones That Got Away", "Lose 100 fish. Every angler has stories.", 500, None, lambda c: c["escaped"] >= 100),
     _ach("crafted_100", "Bait Kitchen", "Craft 100 baits.", 800, None, lambda c: c["crafted"] >= 100),
     _ach("crafted_1000", "Master Baiter", "Craft 1,000 baits.", 6000, "Bait Master", lambda c: c["crafted"] >= 1000),
@@ -4013,6 +4005,12 @@ async def startup():
     # one-off repair: duel losses were counted under a typo key ("losss") before June 2026
     async for u in db.users.find({"duel.losss": {"$exists": True}}, {"duel.losss": 1}):
         await db.users.update_one({"_id": u["_id"]}, {"$inc": {"duel.losses": u["duel"]["losss"]}, "$unset": {"duel.losss": ""}})
+    if not await db.meta.find_one({"key": "tackle_tracks_v1"}):  # reels, lines and enhancement retired: everyone back on the base spool + cotton line
+        await db.users.update_many({}, {"$set": {"gear.reel": "reel_spool", "gear.line": "line_cotton"}, "$pull": {"owned_gear": {"$regex": "^(reel|line)_"}},
+                                        "$unset": {"enhance": "", "scrap": ""}})
+        await db.users.update_many({}, {"$addToSet": {"owned_gear": {"$each": ["reel_spool", "line_cotton"]}}})
+        await db.listings.update_many({"status": "open", "gear_id": {"$regex": "^(reel|line)_"}}, {"$set": {"status": "cancelled"}})
+        await db.meta.insert_one({"key": "tackle_tracks_v1", "at": iso(now())})
     await db.users.create_index("email_lc", unique=True, sparse=True)
     await db.users.create_index("guest_ip_hash", sparse=True)
     await db.users.create_index("last_seen")
@@ -4153,7 +4151,8 @@ import duel  # noqa: E402,F401
 import duel_live  # noqa: E402,F401
 import tournaments  # noqa: E402,F401
 import offerwall  # noqa: E402,F401
-import enhance  # noqa: E402
+import enhance  # noqa: E402,F401
+import tackle  # noqa: E402
 import premium  # noqa: E402,F401
 import almanac  # noqa: E402,F401
 import crew_boss  # noqa: E402,F401

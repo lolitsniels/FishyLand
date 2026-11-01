@@ -7,6 +7,7 @@ import { useGame as useTfl } from "../tfl/context/GameContext";
 import { OFFLINE, rewardedSupported, showRewarded } from "../offline/bridge";
 
 const STARS = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, mythic: 5 };
+const WATER_ART = { crew_pond: "millbrook", hallow: "blackwater" };
 
 function Tape({ cm }) {
   const inch = lengthUnit() === "in";
@@ -33,7 +34,7 @@ function Stars({ rarity }) {
 }
 
 export default function CatchCard({ res, onClose }) {
-  const { setUser } = useTfl();
+  const { setUser, user } = useTfl();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const c = res.catch || {};
@@ -62,7 +63,8 @@ export default function CatchCard({ res, onClose }) {
         </div>
         {res.first_discovery && <div className="text-center -mt-2 text-[11px] font-cinzel tracking-widest text-cyan-200" data-testid="catch-new">NEW SPECIES FOR YOUR FISHDEX!</div>}
         <div className="relative h-44 rounded-xl overflow-hidden border-2 border-[#3a2412] shadow-inner" data-testid="catch-scene">
-          <img src="/art/hud/catch_bg.webp" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={`/art/waters/${WATER_ART[c.water] || c.water || user?.water || "millbrook"}.jpg`} alt="" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/art/hud/catch_bg.webp"; }} className="absolute inset-0 w-full h-full object-cover catch-water-bg" data-testid="catch-water-bg" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#04324a]/25 to-[#021a2a]/70" />
           <img src={res.img} alt={c.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = `/${standInArt(c.rarity, c.species_id || 0)}`; }} className={`absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 ${c.rarity === "mythic" ? "w-[19rem] h-48 scale-110" : c.rarity === "legendary" ? "w-64 h-40" : "w-52 h-32"} object-contain drop-shadow-[0_8px_10px_rgba(0,20,50,0.6)] fish-swim`} />
           <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/45 text-[10px] uppercase tracking-widest font-cinzel rar-${c.rarity}`} data-testid="catch-rarity">{c.rarity}</div>
           {res.level_up && <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/50 gold-text font-deco text-sm" data-testid="catch-levelup">Level {res.level_up}!</div>}
