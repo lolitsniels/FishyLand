@@ -162,3 +162,9 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 ## Backlog
 - P1: Duel Pier computer opponent offline; tutorial card overlaps top signboards on some widths; quest toast can overlap mythic banner
 - P2: Pearl Shop portraits/walls offline; Playgama multiplayer re-enable
+
+## 2026-11 Living water + new landing page
+- Scene.js: FLOW table per water (ripple strength/drift, wave glint count); ripple map scrolls forever (addressMode repeat); drifting wave glints on water.
+- Landing (pages/Landing.js Home + .fl2-* in ui.css): sky with drifting CSS clouds, wood top bar (online count, Log in, Play), floating island art (art/landing_island.webp) + logo,
+  tabs Home/News/Wiki/Media (News empty by choice), screenshot slider + Explore text + navy sign-up box, wood footer with Terms/Privacy.
+- Leaping fish during fight = art/fish/_generic.png, head-first alternating direction.

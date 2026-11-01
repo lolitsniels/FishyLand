@@ -283,6 +283,18 @@ function makeLife(L, back, front, soft, bgTex) {
   };
 }
 
+// how each water moves: d = ripple strength, v = ripple drift (px/s), tile = current of the water art, waves = gentle wave glints
+const FLOW_DEFAULT = { d: 10, v: [16, 7], tile: [3, 1], waves: 7 };
+const FLOW = {
+  harbour: { d: 10, v: [14, 6], tile: [4, 1.5], waves: 8 }, millbrook: { d: 9, v: [10, 5], tile: [2, 1], waves: 6 },
+  willow: { d: 13, v: [34, 4], tile: [14, 1], waves: 9 }, greyfell: { d: 8, v: [9, 5], tile: [1.5, 1], waves: 5 },
+  saltmarsh: { d: 11, v: [18, 8], tile: [5, 2], waves: 8 }, harrow: { d: 15, v: [24, 12], tile: [6, 3], waves: 11 },
+  coral: { d: 13, v: [18, 10], tile: [4, 2], waves: 10 }, sunken: { d: 14, v: [20, 10], tile: [5, 2.5], waves: 10 },
+  drowned: { d: 12, v: [14, 8], tile: [3, 2], waves: 8 }, frozen: { d: 4, v: [5, 2], tile: [0.6, 0.3], waves: 3 },
+  blackwater: { d: 7, v: [8, 4], tile: [1.2, 0.6], waves: 4 }, ghostlight: { d: 7, v: [7, 5], tile: [1, 0.8], waves: 4 },
+  cinder: { d: 6, v: [6, 3], tile: [1, 0.5], waves: 3 }, crew_island: { d: 9, v: [12, 6], tile: [2.5, 1], waves: 7 }, duel_pier: { d: 9, v: [12, 6], tile: [2.5, 1], waves: 7 },
+};
+
 function buildScene(app, tex, key, bgTex, mt) {
   const cfg = sceneFor(key);
   const mode = key === "harbour" ? "harbour" : "water";
@@ -300,7 +312,9 @@ function buildScene(app, tex, key, bgTex, mt) {
   // Layer 0-2: painted world, water shader, waterfalls
   const base = new Container();
   world.addChild(base);
+  const flow = FLOW[key] || FLOW_DEFAULT;
   const dispSprite = new Sprite(dispTex());
+  dispSprite.texture.source.addressMode = "repeat"; // the ripple map scrolls forever without seams
   dispSprite.scale.set(2.2);
   dispSprite.alpha = 0;
   let waterTile = null;
@@ -308,7 +322,7 @@ function buildScene(app, tex, key, bgTex, mt) {
     waterTile = new TilingSprite({ texture: mt.img_tex[cfg.water_tex || "water"], width: BG_W, height: BG_H });
     waterTile.tileScale.set(0.38);
     base.addChild(dispSprite, waterTile);
-    waterTile.filters = [new DisplacementFilter({ sprite: dispSprite, scale: 9 })];
+    waterTile.filters = [new DisplacementFilter({ sprite: dispSprite, scale: flow.d })];
     tm.chunks.forEach((c) => { const sp = new Sprite(c.tex); sp.x = c.x; sp.y = c.y; base.addChild(sp); });
   } else {
     base.addChild(new Sprite(bgTex));
@@ -318,7 +332,7 @@ function buildScene(app, tex, key, bgTex, mt) {
     cfg.water.forEach((p) => mask.poly(p).fill(0xffffff));
     base.addChild(mask);
     water.mask = mask;
-    water.filters = [new DisplacementFilter({ sprite: dispSprite, scale: mode === "harbour" ? 9 : 16 })];
+    water.filters = [new DisplacementFilter({ sprite: dispSprite, scale: flow.d * 1.5 })];
     base.addChild(water);
   }
   const caustics = [];
@@ -329,6 +343,19 @@ function buildScene(app, tex, key, bgTex, mt) {
     c.scale.set(3 + Math.random() * 3, 1 + Math.random());
     c.x = sx + Math.random() * sw0; c.y = sy + Math.random() * sh0; c._s = 0.2 + Math.random() * 0.4; c._p = Math.random() * 6;
     base.addChild(c); caustics.push(c);
+  }
+  // gentle wave glints that drift with the current and fade in and out
+  const waves = [];
+  const onWater = (x, y) => (tm ? tm.nav.isWater(x, y) && tm.nav.isWater(x + 60, y) && tm.nav.isWater(x - 60, y) : true);
+  const placeWave = (w) => {
+    for (let k = 0; k < 12; k++) { w.x = sx + Math.random() * sw0; w.y = sy + Math.random() * sh0; if (onWater(w.x, w.y)) break; }
+    w._ok = onWater(w.x, w.y); w._life = 0; w._len = 2.5 + Math.random() * 3; w.scale.set(2.5 + Math.random() * 3, 0.16 + Math.random() * 0.1);
+  };
+  for (let i = 0; i < (cfg.indoor ? 0 : flow.waves * 3); i++) {
+    const w = new Sprite(soft);
+    w.anchor.set(0.5); w.blendMode = "add"; w.tint = 0xe8ffff; w.alpha = 0;
+    placeWave(w); w._life = Math.random() * w._len;
+    base.addChild(w); waves.push(w);
   }
   const sTex = streakTex();
   const falls = (cfg.falls || []).map(([x, y, w, h]) => {
@@ -582,7 +609,14 @@ function buildScene(app, tex, key, bgTex, mt) {
     time += dt;
     drawGuide();
     applyQuality(useGame.getState().settings.low);
-    dispSprite.x += dt * 22; dispSprite.y += dt * 9;
+    dispSprite.x += dt * flow.v[0]; dispSprite.y += dt * flow.v[1];
+    waves.forEach((w) => {
+      w._life += dt;
+      if (w._life >= w._len) placeWave(w);
+      const k = w._life / w._len;
+      w.alpha = w._ok && !low ? Math.sin(k * Math.PI) * 0.22 : 0;
+      w.x += flow.v[0] * 0.35 * dt; w.y += Math.sin(time * 1.3 + w._len) * 0.08;
+    });
     godray.time = time * 0.35;
     caustics.forEach((c) => { c.alpha = 0.1 + 0.1 * Math.sin(time * c._s + c._p); c.x += Math.sin(time * 0.2 + c._p) * 0.15; });
     falls.forEach((f) => (f.tilePosition.y += f._sp * dt * 60));
@@ -596,7 +630,6 @@ function buildScene(app, tex, key, bgTex, mt) {
     weather(dt, time);
     life(dt, time);
     // the water art stays put (corals, rocks); only the refraction ripple drifts over it
-    if (waterTile) { dispSprite.x = Math.sin(time * 0.5) * 26; dispSprite.y = Math.cos(time * 0.4) * 20; }
     objViews.forEach((v) => { if (v.def.bob) { v.s.y = v.o.y + Math.sin(time * 1.1 + v.o.x) * v.def.bob; v.s.rotation = Math.sin(time * 0.8 + v.o.x) * 0.004 * v.def.bob; } });
 
     // walking (click/tap destination or WASD/arrow keys)
