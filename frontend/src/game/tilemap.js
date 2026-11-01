@@ -20,6 +20,7 @@ export const OBJ = {
   rocks: { w: 180, fp: [0.86, 0.36] },
   barrels: { w: 130, fp: [0.9, 0.42], rect: true },
   reeds: { w: 150, fp: [0, 0], shore: true },
+  lilypad: { w: 110, fp: [0, 0], wet: true, pond: true },
   rowboat: { w: 230, fp: [0, 0], bob: 1.2, wet: true },
   ship: { w: 820, fp: [0, 0], bob: 2, wet: true },
   bridge: { w: 700, fp: [0, 0], ground: true },
@@ -185,11 +186,24 @@ export function buildMap(map, img, objTex = {}) {
   for (const s of map.water) { shape(g, s); if (s.line) { g.lineWidth = s.width + 30; g.stroke(); } else { g.lineWidth = 30; g.fill("evenodd"); if (!s.invert) g.stroke(); } }
   const gw0 = Math.ceil(W / CELL), gh0 = Math.ceil(H / CELL), wpx = g.getImageData(0, 0, gw0, gh0).data;
   const isWater = (x, y) => { const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL); return cx < 0 || cy < 0 || cx >= gw0 || cy >= gh0 || wpx[(cy * gw0 + cx) * 4] < 128; };
+  const deckNear = (x, y) => (map.docks || []).some((d) => { const xs = d.poly.filter((_, i) => i % 2 === 0), ys = d.poly.filter((_, i) => i % 2); return x > Math.min(...xs) - 120 && x < Math.max(...xs) + 120 && y > Math.min(...ys) - 120 && y < Math.max(...ys) + 120; })
+    || (map.bridges || []).some((b) => { const [ax, ay] = b.a, [bx, by] = b.b, L2 = (bx - ax) ** 2 + (by - ay) ** 2, t = Math.max(0, Math.min(1, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / L2)); return Math.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)) < b.w / 2 + 120; });
   // Land props must stand fully on dry ground: if any base point is in water, nudge to the nearest dry spot.
   const settle = (o) => {
     const def = OBJ[o.k];
-    if (def.wet || def.ground) return o;
     const w = o.w || def.w, half = w * 0.4;
+    if (def.pond) {
+      // lily pads float in open water, clear of docks and the bank, but never far from shore
+      const fits = (x, y) => !isWater(x, y) || Array.from({ length: 12 }, (_, k) => [Math.cos((k * Math.PI) / 6) * w, Math.sin((k * Math.PI) / 6) * w * 0.8]).some(([dx, dy]) => !isWater(x + dx, y + dy))
+        ? false : !deckNear(x, y) && [[0, -320], [-320, 0], [320, 0], [0, 320], [-230, -230], [230, 230], [-230, 230], [230, -230]].some(([dx, dy]) => !isWater(x + dx, y + dy));
+      if (fits(o.x, o.y)) return o;
+      for (let r = 16; r <= 420; r += 16) for (let k = 0; k < 24; k++) {
+        const x = o.x + Math.cos((k * Math.PI) / 12) * r, y = o.y + Math.sin((k * Math.PI) / 12) * r;
+        if (fits(x, y)) return { ...o, x, y, _moved: true };
+      }
+      return { ...o, _dropped: true };
+    }
+    if (def.wet || def.ground) return o;
     const deck = (x, y) => (map.docks || []).some((d) => { const xs = d.poly.filter((_, i) => i % 2 === 0), ys = d.poly.filter((_, i) => i % 2); return x > Math.min(...xs) - 30 && x < Math.max(...xs) + 30 && y > Math.min(...ys) - 30 && y < Math.max(...ys) + 40; })
       || (map.bridges || []).some((b) => { const [ax, ay] = b.a, [bx, by] = b.b, L2 = (bx - ax) ** 2 + (by - ay) ** 2, t = Math.max(0, Math.min(1, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / L2)); return Math.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)) < b.w / 2 + 40; });
     const dry = (x, y) => !deck(x, y) && !deck(x - half, y) && !deck(x + half, y) && [[x, y], [x - half, y], [x + half, y], [x, y - w * 0.2], [x - half, y - w * 0.2], [x + half, y - w * 0.2]].every(([a, b]) => !isWater(a, b + 6) && !isWater(a, b + 24));

@@ -168,3 +168,11 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - Landing (pages/Landing.js Home + .fl2-* in ui.css): sky with drifting CSS clouds, wood top bar (online count, Log in, Play), floating island art (art/landing_island.webp) + logo,
   tabs Home/News/Wiki/Media (News empty by choice), screenshot slider + Explore text + navy sign-up box, wood footer with Terms/Privacy.
 - Leaping fish during fight = art/fish/_generic.png, head-first alternating direction.
+
+## 2026-11 Buildings, Wheel of Fortune, cleanup, lily pads
+- 19 building sprites + wheel repainted (modern detailed, solid silhouette). Originals backed up in /app/art_backup/map. Pipeline: /app/scripts/rebuild_buildings.py <urls.txt> [outdir] (magenta key, fills enclosed holes as dark glass, drops specks, fits original canvas).
+- Wheel of Fortune in harbour (maps.js object "wheel" x2570 y1390, spot id "spin" -> SpinModal). Backend login_chest.py tables: gold/bait/crafted bait/Pearls/mystery rare fish; golden day-7 wheel: Pearls 5/10/20/50, gold, epic/legendary fish, mythic jackpot, +5 bonus Pearls. Streak resets on a missed day. Offline mirror offline/spin.js.
+- Wheel icons: hud/gold, hud/pearl, spin/mystery_fish.webp; SpinWheel.js redrawn (colour slices, sharp 18u icons).
+- Deleted 79 unreachable source files (scripts/find_dead_code.py) + unused art (scripts/find_unused_assets.py). Guide links removed from landing.
+- Reeds replaced by lily pads (art/map/lilypad.webp, tilemap def pond:true -> only placed fully in open water near shore, else dropped).
+- Tests: iteration_35 all pass (backend 16/16, online + offline wheel, regression of all pages).

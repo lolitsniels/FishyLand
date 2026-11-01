@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 35: Wheel of Fortune (daily spin) + building repaint + dead-code cleanup regression. Backend: 16/16 pytest pass (8 existing iter34 spin tests after 2 test-only fixes + 8 new iter35 art/golden tests). Frontend online: harbour loads with no console errors; wheel object + 'Wheel of Fortune' signpost right of Pearl Shop; spot-prompt 'Wheel of Fortune [E]' appears; E/click opens spin-modal; header 'Wheel of Fortune · day 1 of 7'; harbourmaster img loads (naturalWidth 207); 8 slice icons all 200 image/webp (gold, bait_live, crafted bait, pearl, mystery_fish); spin shows 'Spinning...', lands on the correct slice under the pointer after ~4.4s, result '8× Live Bait', Collect closes, reopening shows result and no spin button. Golden wheel (TestAngler2 with login_chest day6/yesterday): header 'Golden Wheel of Fortune · day 7', 10 slices all 200 (incl. /art/fish_v2/331.webp mythic), result '5 Pearls' + spin-bonus '+5 bonus Pearls', HUD pearls 16→26. Offline /pgtest: tutorial-skip works, same wheel + modal, 8 icons 200, spin '155 gold', HUD gold 120→275, reopen shows result. Regression: landing toggles/tabs, /wiki, /terms, /privacy, and all 18 in-game pages (journal, inventory, shop, waters, profile, pearl-shop, quests, contracts, market, crews, tournaments, duel, leaderboards, achievements, crafting, messages, almanac, wiki) open via More menu/bottom bar with no pageerrors. Pixel scan of the 20 regenerated map sprites: 0 magenta pixels, 0 enclosed transparent holes. Visual check of harbour + Millbrook: no pink fringes.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Harbour movement to the wheel", "issue": "Clicking the 'Wheel of Fortune' signpost from spawn doesn't reliably walk the player there. In 2 of 3 attempts the player stopped at the Pearl Shop's right corner / lamp post or went behind the shop roof, and auto-open never fired. Holding D from spawn also gets the player stuck on the Pearl Shop's left wall. Please check by hand that tm.nav.path finds a route from spawn (1550,1460) to the spin spot (2570,1457).", "selector": "canvas / spot 'spin'", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Golden wheel (SpinWheel better=true)", "issues": ["Gold coin icons sit on gold/amber slices with very low contrast", "The epic and legendary fish slices use the same mystery_fish icon, so they can't be told apart", "The mythic jackpot icon (331.webp) is small and dim on the maroon slice"]},
+      {"screen": "Harbour wheel area", "issues": ["NPC 'Old Tobias' and a lamp post crowd right up against the wheel sprite"]},
+      {"screen": "Millbrook spawn", "issues": ["The 'Back to Harbour' signpost overlaps the player's feet at spawn"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter34_daily_spin.py", "/app/backend/tests/test_iter35_spin_art.py", "/app/test_reports/pytest/iter35_spin.xml", "/app/test_reports/pytest/iter35_art.xml"],
+  "action_items": [
+    "Check the harbour nav path from spawn to the Wheel of Fortune spot: signpost click-to-walk stalls at the Pearl Shop / lamp",
+    "Optional cleanup: 24 /art paths are still referenced in code but missing on disk. index.js ART_FALLBACK silently swaps them for /art/ui/banner.png, so users see a generic banner frame instead of the real art: Logo.js /art/landing_logo.webp (MarketingShell on /wiki, /terms, /privacy, /reset-password); Tournaments.js icons from backend tournaments.py /art/tournaments/{catches,weight,heaviest,rarity,species,variants}.webp; CrewTabs.js banner /art/header_band.jpg and /art/hall/hall_N.jpg (the whole hall dir is missing); Support.js /art/boost/hero.jpg; Halloween.js /art/avatars/av_pumpkin.jpg and /art/bosses/1099.webp; prizeArt.js xp -> /art/boost/xp6.webp (now unused); backend game_data.py + offline gamedata.json water 'image' /art/water_*.jpg. Art isn't tracked in git, so I couldn't tell whether this round's cleanup deleted them or they were already missing. Either restore them or point the code at existing art",
+    "Optional: raise icon contrast on the golden wheel's gold slices and give the epic and legendary fish slices different icons"
+  ],
+  "critical_code_review_comments": [
+    "login_chest.py spin: the conditional update_one on login_chest.last_claim makes double-spins race-safe. Good.",
+    "login_chest.py: the bonus pearls, last_result and fish label are written in several separate update_one calls (not atomic). Low risk.",
+    "SpinModal.js: the 4.4s setTimeout isn't cleared on unmount, so navigating away mid-spin calls setState on an unmounted component. Minor.",
+    "Offline spin.js picks the crafted bait from dayKey + index while the backend uses a seeded random choice. Different bait, same behaviour; acceptable.",
+    "tests: /api/auth/guest reuses the same guest per IP, so spin tests have to unset login_chest first (fixed in the test helper)"
+  ],
+  "updated_files": ["/app/backend/tests/test_iter34_daily_spin.py (guest helper unsets login_chest; GOLDEN_IDS 'skin' -> 'pearls_50' per the new spec)", "/app/backend/tests/test_iter35_spin_art.py (new)"],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "test_credentials": "TestAngler / Angler#2026, TestAngler2 / Angler#2026 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "TestAngler and TestAngler2 both spun today (2026-11-01 UTC). TestAngler2 login_chest was set to day 6 / yesterday, then spun the golden wheel (day 7 recorded). A guest from the test IP had its login_chest reset repeatedly.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Driving the player in Playwright is unreliable. Teleport with page.evaluate('window.__fx.me.x=2570; window.__fx.me.y=1500'), wait 2s, then the spot-prompt shows and pressing 'e' opens spin-modal. This works both online and in /pgtest. Reset a user's spin with mongo users.update_one({username}, {$unset:{login_chest:''}}); for the golden wheel set {day:6,last_claim:<yesterday>}. Missing /art images don't show as broken because index.js ART_FALLBACK swaps them for /art/ui/banner.png; check img.src for banner.png rather than naturalWidth==0. pytest.ini adds xdist flags; use -n 0 for serial runs."
+}

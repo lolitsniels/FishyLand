@@ -15,7 +15,7 @@ DB = MongoClient(os.environ.get("MONGO_URL"))[os.environ.get("DB_NAME")]
 
 NORMAL_IDS = ["gold_s", "bait", "gold_m", "crafted", "pearls_s", "gold_l", "pearls_m", "fish_rare"]
 NORMAL_KINDS = ["gold", "bait", "gold", "crafted", "pearls", "gold", "pearls", "fish"]
-GOLDEN_IDS = ["gold_l", "pearls_5", "crafted", "pearls_10", "gold_xl", "fish_epic", "pearls_20", "fish_legendary", "skin", "jackpot"]
+GOLDEN_IDS = ["gold_l", "pearls_5", "crafted", "pearls_10", "gold_xl", "fish_epic", "pearls_20", "fish_legendary", "pearls_50", "jackpot"]
 
 
 def day(offset=0):
@@ -28,6 +28,8 @@ def guest():
     d = r.json()
     s = requests.Session()
     s.headers["Authorization"] = f"Bearer {d['token']}"
+    # /auth/guest resumes the same guest per IP, so reset spin state for isolation
+    DB.users.update_one({"_id": ObjectId(d["user"]["id"])}, {"$unset": {"login_chest": ""}})
     return s, d["user"]["id"]
 
 
