@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { LogIn, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogIn, UserPlus, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { api, errMsg, fmt } from "../tfl/lib/api";
 import { useGame } from "../tfl/context/GameContext";
 import { createGuest } from "../tfl/lib/guest";
@@ -115,25 +115,36 @@ function Slider() {
   );
 }
 
-function AuthCard({ user, go, mode, setMode }) {
-  if (user) return (
-    <div className="fl2-join" data-testid="lp-board">
-      <h2 className="fl-h">Ready to cast?</h2>
-      <div className="flex flex-col items-center gap-3 text-center" data-testid="lp-welcome-back">
-        <div className="text-lg font-bold">Welcome back, {user.username}</div>
-        <button type="button" className="btn btn-gold" onClick={go} data-testid="lp-continue-big">Back to the harbour</button>
-      </div>
-    </div>
+function AuthMenu({ open, setOpen, user, go }) {
+  const btn = (k, label, icon) => (
+    <button type="button" className={`fl2-btn dark ${open === k ? "on" : ""}`} onClick={() => setOpen(open === k ? null : k)} data-testid={`lp-${k}-toggle`}>
+      {icon}{label}<ChevronDown size={14} className={`fl2-caret ${open === k ? "up" : ""}`} />
+    </button>
   );
   return (
-    <div className="fl2-join" data-testid="lp-board">
-      <div className="fl2-auth-tabs">
-        <button type="button" className={mode === "signup" ? "on" : ""} onClick={() => setMode("signup")} data-testid="lp-auth-signup">Sign up</button>
-        <button type="button" className={mode === "login" ? "on" : ""} onClick={() => setMode("login")} data-testid="lp-auth-login">Log in</button>
-      </div>
-      {mode === "login" ? <LoginBox onDone={go} /> : <SignupBox go={go} />}
+    <div className="fl2-auth">
+      {!user && btn("login", "Log in", <LogIn size={14} />)}
+      {!user && btn("signup", "Sign up", <UserPlus size={14} />)}
+      <PlayButton user={user} go={go} />
+      {open && !user && (
+        <div className="fl2-drop" data-testid={`lp-${open}-drop`}>
+          <h2 className="fl-h">{open === "login" ? "Welcome back!" : "Create your angler"}</h2>
+          {open === "login" ? <LoginBox onDone={go} /> : <SignupBox go={go} />}
+        </div>
+      )}
     </div>
   );
+}
+
+function PlayButton({ user, go }) {
+  const { login } = useGame();
+  const [busy, setBusy] = useState(false);
+  const play = async () => {
+    if (user) return go();
+    setBusy(true);
+    try { const r = await createGuest("welcome", ""); login(r); go(); } catch (ex) { toast.error(errMsg(ex)); setBusy(false); }
+  };
+  return <button type="button" className="fl2-btn" onClick={play} disabled={busy} data-testid="lp-continue">{busy ? "Casting..." : "Play"}</button>;
 }
 
 function HomeTab() {
@@ -172,7 +183,7 @@ function Home() {
   const { user } = useGame();
   const nav = useNavigate();
   const [stats, setStats] = useState(null);
-  const [mode, setMode] = useState("signup");
+  const [open, setOpen] = useState(null);
   const [tab, setTab] = useState("home");
   const go = () => nav("/game");
   useEffect(() => {
@@ -187,31 +198,22 @@ function Home() {
         description="FishyLand is a free online fishing MMO you play in your browser. Walk the harbour with real players, fish 12 waters, catch hundreds of species, fill your Fishdex, join a crew and win live fishing duels." />
       <Clouds />
       <div className="fl2-wrap">
-        <header className="fl2-bar fl2-wood" data-testid="lp-topbar">
+        <header className="fl2-bar fl2-frame" data-testid="lp-topbar">
           <span className="fl2-tag">Free fishing MMO</span>
           {stats && <span className="fl2-online" data-testid="lp-online"><i />{fmt(stats.online)} online</span>}
-          <div className="flex items-center gap-2">
-            {!user && <button type="button" className="fl2-btn dark" onClick={() => { setMode("login"); window.scrollTo({ top: 0, behavior: "smooth" }); }} data-testid="lp-login-toggle"><LogIn size={14} />Log in</button>}
-            <button type="button" className="fl2-btn" onClick={user ? go : () => { setMode("signup"); window.scrollTo({ top: 0, behavior: "smooth" }); }} data-testid="lp-continue">Play</button>
-          </div>
+          <AuthMenu open={open} setOpen={setOpen} user={user} go={go} />
         </header>
-        <div className="fl2-hero">
-          <div className="fl2-intro">
-            <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl2-logo" data-testid="lp-logo" />
-            <div className="fl2-mascot-row">
-              <img src="/art/hud/mascot.webp" alt="The Harbourmaster" className="fl2-mascot" data-testid="lp-mascot" />
-              <div className="fl2-bubble">Ahoy! FishyLand is a free fishing MMO right in your browser. Pick your angler and come fish with us!</div>
-            </div>
-          </div>
-          <AuthCard user={user} go={go} mode={mode} setMode={setMode} />
+        <div className="fl2-hero" onClick={() => setOpen(null)}>
+          <img src="/art/landing_island.webp" alt="The world of FishyLand" className="fl2-island" data-testid="lp-island" />
+          <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl2-logo" data-testid="lp-logo" />
         </div>
-        <nav className="fl2-tabs fl2-wood" data-testid="lp-tabs">
+        <nav className="fl2-tabs fl2-frame" data-testid="lp-tabs">
           {TABS.map(([k, label]) => <button key={k} type="button" className={tab === k ? "on" : ""} onClick={() => setTab(k)} data-testid={`lp-tab-${k}`}>{label}</button>)}
         </nav>
-        <main className="fl2-panel" data-testid={`lp-panel-${tab}`}>
+        <main className="fl2-panel fl2-frame" data-testid={`lp-panel-${tab}`}>
           {tab === "home" ? <HomeTab /> : <OtherTab tab={tab} />}
         </main>
-        <footer className="fl2-foot fl2-wood" data-testid="lp-footer">
+        <footer className="fl2-foot fl2-frame" data-testid="lp-footer">
           <span>© FishyLand · Free fishing MMO</span>
           <div className="flex gap-2">
             <Link to="/terms" data-testid="wl-footer-terms">Terms &amp; Conditions</Link>
