@@ -466,3 +466,18 @@ html body .g-tab.on img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .7)) !impo
 }
 .fl2-clouds { position: fixed; inset: 0; z-index: 0; }
 .fl2-join { background: linear-gradient(#123063, #0a1d42) !important; border: 3px solid #c9a24a !important; border-radius: 12px; box-shadow: 0 8px 18px rgba(20,10,0,.35); color: #f4ead2; }
+/* landing v2.1: sign-up at the top, no island */
+.fl2-hero { display: grid; grid-template-columns: 1fr 440px; gap: 28px; align-items: center; padding: 22px 0 26px; margin: 0; place-items: initial; }
+.fl2-intro { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.fl2-logo { position: static; width: min(400px, 90%); }
+.fl2-mascot-row { display: flex; align-items: flex-end; gap: 12px; max-width: 460px; }
+.fl2-mascot { width: 130px; flex: none; filter: drop-shadow(0 6px 8px rgba(0,40,80,.35)); animation: fl2-logo 5s ease-in-out infinite; }
+.fl2-bubble { position: relative; background: #fff7e0; color: #3a2412; border: 3px solid #8a5a2b; border-radius: 14px; padding: 12px 14px; font-weight: 700; font-size: 15px; line-height: 1.4; box-shadow: 0 5px 0 #8a5a2b; margin-bottom: 40px; }
+.fl2-bubble::after { content: ""; position: absolute; left: -14px; bottom: 16px; border: 8px solid transparent; border-right: 10px solid #8a5a2b; }
+.fl2-join { max-width: none; justify-self: stretch; padding: 16px 18px 18px; }
+.fl2-auth-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.fl2-auth-tabs button { flex: 1; padding: 8px; border-radius: 9px; font: 400 18px "Lilita One", var(--ui-font); color: #c9d6f0; background: rgba(0,0,0,.25); border: 2px solid rgba(201,162,74,.35); transition: background-color .12s ease, color .12s ease; }
+.fl2-auth-tabs button.on { color: #fff; background: linear-gradient(#ffc04a, #f08a12); border-color: #7a3a00; text-shadow: 0 2px 0 #7a3a00; }
+.fl2-tabs { border-radius: 12px 12px 0 0; }
+@media (max-width: 900px) { .fl2-hero { grid-template-columns: 1fr; } .fl2-mascot { width: 90px; } .fl2-bubble { font-size: 13px; margin-bottom: 24px; } }
+.fl2-hero > .fl2-join { grid-column: auto; }

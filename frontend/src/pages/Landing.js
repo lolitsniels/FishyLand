@@ -115,7 +115,28 @@ function Slider() {
   );
 }
 
-function HomeTab({ user, go }) {
+function AuthCard({ user, go, mode, setMode }) {
+  if (user) return (
+    <div className="fl2-join" data-testid="lp-board">
+      <h2 className="fl-h">Ready to cast?</h2>
+      <div className="flex flex-col items-center gap-3 text-center" data-testid="lp-welcome-back">
+        <div className="text-lg font-bold">Welcome back, {user.username}</div>
+        <button type="button" className="btn btn-gold" onClick={go} data-testid="lp-continue-big">Back to the harbour</button>
+      </div>
+    </div>
+  );
+  return (
+    <div className="fl2-join" data-testid="lp-board">
+      <div className="fl2-auth-tabs">
+        <button type="button" className={mode === "signup" ? "on" : ""} onClick={() => setMode("signup")} data-testid="lp-auth-signup">Sign up</button>
+        <button type="button" className={mode === "login" ? "on" : ""} onClick={() => setMode("login")} data-testid="lp-auth-login">Log in</button>
+      </div>
+      {mode === "login" ? <LoginBox onDone={go} /> : <SignupBox go={go} />}
+    </div>
+  );
+}
+
+function HomeTab() {
   return (
     <div className="fl2-home">
       <Slider />
@@ -124,15 +145,6 @@ function HomeTab({ user, go }) {
         <p>FishyLand is a free fishing MMO you play right in your browser. Sail between twelve waters, from quiet ponds and rivers to frozen lakes and the deep sea. Every water has its own fish, weather and secrets.</p>
         <p>Walk the harbour with real players, chat, trade on the Market, join a crew with your own island and challenge other anglers to live duels.</p>
         <p>Over 350 fish to find. Some are so rare that the whole server hears about it when one is caught!</p>
-      </div>
-      <div className="fl2-join" data-testid="lp-board">
-        <h2 className="fl-h">{user ? "Ready to cast?" : "Sign up now!"}</h2>
-        {user ? (
-          <div className="flex flex-col items-center gap-3 text-center" data-testid="lp-welcome-back">
-            <div className="text-lg font-bold">Welcome back, {user.username}</div>
-            <button type="button" className="btn btn-gold" onClick={go} data-testid="lp-continue-big">Back to the harbour</button>
-          </div>
-        ) : <SignupBox go={go} />}
       </div>
     </div>
   );
@@ -160,7 +172,7 @@ function Home() {
   const { user } = useGame();
   const nav = useNavigate();
   const [stats, setStats] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
+  const [mode, setMode] = useState("signup");
   const [tab, setTab] = useState("home");
   const go = () => nav("/game");
   useEffect(() => {
@@ -179,19 +191,25 @@ function Home() {
           <span className="fl2-tag">Free fishing MMO</span>
           {stats && <span className="fl2-online" data-testid="lp-online"><i />{fmt(stats.online)} online</span>}
           <div className="flex items-center gap-2">
-            {!user && <button type="button" className="fl2-btn dark" onClick={() => setShowLogin(true)} data-testid="lp-login-toggle"><LogIn size={14} />Log in</button>}
-            <button type="button" className="fl2-btn" onClick={user ? go : () => setTab("home")} data-testid="lp-continue">Play</button>
+            {!user && <button type="button" className="fl2-btn dark" onClick={() => { setMode("login"); window.scrollTo({ top: 0, behavior: "smooth" }); }} data-testid="lp-login-toggle"><LogIn size={14} />Log in</button>}
+            <button type="button" className="fl2-btn" onClick={user ? go : () => { setMode("signup"); window.scrollTo({ top: 0, behavior: "smooth" }); }} data-testid="lp-continue">Play</button>
           </div>
         </header>
         <div className="fl2-hero">
-          <img src="/art/landing_island.webp" alt="The world of FishyLand" className="fl2-island" data-testid="lp-island" />
-          <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl2-logo" data-testid="lp-logo" />
+          <div className="fl2-intro">
+            <img src="/art/hud/logo_fishyland.webp" alt="FishyLand" className="fl2-logo" data-testid="lp-logo" />
+            <div className="fl2-mascot-row">
+              <img src="/art/hud/mascot.webp" alt="The Harbourmaster" className="fl2-mascot" data-testid="lp-mascot" />
+              <div className="fl2-bubble">Ahoy! FishyLand is a free fishing MMO right in your browser. Pick your angler and come fish with us!</div>
+            </div>
+          </div>
+          <AuthCard user={user} go={go} mode={mode} setMode={setMode} />
         </div>
         <nav className="fl2-tabs fl2-wood" data-testid="lp-tabs">
           {TABS.map(([k, label]) => <button key={k} type="button" className={tab === k ? "on" : ""} onClick={() => setTab(k)} data-testid={`lp-tab-${k}`}>{label}</button>)}
         </nav>
         <main className="fl2-panel" data-testid={`lp-panel-${tab}`}>
-          {tab === "home" ? <HomeTab user={user} go={go} /> : <OtherTab tab={tab} />}
+          {tab === "home" ? <HomeTab /> : <OtherTab tab={tab} />}
         </main>
         <footer className="fl2-foot fl2-wood" data-testid="lp-footer">
           <span>© FishyLand · Free fishing MMO</span>
@@ -201,11 +219,6 @@ function Home() {
           </div>
         </footer>
       </div>
-      {showLogin && !user && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60" onClick={(e) => e.target === e.currentTarget && setShowLogin(false)} data-testid="lp-login-modal">
-          <div className="panel fl-login"><h2 className="fl-h">Log in</h2><LoginBox onDone={go} /></div>
-        </div>
-      )}
     </div>
   );
 }
