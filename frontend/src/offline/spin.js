@@ -6,7 +6,7 @@ const WHEEL = [
 const BETTER = [
   ["gold_l", "gold", 1500, 20, "uncommon"], ["pearls_5", "pearls", 5, 18, "rare"], ["crafted", "crafted", 10, 14, "rare"], ["pearls_10", "pearls", 10, 12, "epic"],
   ["gold_xl", "gold", 4000, 10, "epic"], ["fish_epic", "fish", 1, 10, "epic"], ["pearls_20", "pearls", 20, 5, "legendary"], ["fish_legendary", "fish", 1, 5, "legendary"],
-  ["skin", "skin", 1, 3, "legendary"], ["jackpot", "mythic", 1, 3, "mythic"],
+  ["pearls_50", "pearls", 50, 3, "legendary"], ["jackpot", "mythic", 1, 3, "mythic"],
 ];
 const SKINS = { skin_kraken: "Krakenjaw Rod Skin", skin_inferno: "Inferno Wyrm Rod Skin", skin_galleon: "Ghost Galleon Rod Skin" };
 const BONUS_PEARLS = 5;

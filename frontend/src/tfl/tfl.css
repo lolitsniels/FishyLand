@@ -960,7 +960,7 @@ html.ev-halloween .wl-title span { color: #ff8a2a; text-shadow: 0 0 34px rgba(25
 .spin-day-better.spin-day-today { border-style: solid; background: #3b3016; }
 .spin-stage { display: grid; grid-template-columns: 190px 1fr; align-items: end; gap: 8px; padding: 12px 12px 4px;
   background: linear-gradient(#16202a, #1b1714 70%); }
-.spin-hm { width: 190px; height: auto; image-rendering: pixelated; align-self: end; margin-bottom: -4px; }
+.spin-hm { width: 170px; height: auto; align-self: end; margin-bottom: -4px; }
 .spin-bubble { position: relative; background: #f1e4c8; color: #2b1d12; font-size: 12px; font-weight: 600; padding: 6px 10px; margin-bottom: 6px; max-width: 280px; text-align: center;
   clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px); }
 .spin-result { text-align: center; padding: 6px 0 2px; }

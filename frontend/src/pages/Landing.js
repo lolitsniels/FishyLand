@@ -81,7 +81,6 @@ function SignupBox({ go }) {
   );
 }
 
-const GUIDES = [["Fishao Alternatives", "fishao-alternatives"], ["Games Like Fishao", "games-like-fishao"], ["Best Browser Fishing Games", "best-browser-fishing-games"], ["Fishing MMO Guide", "fishing-mmo"], ["Online Fishing Games", "online-fishing-games"], ["Game wiki", null]];
 
 const SLIDES = [
   ["/art/shots/harbour.jpg", "The harbour", "Walk the docks with other anglers, visit the shops and take on quests."],
@@ -168,7 +167,6 @@ function OtherTab({ tab }) {
       <h2 className="fl2-h">The FishyLand Wiki</h2>
       <p>Everything about fish, waters, rods, bait, quests and more, written for new and experienced anglers.</p>
       <Link to="/wiki" className="btn btn-gold inline-block mt-2" data-testid="lp-wiki-open">Open the wiki</Link>
-      <div className="fl2-guides">{GUIDES.filter(([, slug]) => slug).map(([t, slug]) => <Link key={slug} to={`/${slug}`} data-testid={`lp-guide-${slug}`}>{t}</Link>)}</div>
     </div>
   );
   return <div className="fl2-media" data-testid="lp-media">{MEDIA.map((src) => <a key={src} href={src} target="_blank" rel="noreferrer"><img src={src} alt="FishyLand screenshot" loading="lazy" /></a>)}</div>;

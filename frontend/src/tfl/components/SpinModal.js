@@ -58,7 +58,7 @@ export default function SpinModal({ state, onClose, onDone }) {
           <button className="ml-auto text-[var(--muted)] hover:text-[var(--text)]" onClick={onClose} disabled={spinning} aria-label={tt("Close")} data-testid="spin-close-button"><X size={16} /></button>
         </header>
         <div className="spin-stage">
-          <img src="/art/spin/harbourmaster_point.webp" alt={tt("The Harbourmaster")} className="spin-hm" draggable="false" />
+          <img src="/art/npc/body_harbourmaster.webp" alt={tt("The Harbourmaster")} className="spin-hm" draggable="false" />
           <div className="flex flex-col items-center min-w-0">
             <div className="spin-bubble">{state.better ? tt("Seven days in a row! The golden wheel always pays 5 bonus Pearls.") : tt("One turn a day, angler. Come back 7 days in a row for the golden wheel!")}</div>
             <Wheel segments={segs} better={state.better} rotation={rot} spinning={spinning} size={270} />

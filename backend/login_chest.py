@@ -24,7 +24,7 @@ WHEEL = [
 BETTER_WHEEL = [
     ("gold_l", "gold", 1500, 20, "uncommon"), ("pearls_5", "pearls", 5, 18, "rare"), ("crafted", "crafted", 10, 14, "rare"), ("pearls_10", "pearls", 10, 12, "epic"),
     ("gold_xl", "gold", 4000, 10, "epic"), ("fish_epic", "fish", 1, 10, "epic"), ("pearls_20", "pearls", 20, 5, "legendary"), ("fish_legendary", "fish", 1, 5, "legendary"),
-    ("skin", "skin", 1, 3, "legendary"), ("jackpot", "mythic", 1, 3, "mythic"),
+    ("pearls_50", "pearls", 50, 3, "legendary"), ("jackpot", "mythic", 1, 3, "mythic"),
 ]
 for _w in (WHEEL, BETTER_WHEEL): assert sum(s[3] for s in _w) == 100
 
