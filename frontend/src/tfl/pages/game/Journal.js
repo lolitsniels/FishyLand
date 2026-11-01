@@ -4,7 +4,7 @@
  * modification, distribution or use of this file, in whole or in part, via any medium,
  * is strictly prohibited without prior written permission from the owner.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { api, wt, wtRange, RARITIES } from "../../lib/api";
 import { useGame } from "../../context/GameContext";
@@ -80,6 +80,7 @@ export default function Journal() {
   const [page, setPage] = useState(0);
   const [flip, setFlip] = useState("");
   const [openId, setOpenId] = useState(null);
+  const tabsRef = useRef(null);
   useEffect(() => { api.get("/journal").then((r) => setJournal(r.data)).catch(() => {}); }, []);
   useEffect(() => { setPage(0); }, [water, filter, q]);
   const regular = useMemo(() => data?.fish.filter((f) => !f.secret) || [], [data]);
@@ -90,7 +91,9 @@ export default function Journal() {
   const shown = list.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
   return (
     <div className="dex fade-in" data-testid="journal-page">
-      <div className="dex-tabs" data-testid="journal-water-filter">
+      <div className="dex-tabs-wrap">
+      <button type="button" className="dex-scroll" onClick={() => tabsRef.current?.scrollBy({ left: -260, behavior: "smooth" })} aria-label="Scroll left" data-testid="journal-tabs-left"><ChevronLeft size={15} /></button>
+      <div className="dex-tabs" ref={tabsRef} onWheel={(e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) e.currentTarget.scrollLeft += e.deltaY; }} data-testid="journal-water-filter">
         <button type="button" className={water === "all" ? "on" : ""} onClick={() => setWater("all")} data-testid="journal-water-all">{tt("All")}</button>
         {data.waters.map((w) => { const open = user.unlocked_waters.includes(w.key); return (
           <button key={w.key} type="button" disabled={!open} className={`${water === w.key ? "on" : ""} ${open ? "" : "locked"}`} onClick={() => setWater(w.key)} title={open ? w.name : `${w.name} (locked)`} data-testid={`journal-water-${w.key}`}>
@@ -98,6 +101,8 @@ export default function Journal() {
           </button>
         ); })}
         <button type="button" className={water === "crew_pond" ? "on" : ""} onClick={() => setWater("crew_pond")} data-testid="journal-water-crew_pond"><img src="/art/waters/millbrook_thumb.jpg" alt="" /><span>Crew Pond</span></button>
+      </div>
+      <button type="button" className="dex-scroll" onClick={() => tabsRef.current?.scrollBy({ left: 260, behavior: "smooth" })} aria-label="Scroll right" data-testid="journal-tabs-right"><ChevronRight size={15} /></button>
       </div>
       <div className="dex-book">
         <LeftPage {...{ water, setWater, data, user, journal, regular, filter, setFilter, q, setQ }} />

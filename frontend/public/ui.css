@@ -347,7 +347,8 @@ html body .g-tab.on img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .7)) !impo
 
 /* Fishdex book */
 .dex { --ink: #3a2412; --ink2: #6b4a2a; }
-.dex-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 0 18px; position: relative; z-index: 2; margin-bottom: -6px; scrollbar-width: thin; }
+.dex-tabs { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; padding-top: 4px !important; padding: 0 18px; position: relative; z-index: 2; margin-bottom: -6px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.dex-tabs::-webkit-scrollbar { display: none; }
 .dex-tabs button { flex: none; display: flex; align-items: center; gap: 5px; padding: 6px 10px 10px; border-radius: 10px 10px 0 0; background: linear-gradient(#24407a, #182c55); border: 2px solid #c9a24a; border-bottom: 0; color: #f6e7c1; font: 800 11.5px var(--ui-font); transform: translateY(4px); transition: transform .15s ease, background-color .15s ease; }
 .dex-tabs button img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; border: 1px solid #f3d27a; }
 .dex-tabs button:hover:not(:disabled) { transform: translateY(0); }
@@ -473,3 +474,14 @@ html body .g-tab.on img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .7)) !impo
   .fl2-drop { left: 8px; right: 8px; width: auto; } .fl2-drop::before { display: none; }
   .fl2-island { margin-top: 56px; }
 }
+/* themed scrollbars everywhere in the game (navy track, brass thumb) */
+* { scrollbar-width: thin; scrollbar-color: #c9a24a rgba(6, 18, 43, .6); }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: rgba(6, 18, 43, .6); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(#ffe27a, #c9a24a); border: 2px solid #0d2552; border-radius: 8px; }
+::-webkit-scrollbar-corner { background: transparent; }
+.dex-tabs-wrap { position: relative; display: flex; align-items: flex-end; gap: 4px; }
+.dex-tabs-wrap .dex-tabs { flex: 1; min-width: 0; padding: 0 4px; }
+.dex-scroll { flex: none; width: 28px; height: 28px; margin-bottom: 4px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(#24407a, #182c55); border: 2px solid #c9a24a; color: #f6e7c1; transition: transform .12s ease; }
+.dex-scroll:hover { transform: scale(1.1); }
+@media (max-width: 760px) { .dex-tabs-wrap { display: none; } }
