@@ -137,3 +137,8 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - Walk-in Crew Clubhouse (map key clubhouse, mode "clubhouse", yacht club art art/map/club_*.webp, t_clubwall/t_clubfloor): Notice Board (motd editor + broadcast + activity), Member Portraits (faces, promote/demote/kick), Trophy Shelf (GET /crews/{id} trophies), Captain's Desk (joining toggle, invite, colour, bank, leave), Mailbox (join requests). Managers = leader+officers. Island signpost "Enter the Crew Clubhouse"; exit returns near the hall. Presence scoped club:<crew>. Motd no longer needs the Hall perk.
 
 
+
+## 2026-11 Playgama tutorial fixes
+- Tutorial tour steps (buildings) no longer have a Next button; player must walk to each building following the arrows.
+- Mythic first catch (The Mill Giant) now re-hooks on every Millbrook cast until landed while the tutorial is active (previously one-shot; an escape fell back to random fish like Bowfin).
+- Rebuilt /app/playgama/fishyland-playgama.zip (download at /downloads/fishyland-playgama.zip).

@@ -155,8 +155,8 @@ function cast() {
   if (bait) u.bait[bait.id] -= 1;
   const castEv = HB.event("cast", {});
   const t = u.tutorial || {};
-  const guaranteed = !t.done && !t.guaranteed && !u.stats.catches && water.key === "millbrook";
-  if (guaranteed) t.guaranteed = true;
+  // keeps hooking The Mill Giant until the tutorial angler actually lands it (an escape no longer burns the guarantee)
+  const guaranteed = !t.done && !u.stats.catches && water.key === "millbrook";
   S.pending = null;
   if (!guaranteed && Math.floor(rnd() * 100) + 1 > 72 + bite) {
     save();

@@ -110,7 +110,7 @@ export function WorldTutorial({ mode }) {
         <p className="wtut-text" data-testid="tutorial-text">{text}</p>
         <div className="flex gap-2 justify-end items-center mt-2">
           {!s.finish && <button type="button" className="wtut-skip" onClick={skip} data-testid="tutorial-skip">Skip tutorial</button>}
-          {(s.next || s.visit) && <button type="button" className="img-pill-dark !min-w-[120px] !min-h-[40px] px-5" onClick={() => go(step + 1)} data-testid="tutorial-next">{s.next || "Next"}</button>}
+          {s.next && <button type="button" className="img-pill-dark !min-w-[120px] !min-h-[40px] px-5" onClick={() => go(step + 1)} data-testid="tutorial-next">{s.next || "Next"}</button>}
           {s.finish && <button type="button" className="img-pill-dark !min-w-[150px] !min-h-[40px] px-5" onClick={finish} data-testid="tutorial-finish">Collect my gift!</button>}
           {s.wait && <span className="wtut-wait" data-testid="tutorial-waiting">{s.wait === "walk" ? "Walk around..." : s.wait === "catch" ? "Catch a fish..." : "Close the card..."}</span>}
           {s.visit && <span className="wtut-wait" data-testid="tutorial-waiting">{mode === "harbour" ? "Follow the arrows..." : "Sail back to the harbour..."}</span>}
