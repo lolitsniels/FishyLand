@@ -142,3 +142,23 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - Tutorial tour steps (buildings) no longer have a Next button; player must walk to each building following the arrows.
 - Mythic first catch (The Mill Giant) now re-hooks on every Millbrook cast until landed while the tutorial is active (previously one-shot; an escape fell back to random fish like Bowfin).
 - Rebuilt /app/playgama/fishyland-playgama.zip (download at /downloads/fishyland-playgama.zip).
+
+## 2026-11 Big unification round (online + Playgama are the same game)
+- Reels/lines retired from shop/tackle box; right-corner Reel & Line = upgrade tracks L1-10, Pearls only (3,5,8,12,16,20,25,30,40).
+  backend/tackle.py (POST /api/tackle/upgrade, user.tackle), offline/social.js mirror. recovery 1+0.12/lv, tolerance 1+0.11/lv, +2% sell/XP per lv.
+  Startup migration tackle_tracks_v1 reset everyone to reel_spool/line_cotton, pulled other reels/lines, unset enhance/scrap (no refund, user choice).
+- Enhancement removed (/enhance/upgrade & /recycle -> 410, trash rolls gone, enhance achievements removed). Matched-set bonus retired. Only rods wear.
+- Fight minigame (TensionGame.js): one bar, fixed centre green zone, hold = needle right, release = drift left, fish shoves/jerks, tricks kept, progress bar.
+- Tutorial (WorldTutorial.js, same both builds, 19-20 steps): welcome (MMO) -> sail to Millbrook -> first catch always The Mill Giant (mythic, id 294,
+  online too: TUTORIAL_MYTHIC/TUTORIAL_FIGHT in server.py) -> mythic banner -> back to harbour -> walk-only tour of 9 buildings -> reel/line, energy, Fishdex, chat -> gift.
+- Mythic banner (world/MythicBanner.js): own mythic via fr-mythic event; online polls /alerts/live for others' landed mythics. Tutorial recasts clear old hooked/lost alerts.
+- Fishdex = book (art/hud/fishdex_book.webp, Journal.js, .dex-* in ui.css); boss tabs removed; search only matches discovered fish.
+- Catch card backdrop = /art/waters/<water>.jpg.
+- Playgama build: all signposts/menus/pages (App.js no longer filters routes), local-only chat, empty market/crews/tournaments, duel queue waits forever,
+  leaderboards with just the player, wiki (offline/wiki.json), crafting + ingredients offline.
+- Menus: inputs/selects and locked achievement cards restyled navy+brass (ui.css).
+- Tests: iteration 33 (forced summary): backend 9/9, online frontend all pass; offline route bug fixed after and self-verified.
+
+## Backlog
+- P1: Duel Pier computer opponent offline; tutorial card overlaps top signboards on some widths; quest toast can overlap mythic banner
+- P2: Pearl Shop portraits/walls offline; Playgama multiplayer re-enable

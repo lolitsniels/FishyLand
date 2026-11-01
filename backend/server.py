@@ -1398,6 +1398,7 @@ async def cast(body: Optional[CastIn] = None, user=Depends(get_current_user)):
     enc = {"user_id": str(user["_id"]), "species_id": f["id"], "weight": weight, "variant": variant, "vmult": vmult,
            "water": water["key"], "created_at": iso(now()), "params": params}
     if f["rarity"] in ("legendary", "mythic"):
+        if guaranteed: await db.alerts.delete_many({"username": user["username"], "status": {"$in": ["hooked", "lost"]}})  # tutorial recasts never flood the feed
         a = await db.alerts.insert_one({"username": user["username"], "water": water["key"], "water_name": water["name"], "status": "hooked", "species": None, "rarity": f["rarity"],
                                         "weight": None, "variant": None, "at": iso(now()), "cheers": [], "text": f"{user['username']} has hooked something {'mythic' if f['rarity'] == 'mythic' else 'legendary'} at {water['name']}!"})
         enc["alert_id"] = str(a.inserted_id)

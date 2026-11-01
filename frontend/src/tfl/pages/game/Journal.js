@@ -83,7 +83,7 @@ export default function Journal() {
   useEffect(() => { api.get("/journal").then((r) => setJournal(r.data)).catch(() => {}); }, []);
   useEffect(() => { setPage(0); }, [water, filter, q]);
   const regular = useMemo(() => data?.fish.filter((f) => !f.secret) || [], [data]);
-  const list = useMemo(() => (data ? data.fish.filter((f) => (!f.secret || journal[f.id]) && (water === "all" || q || f.water === water) && (filter === "all" || f.rarity === filter) && (!q || f.name.toLowerCase().includes(q.toLowerCase()))) : []), [data, journal, water, filter, q]);
+  const list = useMemo(() => (data ? data.fish.filter((f) => (!f.secret || journal[f.id]) && (water === "all" || q || f.water === water) && (filter === "all" || f.rarity === filter) && (!q || (journal[f.id] && f.name.toLowerCase().includes(q.toLowerCase())))) : []), [data, journal, water, filter, q]);
   if (!data) return null;
   const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
   const turn = (d) => { setFlip(d > 0 ? "next" : "prev"); setPage((p) => Math.max(0, Math.min(pages - 1, p + d))); };

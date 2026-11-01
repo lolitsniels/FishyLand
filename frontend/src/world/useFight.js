@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { api, errMsg } from "../tfl/lib/api";
+import { api, errMsg, wt } from "../tfl/lib/api";
 import { useGame as useTfl } from "../tfl/context/GameContext";
 import { useGame } from "../store";
 import { fx, setPhase as setFxPhase } from "../game/fx";
@@ -62,7 +62,7 @@ export function useFight() {
         fx.speciesImg = fishArt(c.rarity, (c.species_id || 0), c.species_id);
         phase("landed"); sfx("land");
         useGame.setState({ result: { ...r, img: fx.speciesImg } });
-        if (c.rarity === "mythic" && !r.duel) { const { user: u, data: d } = who.current; announceMythic(`${u?.username || "An angler"} landed the mythic ${c.name} (${c.weight} kg) at ${d?.waters?.find((w) => w.key === c.water)?.name || "the water"}!`); }
+        if (c.rarity === "mythic" && !r.duel) { const { user: u, data: d } = who.current; announceMythic(`${u?.username || "An angler"} landed the mythic ${c.name} (${wt(c.weight)}) at ${d?.waters?.find((w) => w.key === c.water)?.name || "the water"}!`); }
       } else {
         phase("lost"); sfx("snap");
         toast(why || r.message || "It got away.");

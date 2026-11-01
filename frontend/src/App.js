@@ -46,9 +46,7 @@ const GAME_PAGES = [
   ["quests", Quests], ["contracts", Contracts], ["market", Market], ["crews/:id?", Crews], ["tournaments", Tournaments], ["duel", DuelLive],
   ["leaderboards", Leaderboards], ["achievements", Achievements], ["crafting", Crafting], ["messages/:username?", Messages], ["almanac", Almanac], ["wiki", Wiki], ["admin", Admin],
 ];
-// offline (portal) build: solo pages only, everything multiplayer waits for the online version
-const OFFLINE_PAGES = new Set(["waters", "journal", "inventory", "shop", "profile/:username?", "quests", "achievements", "pearl-shop", "contracts", "almanac"]);
-const PAGES = OFFLINE ? GAME_PAGES.filter(([p]) => OFFLINE_PAGES.has(p)) : GAME_PAGES;
+const PAGES = OFFLINE ? GAME_PAGES.filter(([p]) => p !== "admin") : GAME_PAGES;
 const Router = ({ children }) => (OFFLINE ? <MemoryRouter initialEntries={["/game"]}>{children}</MemoryRouter> : <BrowserRouter>{children}</BrowserRouter>);
 
 function App() {

@@ -18,6 +18,8 @@ import { t as tt } from "../../i18n";
 import { fx } from "../../../game/fx";
 import { ls } from "../../../offline/bridge";
 
+const left = (iso) => { const m = Math.max(0, Math.round((new Date(iso) - Date.now()) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`; };
+
 function CreateCrew({ cost, minLevel, onCreated }) {
   const { user } = useGame();
   const [f, setF] = useState({ name: "", tag: "", desc: "", open: true });

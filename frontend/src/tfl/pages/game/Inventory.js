@@ -196,7 +196,7 @@ export default function Inventory() {
   return (
     <div className="space-y-3 fade-in" data-testid="inventory-page">
       <Loadout user={user} lookups={lookups} onInfo={setRodInfo} onBait={() => setTab("bait")} />
-      <GameTabs testid="inventory-tab" value={tab} onChange={setTab} tabs={INV_TABS.map(([id, label, img]) => [id, label, img, fmt((id === "fish" ? (inv?.total ?? inv?.fish.length) : id === "bait" ? baitRows.reduce((a, [, n]) => a + n, 0) : id === "tackle" ? user.owned_gear.length : id === "ingredients" ? ingRows.reduce((a, [, n]) => a + n, 0) : null) ?? "") || null])} />
+      <GameTabs testid="inventory-tab" value={tab} onChange={setTab} tabs={INV_TABS.map(([id, label, img]) => [id, label, img, fmt((id === "fish" ? (inv?.total ?? inv?.fish.length) : id === "bait" ? baitRows.reduce((a, [, n]) => a + n, 0) : id === "tackle" ? user.owned_gear.filter((g) => g.startsWith("rod_")).length : id === "ingredients" ? ingRows.reduce((a, [, n]) => a + n, 0) : null) ?? "") || null])} />
       {tab === "fish" && (
         <Panel icon="net" title={tt("Keepnet")} right={<span>{fmt(inv?.total ?? inv?.fish.length ?? 0)} {tt("fish ·")} <Link to="/game/profile" className="underline">{tt("trophy wall")} {inv?.mounted ?? 0}/{inv?.max_trophies ?? 6}</Link></span>} testId="keepnet-panel">
           <div className="flex flex-wrap gap-2 items-center mb-2">
