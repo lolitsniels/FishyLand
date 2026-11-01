@@ -498,6 +498,8 @@ function buildScene(app, tex, key, bgTex, mt) {
   fishShadow.visible = false;
   fxLayer.addChild(fishShadow);
   const fish = new Sprite(Texture.EMPTY);
+  let genericTex = null, speciesTex = null; // the hooked fish stays a mystery until it's landed
+  Assets.load("art/fish/_generic.png").then((t) => { genericTex = t; }).catch(() => {});
   fish.anchor.set(0.5); fish.visible = false;
   const auraRing = new Sprite(soft);
   auraRing.anchor.set(0.5); auraRing.blendMode = "add"; auraRing.visible = false;
@@ -700,9 +702,11 @@ function buildScene(app, tex, key, bgTex, mt) {
       if (fx.phase === "landed") { celebrate = 1.6; flyFish = 0; splash(fx.target.x, fx.target.y, 40, 1.6); }
       if (fx.phase === "lost") splash(fx.target.x, fx.target.y, 12, 0.7);
       if (fx.phase === "fight" && fx.speciesImg !== fishTexUrl) {
-        fishTexUrl = fx.speciesImg;
-        Assets.load(fishTexUrl).then((t) => { if (!fish.destroyed) fish.texture = t; }).catch(() => {});
+        fishTexUrl = fx.speciesImg; speciesTex = null;
+        Assets.load(fishTexUrl).then((t) => { speciesTex = t; }).catch(() => {});
       }
+      if (fx.phase === "fight" && genericTex) fish.texture = genericTex;
+      if (fx.phase === "landed" && speciesTex) fish.texture = speciesTex;
       lastPhase = fx.phase;
     }
     const ph = fx.phase;
@@ -761,12 +765,13 @@ function buildScene(app, tex, key, bgTex, mt) {
       const cyc = (time % 1.7) / 1.7;
       const leaping = cyc < 0.42;
       const k = cyc / 0.42;
+      const dir = Math.floor(time / 1.7) % 2 ? -1 : 1; // alternate leaps left and right, always head first
       fish.visible = leaping && fish.texture !== Texture.EMPTY;
       fishShadow.visible = !leaping;
       fish.scale.set(w / Math.max(1, fish.texture.width));
-      fish.scale.x *= fx.pos > 0.5 ? -1 : 1;
-      fish.x = bob.x + (k - 0.5) * 40; fish.y = bob.y - Math.sin(k * Math.PI) * (50 + w * 0.3);
-      fish.rotation = (k - 0.5) * 1.2 * (fx.pos > 0.5 ? 1 : -1);
+      fish.scale.x *= dir;
+      fish.x = bob.x + (k - 0.5) * 60 * dir; fish.y = bob.y - Math.sin(k * Math.PI) * (50 + w * 0.3);
+      fish.rotation = (k - 0.5) * 0.9 * dir;
       fishShadow.x = bob.x; fishShadow.y = bob.y + 6; fishShadow.scale.set(w / 80);
       if (leaping && k < 0.06 && !fish._sp) { splash(bob.x, bob.y, 14, 0.9 + w / 260); fish._sp = true; }
       if (!leaping) fish._sp = false;
