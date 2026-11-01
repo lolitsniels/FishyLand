@@ -28,6 +28,7 @@ import { WorldTutorial } from "./WorldTutorial";
 import { MythicBanner } from "./MythicBanner";
 import { lookFace } from "../game/look";
 import { ss } from "../offline/bridge";
+import SpinModal from "../tfl/components/SpinModal";
 
 export const PAGES = {
   inventory: ["Inventory", "inventory"], journal: ["Fishdex", "fishdex"], shop: ["Tackle Shop", "/art/hud/tackle.webp"], waters: ["Travel Map", "map"], profile: ["My Angler", "skills"],
@@ -104,6 +105,7 @@ export default function World() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [club, setClub] = useState(null);
   const [pondOpen, setPondOpen] = useState(false);
+  const [spin, setSpin] = useState(null);
   const prevWater = useRef(null);
   const page = loc.pathname.replace(/^\/game\/?/, "").split("/")[0];
   const water = data?.waters?.find((x) => x.key === user?.water);
@@ -144,6 +146,7 @@ export default function World() {
       else if (id === "crew-island") goTo("crew", { x: 1200, y: 790 });
       else if (id.startsWith("club-")) setClub(id);
       else if (id === "pond-keeper") setPondOpen(true);
+      else if (id === "spin") api.get("/daily-spin").then((r) => setSpin(r.data)).catch(() => toast.error("The wheel is stuck, try again in a moment."));
       else nav(`/game/${id}`);
     };
     const iv = setInterval(() => { setNear(fx.near); setAtSpot(fx.atSpot); }, 150);
@@ -234,6 +237,7 @@ export default function World() {
       )}
       {settingsOpen && <GameSettings onClose={() => setSettingsOpen(false)} />}
       {pondOpen && mode === "crew" && <PondKeeper onClose={() => setPondOpen(false)} />}
+      {spin && <div className="tfl-skin"><SpinModal state={spin} onClose={() => setSpin(null)} onDone={(st) => setSpin((cur) => (cur ? st : cur))} /></div>}
       {club && mode === "clubhouse" && <ClubhousePanel spot={club} onClose={() => setClub(null)} />}
       {page && page !== "fish" && (
         <Modal title={title} testid="page-modal" width={980} onClose={() => nav("/game")}>

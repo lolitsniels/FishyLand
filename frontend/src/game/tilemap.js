@@ -10,6 +10,7 @@ export const OBJ = {
   bait_hut: { rect: true, w: 370, fp: [0.86, 0.5] },
   house: { rect: true, w: 300, fp: [0.9, 0.8] },
   quest_board: { w: 150, fp: [0.9, 0.16], rect: true },
+  wheel: { w: 150, fp: [0.7, 0.14], rect: true },
   fountain: { w: 270, fp: [0.94, 0.5], rect: true, jet: [0.66, 0.2, 0.62, 0.72] },
   lantern: { w: 60, fp: [0.5, 0.12], glow: [0.5, 0.13] },
   oak: { w: 300, fp: [0.22, 0.08] },

@@ -18,6 +18,7 @@ const Result = ({ r, onClose }) => (
     <div className="label">{r.fish ? tt("Jackpot!") : tt("You won")}</div>
     <div className="font-heading text-[20px] leading-tight my-1" style={{ color: `var(--r-${r.rarity})` }} data-testid="spin-result-label">{r.label}</div>
     {r.fish && <div className="text-[12px] text-[var(--text-2)]">{tt("It is waiting in your keepnet.")}</div>}
+    {r.bonus_pearls > 0 && <div className="text-[12px] text-[var(--text-2)]" data-testid="spin-bonus">+{r.bonus_pearls} bonus Pearls for your 7-day streak</div>}
     <button className="btn btn-gold mt-2" onClick={onClose} data-testid="spin-collect-button">{tt("Collect")}</button>
   </div>
 );
@@ -53,13 +54,13 @@ export default function SpinModal({ state, onClose, onDone }) {
     <div className="fixed inset-0 z-[80] bg-black/70 flex items-center justify-center p-3 px-ui" onClick={() => !spinning && onClose()} data-testid="spin-modal">
       <div className="panel panel-gold w-full max-w-[620px] fade-in" onClick={(e) => e.stopPropagation()}>
         <header className="panel-head">
-          <span>{state.better ? tt("The Better Wheel · day 7") : `${tt("Daily Spin · day")} ${state.day} ${tt("of 7")}`}</span>
+          <span>{state.better ? tt("Golden Wheel of Fortune · day 7") : `${tt("Wheel of Fortune · day")} ${state.day} ${tt("of 7")}`}</span>
           <button className="ml-auto text-[var(--muted)] hover:text-[var(--text)]" onClick={onClose} disabled={spinning} aria-label={tt("Close")} data-testid="spin-close-button"><X size={16} /></button>
         </header>
         <div className="spin-stage">
           <img src="/art/spin/harbourmaster_point.webp" alt={tt("The Harbourmaster")} className="spin-hm" draggable="false" />
           <div className="flex flex-col items-center min-w-0">
-            <div className="spin-bubble">{state.better ? tt("Seven days on the dock! Give my good wheel a turn.") : tt("One turn a day, angler. Let's see what the sea gives you.")}</div>
+            <div className="spin-bubble">{state.better ? tt("Seven days in a row! The golden wheel always pays 5 bonus Pearls.") : tt("One turn a day, angler. Come back 7 days in a row for the golden wheel!")}</div>
             <Wheel segments={segs} better={state.better} rotation={rot} spinning={spinning} size={270} />
             {result ? <Result r={result} onClose={onClose} />
               : <button className="btn btn-gold mt-2 !px-6" onClick={spin} disabled={spinning} data-testid="spin-button">{spinning ? tt("Spinning...") : tt("Spin the wheel")}</button>}

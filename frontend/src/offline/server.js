@@ -2,6 +2,7 @@
 import G from "./gamedata.json";
 import { loadSave, saveSoon } from "./bridge";
 import { makeHarbour } from "./harbour";
+import { makeSpin } from "./spin";
 import { makeSocial, TACKLE_INFO, tackleStat, tacklePct, tackleView } from "./social";
 
 const C = G.c;
@@ -310,7 +311,22 @@ function profile() {
 const HB = makeHarbour({ S: () => S, U, pub, save: () => save(), levelOf, WATERS, BY_WATER, WATER, FISH });
 
 const SOCIAL = makeSocial({ S: () => S, U, pub, save: () => save(), fail, levelOf, FISH, BAIT, DATA, nowIso });
+function grantSpinFish(rarity) {
+  const pool = DATA.fish.filter((f) => f.rarity === rarity && !f.boss);
+  const f = pool[Math.floor(rnd() * pool.length)], weight = rollWeight(f, 0);
+  const c = { id: `c${S.seq++}`, user_id: U().id, username: U().username, species_id: f.id, name: f.name, rarity: f.rarity, weight, length_cm: lengthCm(f, weight), variant: "normal",
+    value: Math.round(fishValue(f, weight, 1)), water: f.water, caught_at: nowIso(), listed: false, mounted: false };
+  S.catches.unshift(c);
+  const j = S.journal[f.id];
+  S.journal[f.id] = !j ? { count: 1, best_kg: weight, first_at: nowIso(), variants: ["normal"] } : { ...j, count: j.count + 1, best_kg: Math.max(j.best_kg, weight) };
+  if (!j) U().stats.species += 1;
+  return { species_id: f.id, name: f.name, variant: "normal", weight, rarity: f.rarity };
+}
+const SPIN = makeSpin({ S: () => S, U, save: () => save(), level: () => levelOf(U().xp)[0], baitName: (id) => BAIT[id]?.name || id,
+  craftedBaits: DATA.baits.filter((b) => b.crafted), grantFish: grantSpinFish });
 const ROUTES = [
+  ["get", /^\/daily-spin$/, () => SPIN.state()],
+  ["post", /^\/daily-spin\/spin$/, () => { const r = SPIN.spin(); return r.spun ? { ...r, user: pub() } : r; }],
   ...HB.routes,
   ...SOCIAL.routes,
   ["get", /^\/auth\/me$/, () => pub()],

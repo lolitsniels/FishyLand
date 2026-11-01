@@ -13,7 +13,7 @@ export const HARBOUR_NPCS = [
     "Riddle time! When the sky blushes red and the frogs start to sing, something long and slippery slides through Blackwater's roots.",
     "Mix bait at the Workshop. The Angler's Secret recipe makes fish go wild!",
   ] },
-  { id: "sailor", name: "Old Tobias", x: 2560, y: 1470, lines: [
+  { id: "sailor", name: "Old Tobias", x: 2690, y: 1320, lines: [
     "Back in my day I hooked a fish as big as a boat! The mythic ones are out there, I promise you.",
     "Listen close: when the sun goes to bed and the stars blink awake, a ray made of night glides over the coral. Few have seen it.",
     "Take the Sea Serpent to new waters. Each one hides fish you've never seen!",
@@ -51,12 +51,12 @@ export const HARBOUR_MAP = {
     { k: "ship", x: 3140, y: 1590, w: 620, flip: true }, { k: "rowboat", x: 1760, y: 2120, w: 210 },
     ...[400, 900, 1350, 1750, 2200, 2650].map((x) => ({ k: "lantern", x, y: 1125 })),
     ...[500, 1150, 1750, 2350].map((x) => ({ k: "lantern", x, y: 1785 })),
-    { k: "lantern", x: 2640, y: 1560 },
+    { k: "lantern", x: 2700, y: 1500 },
     { k: "barrels", x: 1360, y: 950, w: 110 }, { k: "barrels", x: 2660, y: 950, w: 110 }, { k: "barrels", x: 1100, y: 1590, w: 100 },
     ...[[180, 560], [620, 520], [1000, 600], [1380, 560], [1780, 520], [2250, 560], [2600, 600]].map(([x, y]) => ({ k: "oak", x, y })),
     ...[[90, 900], [400, 380], [1200, 350], [1600, 330], [2050, 380], [2450, 330], [140, 1300]].map(([x, y]) => ({ k: "pine", x, y })),
     { k: "oak", x: 1000, y: 1400, w: 240 }, { k: "oak", x: 2050, y: 1420, w: 240 }, { k: "oak", x: 300, y: 1400, w: 240 },
-    { k: "bush", x: 1300, y: 1420 }, { k: "bush", x: 1800, y: 1420 }, { k: "bush", x: 2650, y: 1380 }, { k: "bush", x: 800, y: 1380 },
+    { k: "bush", x: 1300, y: 1420 }, { k: "bush", x: 1800, y: 1420 }, { k: "wheel", x: 2570, y: 1390, w: 150 }, { k: "bush", x: 800, y: 1380 },
     { k: "rocks", x: 2582, y: 1812, w: 150 }, { k: "rocks", x: 382, y: 1856, w: 150 }, { k: "rocks", x: 2687, y: 855, w: 160 },
   ],
   spots: [
@@ -71,6 +71,7 @@ export const HARBOUR_MAP = {
     { id: "leaderboards", label: "Fountain of Fame", img: "rankings", x: 1550, y: 1350 },
     { id: "contracts", label: "Anchor Café · Contracts", img: "daily", x: 900, y: 1640 },
     { id: "pearl-shop", label: "Pearl Shop", img: "pass", x: 2120, y: 1640 },
+    { id: "spin", label: "Wheel of Fortune", img: "daily", x: 2570, y: 1445 },
     { id: "boat", label: "Sea Serpent · Travel", img: "map", x: 3260, y: 1665 },
     { id: "duel", label: "Duel Pier", img: "guild", x: 1550, y: 2040 },
   ],

@@ -37,7 +37,7 @@ export default function DailySpin() {
           <DayLadder s={s} />
           <div className="text-[12px] text-[var(--text-2)]">
             {s.claimed_today ? <span className="text-[var(--ok)]" data-testid="spin-claimed">{tt("✓ Spun today")}{s.last && <>: <b style={{ color: `var(--r-${s.last.rarity})` }}>{s.last.label}</b></>}</span>
-              : s.better ? tt("Day 7: the Better Wheel is ready, with Pearls, crates and a mythic jackpot.") : tt("Spin once a day. Come back every day to reach the Better Wheel on day 7.")}
+              : s.better ? tt("Day 7: the golden wheel is ready, with bonus Pearls, rare fish, a rod skin and a mythic jackpot.") : tt("Spin once a day. Come back every day to reach the golden wheel on day 7.")}
           </div>
           <div className="text-[11.5px] text-[var(--muted)]">{tt("Miss a day and it resets to day 1.")}</div>
         </div>
