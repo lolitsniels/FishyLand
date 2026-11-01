@@ -95,6 +95,10 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - 2026-06 (iter 34): Offline Starter Goals (8 goals, +100 gold each, gift chest 1500 gold/25 pearls/400 xp) - harbour.js starter*, world/StarterGoals.js;
   Playgama zip rebuilt with all new art/icons/collision.
 
+- 2026-06 (iter 35): Offline 15-step tutorial tour (WorldTutorial OFFLINE_STEPS, visit steps) with ground chevron guide (fx.guide, Scene drawGuide),
+  first Millbrook catch = mythic The Mill Giant (id 294) with long easy fight; Fishdex "fish still hiding" line; ad close always resumes (bridge.js);
+  modern fishbtn; fight soundtrack audio/fight.mp3 (sfx.js swaps on phase "fight").
+
 ## Backlog
 - P0: Fishing Duels as a real duel map: 2 anglers face off, live scoreboard, win/lose result screen
 - P0: Convert remaining 11 waters to tiled maps after user approves Harbour + Millbrook (incl. a boat-deck-at-sea map)

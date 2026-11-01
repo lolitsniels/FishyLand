@@ -352,6 +352,29 @@ function buildScene(app, tex, key, bgTex, mt) {
   plates.zIndex = 20000;
   const spotLayer = new Container();
   spotLayer.zIndex = -1;
+  // tutorial guide: animated chevrons on the ground along the walking route to fx.guide
+  const guideG = new Graphics(); spotLayer.addChild(guideG);
+  let gPath = null, gAt = 0, gKey = "";
+  const drawGuide = () => {
+    guideG.clear();
+    const g = fx.guide; if (!g || !tm || fx.mode === "duel") { gPath = null; return; }
+    const k = `${g.x},${g.y}`, now = performance.now();
+    if (k !== gKey || now - gAt > 700) { gPath = tm.nav.path(fx.me, g) || [g]; gAt = now; gKey = k; }
+    const pts = [{ x: fx.me.x, y: fx.me.y }, ...gPath], STEP = 48;
+    let carry = STEP - ((time * 70) % STEP);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1], len = Math.hypot(b.x - a.x, b.y - a.y); if (!len) continue;
+      const ux = (b.x - a.x) / len, uy = (b.y - a.y) / len;
+      for (let d = carry; d < len; d += STEP) {
+        const x = a.x + ux * d, y = a.y + uy * d;
+        if (Math.hypot(g.x - x, g.y - y) < 50 || Math.hypot(fx.me.x - x, fx.me.y - y) < 40) continue;
+        const px = -uy, py = ux, tip = [x + ux * 13, y + uy * 13], l = [x - ux * 7 + px * 12, y - uy * 7 + py * 12], r = [x - ux * 7 - px * 12, y - uy * 7 - py * 12], m = [x - ux * 1, y - uy * 1];
+        guideG.poly([...tip, ...l, ...m, ...r]).fill({ color: 0xffd35a, alpha: 0.92 }).stroke({ width: 2, color: 0x3a2205, alpha: 0.7 });
+      }
+      carry = ((carry - len) % STEP + STEP) % STEP;
+    }
+    guideG.circle(g.x, g.y, 26 + Math.sin(time * 5) * 5).stroke({ width: 4, color: 0xffd35a, alpha: 0.8 });
+  };
   actors.addChild(spotLayer);
   const groundLayer = new Container();
   base.addChild(groundLayer);
@@ -555,6 +578,7 @@ function buildScene(app, tex, key, bgTex, mt) {
     if (app.screen.width !== cam.sw || app.screen.height !== cam.sh) layout();
     const dt = Math.min(0.05, tk.deltaMS / 1000);
     time += dt;
+    drawGuide();
     applyQuality(useGame.getState().settings.low);
     dispSprite.x += dt * 22; dispSprite.y += dt * 9;
     godray.time = time * 0.35;

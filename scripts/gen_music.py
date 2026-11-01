@@ -24,6 +24,7 @@ TRACKS = {
     "temple": "Ancient jungle temple lake: bamboo flute, koto, gentle tribal percussion, mysterious and serene, 88 bpm.",
     "cinder": "Volcanic deep-sea trench: deep taiko drums, low brass, rumbling synth bass, tense and epic but restrained, 95 bpm.",
     "duel_pier": "Friendly competitive fishing contest: upbeat brass and snare, playful pizzicato strings, energetic sports-game feel, 125 bpm.",
+    "fight": "Thrilling fishing battle music for a kids fishing game: driving fast percussion and taiko, pulsing staccato strings, heroic brass stabs, rising tension and excitement, adventurous and fun not scary, 140 bpm.",
     "crew_island": "Relaxed private island hangout: ukulele, soft steel guitar, light hand percussion, warm and happy, 95 bpm.",
 }
 

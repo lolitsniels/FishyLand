@@ -57,6 +57,8 @@ export default function Journal() {
           <div>
             <div className="label !text-[#cff6ff]">{water === "all" ? tt("All waters") : (water === "crew_pond" ? "Crew Pond" : data?.waters.find((w) => w.key === water)?.name)}</div>
             <div className="font-deco gold-text text-2xl" data-testid="journal-progress">{found} / {total} <span className="text-base">{tt("discovered")}</span>{secretsFound > 0 && <span className="text-[#c9a7f0] text-sm" data-testid="journal-secrets-found"> + {secretsFound} secret</span>}</div>
+            {(() => { const w = water === "all" ? user.water : water, here = regular.filter((f) => f.water === w), left = here.filter((f) => !journal[f.id]).length, nm = w === "crew_pond" ? "the Crew Pond" : data?.waters.find((x) => x.key === w)?.name;
+              return here.length > 0 && <div className="text-[13px] font-bold text-[#9fe0ff] mt-0.5" data-testid="journal-left-here">{left ? `${left} of ${here.length} fish still hiding in ${nm}. Go find them!` : `You found every fish in ${nm}!`}</div>; })()}
           </div>
           <div className="flex gap-2 flex-wrap">
             {RARITIES.map((r) => { const s = byRarity(r); return <div key={r} className={`g-stat rc-${r} !py-1 text-center min-w-[62px]`} style={{ borderColor: "var(--rc)" }}><div className={`num rar-${r} text-[15px]`}>{s.have}<span className="text-[var(--muted)] text-[11px]">/{s.all}</span></div><div className="k !text-[8.5px]">{r}</div></div>; })}

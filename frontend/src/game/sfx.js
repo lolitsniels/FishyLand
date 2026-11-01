@@ -34,17 +34,23 @@ const fade = (el, to, ms, done) => {
 };
 const wanted = () => { const st = useGame.getState(); return unlocked && st.settings.music && !st.paused && !st.platformMuted && !window.__flMuted; };
 
+// the fishing fight swaps to a thrilling battle track; the map's own track resumes where it left off afterwards
+const cache = {};
 function play() {
-  const src = `/audio/${TRACK[place] || place}.mp3`;
+  const fight = useGame.getState().phase === "fight";
+  const src = fight ? "/audio/fight.mp3" : `/audio/${TRACK[place] || place}.mp3`;
   if (!wanted()) { track?.pause(); return; }
   if (track && track.dataset.src === src) { if (track.paused) track.play().catch(() => {}); return; }
   const old = track;
-  if (old) fade(old, 0, 900, () => { old.pause(); old.src = ""; });
-  track = new Audio(src); track.dataset.src = src; track.loop = true; track.volume = 0;
-  track.play().then(() => fade(track, VOL, 1400)).catch(() => {});
+  if (old) fade(old, 0, fight ? 350 : 900, () => { if (old !== track) old.pause(); });
+  track = cache[src] || (cache[src] = Object.assign(new Audio(src), { loop: true }));
+  track.dataset.src = src; track.volume = 0;
+  if (fight) track.currentTime = 0;
+  const t = track;
+  t.play().then(() => fade(t, fight ? VOL * 1.15 : VOL, fight ? 500 : 1400)).catch(() => {});
 }
 
 export function setMusicPlace(key) { place = key; play(); }
 export function startMusic() { unlocked = true; play(); }
 export function applyAudio() { play(); }
-useGame.subscribe((s, p) => { if (s.paused !== p.paused || s.settings.music !== p.settings.music || s.platformMuted !== p.platformMuted) play(); });
+useGame.subscribe((s, p) => { if ((s.phase === "fight") !== (p.phase === "fight") || s.paused !== p.paused || s.settings.music !== p.settings.music || s.platformMuted !== p.platformMuted) play(); });

@@ -23,7 +23,13 @@ export async function initBridge() {
   const E = br.EVENT_NAME;
   br.platform.on(E.PAUSE_STATE_CHANGED, (p) => setReason("platform", !!p));
   br.platform.on(E.AUDIO_STATE_CHANGED, (on) => setReason("audio", !on));
-  const adState = (st) => { if (st === "opened") setReason("ad", true); if (st === "closed" || st === "failed") setReason("ad", false); };
+  // some portals pause the game for an ad but never send the matching resume, so an ad closing always resumes the game
+  let adOpen = false;
+  const adState = (st) => {
+    if (st === "opened") { adOpen = true; setReason("ad", true); }
+    if (st === "closed" || st === "failed") { adOpen = false; setReason("ad", false); setReason("platform", false); }
+  };
+  window.addEventListener("focus", () => { if (!adOpen) setTimeout(() => { if (!adOpen && !document.hidden) { setReason("platform", false); setReason("hidden", false); } }, 400); });
   br.advertisement.on(E.INTERSTITIAL_STATE_CHANGED, adState);
   br.advertisement.on(E.REWARDED_STATE_CHANGED, adState);
   if (br.platform.isAudioEnabled === false) setReason("audio", true);

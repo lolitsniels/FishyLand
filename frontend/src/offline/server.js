@@ -155,7 +155,7 @@ function cast() {
   if (bait) u.bait[bait.id] -= 1;
   const castEv = HB.event("cast", {});
   const t = u.tutorial || {};
-  const guaranteed = !t.done && t.step === 2 && !t.guaranteed && !u.stats.catches;
+  const guaranteed = !t.done && !t.guaranteed && !u.stats.catches && water.key === "millbrook";
   if (guaranteed) t.guaranteed = true;
   S.pending = null;
   if (!guaranteed && Math.floor(rnd() * 100) + 1 > 72 + bite) {
@@ -163,12 +163,14 @@ function cast() {
     return { ...castEv, result: "nothing", encounter: null, user: pub(), message: pick(["The line drifts. Nothing bites.", "A nibble... then nothing.", "Your bait comes back untouched.", "Ripples spread and fade. The water keeps its secrets."], [1, 1, 1, 1]) };
   }
   let f;
-  if (guaranteed) { const plain = BY_WATER[water.key].filter((x) => x.rarity === "common" && !x.bait_only); f = plain[Math.floor(rnd() * plain.length)]; }
+  if (guaranteed) f = FISH[294]; // tutorial: The Mill Giant, a mythic first catch
   else { const sec = secretOpen(water.key); f = sec && rnd() < C.SECRET_CHANCE ? sec : pickSpecies(water.key, luck, period, bait?.id); }
   const wb = 1 + (GEAR[u.gear.rod]?.weight_bonus || 0);
   const weight = Math.min(r3(f.max_kg * 1.1 * wb), r3(rollWeight(f, bait?.size || 0) * wb));
   const [variant, vmult] = guaranteed ? ["normal", 1] : rollVariant(1 + SIZE_VARIANT * (bait?.size || 0));
-  const params = encounter(f, weight, u, variant, water.key);
+  let params = encounter(f, weight, u, variant, water.key);
+  // tutorial mythic: a long, dramatic fight that a new angler can still win
+  if (guaranteed) params = { ...params, strength: 0.75, erratic: 0.55, stamina: 42, zone_width: 50, tolerance: 1.7, recovery: 1.35, time_limit: 160, tricks: ["second_wind"], trick_names: [C.TRICK_INFO.second_wind.name], trick_score: 3, tiring_min: 0.75, trick_repeat: false, hint: "Something ENORMOUS is on the line! Hold on tight, this is a legend of Millbrook!", size_note: "A giant of its kind." };
   const id = `e${S.seq++}`;
   S.pending = { id, species_id: f.id, weight, variant, vmult, water: water.key, created: Date.now(), params, period, weather: conditions(water.key).weather };
   save();
