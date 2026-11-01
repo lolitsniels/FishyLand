@@ -485,3 +485,10 @@ html body .g-tab.on img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .7)) !impo
 .dex-scroll { flex: none; width: 28px; height: 28px; margin-bottom: 4px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(#24407a, #182c55); border: 2px solid #c9a24a; color: #f6e7c1; transition: transform .12s ease; }
 .dex-scroll:hover { transform: scale(1.1); }
 @media (max-width: 760px) { .dex-tabs-wrap { display: none; } }
+/* Seam fix: the 9-slice frame leaves hairline gaps between its pieces when scaled; a matching underlay hides them */
+html body .fr-modal, html body [data-testid="action-bar"].fr-panel, html body [data-sonner-toast], html body .fixed.inset-0 > .panel, html body .fixed.inset-0 > div > .panel,
+html body [role="dialog"] .panel, html body [data-testid="look-dialog"] > div, html body .panel.fl-card, html body .panel.fl-login,
+.duel-board, .chatbox, .qt-pop, .wm-pop, .wm-banner > *, .wtut-body {
+  background: linear-gradient(#0d2147, #0d2147) padding-box, linear-gradient(#2a1a1c, #2a1a1c) border-box !important;
+  border-radius: 6px !important;
+}

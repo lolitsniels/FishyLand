@@ -176,3 +176,4 @@ Pearls: earned in game only, cosmetics only (no pay-to-win; Angler Pass allowed)
 - Deleted 79 unreachable source files (scripts/find_dead_code.py) + unused art (scripts/find_unused_assets.py). Guide links removed from landing.
 - Reeds replaced by lily pads (art/map/lilypad.webp, tilemap def pond:true -> only placed fully in open water near shore, else dropped).
 - Tests: iteration_35 all pass (backend 16/16, online + offline wheel, regression of all pages).
+- 2026-11: menu frame seam fix (underlay behind 9-slice panel frames in ui.css)
